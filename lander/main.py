@@ -1,9 +1,14 @@
 """Command line interface for ``lander`` executable."""
 from argparse import ArgumentParser
+import logging
 import os
 import sys
 
 import pkg_resources
+import structlog
+
+from .config import Configuration
+from .lander import Lander
 
 
 def parse_args():
@@ -28,12 +33,32 @@ def parse_args():
         action='store_true',
         help="Show version information and exit.")
 
+    parser.add_argument(
+        '--verbose',
+        default=False,
+        action='store_true',
+        help='Show debugging information.')
+
+    parser.add_argument(
+        '--build-dir',
+        dest='build_dir',
+        default=os.path.abspath('_build'),
+        help='Build directory (scratch space).')
+
+    parser.add_argument(
+        '--pdf',
+        dest='pdf_path',
+        help='Filepath of PDF document.'
+    )
+
     return parser.parse_args()
 
 
 def main():
     """Entrypoint for ``lander`` executable."""
     args = parse_args()
+    config_logger(args)
+    logger = structlog.get_logger(__name__)
 
     if args.show_license:
         print_license()
@@ -42,6 +67,37 @@ def main():
     if args.show_version:
         print_version()
         sys.exit(0)
+
+    config = Configuration(args=args)
+    lander = Lander(config)
+    lander.render()
+
+    logger.info('Complete')
+
+
+def config_logger(args):
+    if args.verbose:
+        level = logging.DEBUG
+    else:
+        level = logging.INFO
+    logging.basicConfig(level=level)
+
+    structlog.configure(
+        processors=[
+            structlog.stdlib.filter_by_level,
+            structlog.stdlib.add_logger_name,
+            structlog.stdlib.add_log_level,
+            structlog.stdlib.PositionalArgumentsFormatter(),
+            structlog.processors.StackInfoRenderer(),
+            structlog.processors.format_exc_info,
+            structlog.processors.UnicodeDecoder(),
+            structlog.stdlib.render_to_log_kwargs,
+        ],
+        context_class=dict,
+        logger_factory=structlog.stdlib.LoggerFactory(),
+        wrapper_class=structlog.stdlib.BoundLogger,
+        cache_logger_on_first_use=True,
+    )
 
 
 def print_license():

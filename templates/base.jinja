@@ -1,0 +1,26 @@
+<!doctype html>
+<html class="no-js" lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>{% block page_title %}{% endblock page_title %}</title>
+  <meta name="description" content="{% block page_description %}{% endblock page_description %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% include "_typekit_loader.jinja" %}
+</head>
+
+<body class="lander-page">
+
+  <div class="universal-header">
+    <div class="universal-header--lander">
+      <span><a href="https://www.lsst.org">An LSST.org project</a></span>
+    </div>
+  </div>
+
+
+  {% block body %}
+  {% endblock body %}
+</body>
+
+</html>

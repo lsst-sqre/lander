@@ -40,8 +40,11 @@ setup(
     ],
     keywords='lsst',
     packages=find_packages(exclude=['docs', 'tests*', 'data']),
-    install_requires=[],
-    # package_data={},
+    install_requires=[
+        'Jinja2==2.9.6',
+        'structlog==17.1.0'
+    ],
+    include_package_data=True,
     entry_points={
         'console_scripts': [
             'lander = lander.main:main'
