@@ -43,6 +43,8 @@ setup(
     install_requires=[],
     # package_data={},
     entry_points={
-        'console_scripts': []
+        'console_scripts': [
+            'lander = lander.main:main'
+        ]
     }
 )
