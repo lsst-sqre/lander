@@ -70,7 +70,7 @@ def main():
 
     config = Configuration(args=args)
     lander = Lander(config)
-    lander.render()
+    lander.build_site()
 
     logger.info('Complete')
 
