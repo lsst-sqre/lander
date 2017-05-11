@@ -1,0 +1,44 @@
+{
+  "name": "lander",
+  "version": "1.0.0",
+  "description": "HTML landing page generator for LSST PDF documentation deployed from Git to LSST the Docs.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lsst-sqre/lander.git"
+  },
+  "author": "Association of Universities for Research in Astronomy, Inc.",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lsst-sqre/lander/issues"
+  },
+  "homepage": "https://github.com/lsst-sqre/lander#readme",
+  "devDependencies": {
+    "babel-core": "^6.22.1",
+    "babel-preset-es2015": "^6.22.0",
+    "browser-sync": "^2.18.7",
+    "express": "^4.14.1",
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^3.1.1",
+    "gulp-cheerio": "^0.6.2",
+    "gulp-minify-css": "^1.2.4",
+    "gulp-rename": "^1.2.2",
+    "gulp-run": "^1.7.1",
+    "gulp-sass": "^3.1.0",
+    "gulp-sourcemaps": "^2.4.0",
+    "gulp-svgmin": "^1.2.3",
+    "gulp-svgstore": "^6.1.0",
+    "gulp-util": "^3.0.8",
+    "minimist": "^1.2.0",
+    "path": "^0.12.7"
+  },
+  "dependencies": {
+    "inuitcss": "^6.0.0-beta.4",
+    "normalize-scss": "^6.0.0",
+    "sass-math-pow": "^0.1.3",
+    "sass-mq": "^3.3.2",
+    "squared": "lsst-sqre/squared#tickets\/DM-10503"
+  }
+}
