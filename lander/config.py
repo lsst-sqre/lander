@@ -37,3 +37,6 @@ class Configuration(object):
             return self._config[key]
         except KeyError:
             return getattr(self._args, key)
+
+    def __setitem__(self, key, value):
+        self._config[key] = value
