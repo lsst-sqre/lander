@@ -20,7 +20,7 @@ loadingTask.promise.then(function (pdfDocument) {
   return pdfDocument.getPage(1).then(function (pdfPage) {
     // Display page on the existing canvas with 100% scale.
     var viewport = pdfPage.getViewport(1.0);
-    var canvas = document.getElementById('theCanvas');
+    var canvas = document.getElementById('pdf-canvas');
     canvas.width = viewport.width;
     canvas.height = viewport.height;
     var ctx = canvas.getContext('2d');
