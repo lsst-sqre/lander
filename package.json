@@ -32,13 +32,15 @@
     "gulp-svgstore": "^6.1.0",
     "gulp-util": "^3.0.8",
     "minimist": "^1.2.0",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "pdfjs-dist": "^1.8.342",
+    "webpack": "^2.5.1"
   },
   "dependencies": {
     "inuitcss": "^6.0.0-beta.4",
     "normalize-scss": "^6.0.0",
     "sass-math-pow": "^0.1.3",
     "sass-mq": "^3.3.2",
-    "squared": "lsst-sqre/squared#tickets\/DM-10503"
+    "squared": "lsst-sqre/squared#tickets/DM-10503"
   }
 }
