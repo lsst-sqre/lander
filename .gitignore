@@ -88,4 +88,9 @@ ENV/
 # Rope project settings
 .ropeproject
 
+# Automatically created by npm install
 node_modules
+# Assets is automatically built by gulp assets --env=deploy
+assets
+# Automatically built by gulp assets --env=deploy
+templates/icons.svg

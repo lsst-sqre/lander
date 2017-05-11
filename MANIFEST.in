@@ -2,5 +2,7 @@ include *.rst
 include LICENSE
 include setup.cfg
 recursive-include templates *
+recursive-include assets *
 package.json
 gulpfile.babel.js
+
