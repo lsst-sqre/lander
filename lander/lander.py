@@ -24,6 +24,10 @@ class Lander(object):
         relative_pdf_path = os.path.basename(self._config['pdf_path'])
         self._config['relative_pdf_path'] = relative_pdf_path
 
+        # Add data for HTML title/description tags
+        self._config['page_title'] = self._config['title']
+        self._config['page_description'] = self._config['abstract']
+
         # Write index.html page
         index_html = render_homepage(self._config, self._jinja_env)
         index_html_path = os.path.join(self._config['build_dir'], 'index.html')
@@ -31,8 +35,12 @@ class Lander(object):
             f.write(index_html)
 
         # Copy assets (css, js)
+        # This algorithm is slightly naieve; we copy the whole built
+        # assets directory everytime.
         asset_src_dir = os.path.join(os.path.dirname(__file__), '../assets')
         asset_dest_dir = os.path.join(self._config['build_dir'], 'assets')
+        if os.path.isdir(asset_dest_dir):
+            shutil.rmtree(asset_dest_dir)
         shutil.copytree(asset_src_dir, asset_dest_dir)
 
         # Copy PDF
