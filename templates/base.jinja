@@ -1,14 +1,14 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html lang="en">
 
 <head>
   <meta charset="utf-8">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <title>{% block page_title %}{% endblock page_title %}</title>
-  <meta name="description" content="{% block page_description %}{% endblock page_description %}">
+  <title>{{ page_title }}</title>
+  <meta name="description" content="{{ page_description }}">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   {% include "_typekit_loader.jinja" %}
-  <script src="assets/app.bundle.js"></script>
+  <link rel="stylesheet" href="assets/app.css">
 </head>
 
 <body class="lander-page">
@@ -23,5 +23,7 @@
   {% block body %}
   {% endblock body %}
 </body>
+
+<script src="assets/app.bundle.js"></script>
 
 </html>

@@ -90,7 +90,9 @@ ENV/
 
 # Automatically created by npm install
 node_modules
-# Assets is automatically built by gulp assets --env=deploy
+# Assets is automatically built by gulp assets
 assets
-# Automatically built by gulp assets --env=deploy
+# Automatically built by gulp assets
 templates/icons.svg
+# Automatically build by gulp (development mode)
+_build
