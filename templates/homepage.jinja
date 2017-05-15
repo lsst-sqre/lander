@@ -1,11 +1,17 @@
 {% extends "base.jinja" %}
 
-{% block page_title %}{{ config['title'] }}{% endblock page_title %}
-{% block page_description %}{{ config['abstract'] }}{% endblock page_description %}
 {% block body %}
 
-<div class="lander-container">
-  <a href="{{ config['relative_pdf_path'] }}">PDF</a>
-  <div id="pdf-container"></div>
+<div class="lander-content-container">
+
+  <div class="lander-info-item">
+    {% include "_info-panel.jinja" %}
+  </div>
+
+  <div class="lander-pdf-item">
+    <div id="pdf-container">
+    </div>
+  </div>
 </div>
+
 {% endblock body %}

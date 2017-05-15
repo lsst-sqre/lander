@@ -10,9 +10,9 @@
 // ===========================================================================
 // SETTINGS
 // ===========================================================================
-// @import "inuitcss/settings/example.settings.config";
+@import "inuitcss/settings/example.settings.config";
 @import 'inuitcss/settings/settings.core';
-// @import "inuitcss/settings/example.settings.global";
+@import "inuitcss/settings/example.settings.global";
 
 @import 'sass-math-pow/sass/math-pow';
 @import 'squared/scss/settings/fonts';
@@ -74,24 +74,21 @@
 // ===========================================================================
 // COMPONENTS
 // ===========================================================================
-// @import 'components/example.components.buttons';
 @import 'squared/scss/components/universal-header';
-@import 'squared/scss/components/dashboard-page';
-@import 'squared/scss/components/dashboard-header';
-@import 'squared/scss/components/dashboard-section';
-@import 'squared/scss/components/dashboard-footer';
-@import 'squared/scss/components/inventory';
+@import 'squared/scss/components/lander-page';
+@import 'squared/scss/components/lander-info-panel';
 
 
 // ===========================================================================
 // UTILITIES
 // ===========================================================================
-// @import 'inuitcss/utilities/utilities.clearfix';
-// $inuit-offsets: true;
-// @import 'inuitcss/utilities/utilities.widths';
-// @import 'inuitcss/utilities/utilities.headings';
-// @import 'inuitcss/utilities/utilities.spacing';
-// @import 'inuitcss/utilities/utilities.print';
+@import 'inuitcss/utilities/utilities.clearfix';
+$inuit-offsets: true;
+@import 'inuitcss/utilities/utilities.widths';
+@import 'inuitcss/utilities/utilities.headings';
+@import 'inuitcss/utilities/utilities.spacing';
+@import 'inuitcss/utilities/utilities.print';
+
 @import 'inuitcss/utilities/utilities.hide';
 
 @import 'squared/scss/utilities/links';

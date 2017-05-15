@@ -4,14 +4,18 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <title>{{ page_title }}</title>
-  <meta name="description" content="{{ page_description }}">
+  <title>{{ config['page_title'] }}</title>
+  <meta name="description" content="{{ config['page_description'] }}">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   {% include "_typekit_loader.jinja" %}
   <link rel="stylesheet" href="assets/app.css">
 </head>
 
 <body class="lander-page">
+
+  <div class="u-hidden">
+    {% include "icons.svg" %}
+  </div>
 
   <div class="universal-header">
     <div class="universal-header--lander">
