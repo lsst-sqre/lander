@@ -65,6 +65,14 @@ class Configuration(object):
                     self['series'] = lsstdoc.series
                     self['series_name'] = self._get_series_name(self['series'])
 
+        # Get metadata from Travis environment
+        if self['environment'] is not None:
+            self['git_commit'] = os.getenv('TRAVIS_COMMIT')
+            self['git_branch'] = os.getenv('TRAVIS_BRANCH')
+            self['git_tag'] = os.getenv('TRAVIS_TAG')
+            self['github_slug'] = os.getenv('TRAVIS_REPO_SLUG')
+            self['travis_job_number'] = os.getenv('TRAVIS_JOB_NUMBER')
+
         # Apply metadata overrides
 
         if 'title' in self._args:
@@ -85,8 +93,8 @@ class Configuration(object):
         if 'repo_url' in self._args:
             self['repo_url'] = self._args['rep_url']
 
-        if 'repo_branch' in self._args:
-            self['repo_branch'] = self._args['repo_branch']
+        if 'git_branch' in self._args:
+            self['git_branch'] = self._args['git_branch']
 
         if 'ltd_product' in self._args:
             self['ltd_product'] = self._args['ltd_product']
@@ -116,6 +124,7 @@ class Configuration(object):
         defaults = {
             'build_dir': None,
             'pdf_path': None,
+            'environment': None,
             'lsstdoc_tex_path': None,
             'title': None,
             'authors': None,
@@ -123,8 +132,11 @@ class Configuration(object):
             'series': None,
             'series_name': None,
             'abstract': None,
-            'repo_url': None,
-            'repo_branch': None,
-            'ltd_product': None
+            'ltd_product': None,
+            'github_slug': None,
+            'git_branch': None,
+            'git_commit': None,
+            'git_tag': None,
+            'travis_job_number': None
         }
         return defaults

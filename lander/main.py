@@ -58,6 +58,14 @@ def parse_args():
     )
 
     parser.add_argument(
+        '--env',
+        dest='environment',
+        choices=['travis'],
+        default=None,
+        help='Environment for auto-configuration'
+    )
+
+    parser.add_argument(
         '--title',
         dest='title',
         help='Document title (metadata override)'
