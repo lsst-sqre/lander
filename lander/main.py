@@ -108,6 +108,36 @@ def parse_args():
              '(metadata override).'
     )
 
+    parser.add_argument(
+        '--keeper-url',
+        dest='keeper_url',
+        help='LTD Keeper API URL (or $LTD_KEEPER_URL)'
+    )
+
+    parser.add_argument(
+        '--keeper-user',
+        dest='keeper_user',
+        help='LTD Keeper API username (or $LTD_KEEPER_USER)'
+    )
+
+    parser.add_argument(
+        '--keeper-password',
+        dest='keeper_password',
+        help='LTD Keeper API password (or $LTD_KEEPER_PASSWORD)'
+    )
+
+    parser.add_argument(
+        '--aws-id',
+        dest='aws_id',
+        help='AWS key ID (or $LTD_AWS_ID)'
+    )
+
+    parser.add_argument(
+        '--aws-secret',
+        dest='aws_secret',
+        help='AWS secret key (or $LTD_AWS_SECRET)'
+    )
+
     return parser.parse_args()
 
 
