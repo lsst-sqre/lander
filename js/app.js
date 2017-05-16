@@ -2,4 +2,7 @@
 
 var PDFObject = require('pdfobject');
 
-PDFObject.embed("LDM-nnn.pdf", "#pdf-container");
+var pdfContainer = document.getElementById('pdf-container');
+var pdfPath = pdfContainer.dataset.pdfPath;
+
+PDFObject.embed(pdfPath, "#pdf-container");
