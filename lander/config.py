@@ -146,7 +146,9 @@ class Configuration(object):
             'travis_job_number': None,
             'aws_id': None,
             'aws_secret': None,
-            'keeper_url': 'https://keeper.lsst.codes'
+            'keeper_url': 'https://keeper.lsst.codes',
+            'keeper_user': None,
+            'keeper_password': None
         }
         return defaults
 

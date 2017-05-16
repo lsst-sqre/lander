@@ -108,6 +108,24 @@ def parse_args():
              '(metadata override).'
     )
 
+    parser.add_argument(
+        '--keeper-url',
+        dest='keeper_url',
+        help='LTD Keeper API URL (or $LTD_KEEPER_URL)'
+    )
+
+    parser.add_argument(
+        '--keeper-user',
+        dest='keeper_user',
+        help='LTD Keeper API username (or $LTD_KEEPER_USER)'
+    )
+
+    parser.add_argument(
+        '--keeper-password',
+        dest='keeper_password',
+        help='LTD Keeper API passwordname (or $LTD_KEEPER_PASSWORD)'
+    )
+
     return parser.parse_args()
 
 
