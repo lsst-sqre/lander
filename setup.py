@@ -7,10 +7,10 @@ from setuptools import setup, find_packages
 packagename = 'lander'
 description = ('HTML landing page generator for LSST PDF documentation '
                'deployed from Git to LSST the Docs.')
-author = 'Association of Universities for Research in Astronony, Inc.'
+author = 'Association of Universities for Research in Astronomy, Inc.'
 author_email = 'jsick@lsst.org'
 license = 'MIT'
-url = 'https://github.com/lsst-sqre/'
+url = 'https://github.com/lsst-sqre/lander'
 version = '0.1.0'
 
 
