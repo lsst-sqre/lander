@@ -35,10 +35,16 @@ class Configuration(object):
         # Default configurations
         self._defaults = self._init_defaults()
 
-        # Configurations are merged in a ChainMap. Priority is for computed
-        # configurations. Then values fdirectly from command line arguments.
-        # Then defaults.
-        self._chain = ChainMap(self._configs, self._args, self._defaults)
+        # Configurations from environment variables
+        self._envvars = self._get_environment_variables()
+
+        # Configurations are merged in a ChainMap. Priority is
+        # 1. Computed configurations.
+        # 2. Command line variables.
+        # 3. Environment variables.
+        # 4. Defaults.
+        self._chain = ChainMap(self._configs, self._args,
+                               self._envvars, self._defaults)
 
         # Validate inputs
         if self['pdf_path'] is None:
@@ -137,6 +143,24 @@ class Configuration(object):
             'git_branch': None,
             'git_commit': None,
             'git_tag': None,
-            'travis_job_number': None
+            'travis_job_number': None,
+            'aws_id': None,
+            'aws_secret': None,
+            'keeper_url': 'https://keeper.lsst.codes'
         }
         return defaults
+
+    def _get_environment_variables(self):
+        var_keys = {
+            'aws_id': 'LTD_AWS_ID',
+            'aws_secret': 'LTD_AWS_SECRET',
+            'keeper_url': 'LTD_KEEPER_URL',
+            'keeper_user': 'LTD_KEEPER_USER',
+            'keeper_password': 'LTD_KEEPER_PASSWORD',
+        }
+        env_configs = {}
+        for config_key, var_name in var_keys.items():
+            env_value = os.getenv(config_key)
+            if env_value is not None:
+                env_configs[config_key] = env_value
+        return env_configs
