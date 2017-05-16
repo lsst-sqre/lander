@@ -43,6 +43,7 @@ setup(
     install_requires=[
         'Jinja2==2.9.6',
         'structlog==17.1.0'
+        'metaget'
     ],
     include_package_data=True,
     entry_points={

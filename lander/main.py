@@ -51,6 +51,12 @@ def parse_args():
         help='Filepath of PDF document.'
     )
 
+    parser.add_argument(
+        '--lsstdoc',
+        dest='lsstdoc_tex_path',
+        help='File path of a lsstdoc LaTeX file (for metadata).'
+    )
+
     return parser.parse_args()
 
 
