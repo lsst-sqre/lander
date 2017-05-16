@@ -57,6 +57,49 @@ def parse_args():
         help='File path of a lsstdoc LaTeX file (for metadata).'
     )
 
+    parser.add_argument(
+        '--title',
+        dest='title',
+        help='Document title (metadata override)'
+    )
+
+    parser.add_argument(
+        '--authors',
+        dest='authors_json',
+        help='Author list, as a JSON array of strings (metadata override).'
+    )
+
+    parser.add_argument(
+        '--abstract',
+        dest='abstract',
+        help='Document abstract (metadata override).'
+    )
+
+    parser.add_argument(
+        '--handle',
+        dest='doc_handle',
+        help='Document handle, such as LDM-000 (metadata override).'
+    )
+
+    parser.add_argument(
+        '--repo-url',
+        dest='repo_url',
+        help='Git repository URL (metadata override).'
+    )
+
+    parser.add_argument(
+        '--repo-branch',
+        dest='repo_branch',
+        help='Git repository branch name (metadata override).'
+    )
+
+    parser.add_argument(
+        '--ltd-product',
+        dest='ltd_product',
+        help='Product name on LSST the Docs, such as `ldm-000` '
+             '(metadata override).'
+    )
+
     return parser.parse_args()
 
 
