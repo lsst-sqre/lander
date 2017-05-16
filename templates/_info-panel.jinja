@@ -5,3 +5,9 @@
   {% endif %}
   <h1 class="lander-info-header__product-name">{{ config['title'] }}</h1>
 </header>
+
+{% if config['abstract'] %}
+<section class="lander-info-abstract">
+  <p class="lander-abstract">{{ config['abstract'] }}</p>
+</section>
+{% endif %}
