@@ -3,6 +3,7 @@
 import json
 import sys
 import os
+from collections import ChainMap
 
 from metaget.tex.lsstdoc import LsstDoc
 import structlog
@@ -24,20 +25,35 @@ class Configuration(object):
     def __init__(self, args=None, **config):
         super().__init__()
         self._logger = structlog.get_logger(__name__)
-        self._args = args
+
+        # Make dict from argparse namespace
+        self._args = {k: v for k, v in vars(args).items() if v}
+
+        # Holds configuration overrides and computed configurations
         self._configs = dict(config)
 
-        # Validate configuration
+        # Default configurations
+        self._defaults = self._init_defaults()
+
+        # Configurations are merged in a ChainMap. Priority is for computed
+        # configurations. Then values fdirectly from command line arguments.
+        # Then defaults.
+        self._chain = ChainMap(self._configs, self._args, self._defaults)
+
+        # Validate inputs
         if self['pdf_path'] is None:
             self._logger.error('--pdf argument must be set')
             sys.exit(1)
-
         if not os.path.exists(self['pdf_path']):
             self._logger.error('Cannot find PDF ' + self['pdf_path'])
             sys.exit(1)
 
-        # get metadata from the TeX source
+        # Get metadata from the TeX source
         if self['lsstdoc_tex_path'] is not None:
+            if not os.path.exists(self['lsstdoc_tex_path']):
+                self._logger.error('Cannot find {0}'.format(
+                    self['lsstdoc_tex_path']))
+                sys.exit(1)
             with open(self['lsstdoc_tex_path']) as f:
                 tex_source = f.read()
                 lsstdoc = LsstDoc(tex_source)
@@ -51,41 +67,38 @@ class Configuration(object):
 
         # Apply metadata overrides
 
-        if self._args.title is not None:
-            self['title'] = self._args.title
+        if 'title' in self._args:
+            self['title'] = self._args['title']
 
-        if self._args.authors_json is not None:
-            author_list = json.loads(self._args.authors)
+        if 'authors_json' in self._args:
+            author_list = json.loads(self._args['authors_json'])
             self['authors'] = author_list
 
-        if self._args.doc_handle is not None:
-            self['doc_handle'] = self._args.doc_handle
+        if 'doc_handle' in self._args:
+            self['doc_handle'] = self._args['doc_handle']
             self['series'] = self['doc_handle'].split('-', 1)[0]
             self['series_name'] = self._get_series_name(self['series'])
 
-        if self._args.abstract is not None:
-            self['abstract'] = self._args.abstract
+        if 'abstract' in self._args:
+            self['abstract'] = self._args['abstract']
 
-        if self._args.repo_url is not None:
-            self['repo_url'] = self._args.rep_url
+        if 'repo_url' in self._args:
+            self['repo_url'] = self._args['rep_url']
 
-        if self._args.repo_branch is not None:
-            self['repo_branch'] = self._args.repo_branch
+        if 'repo_branch' in self._args:
+            self['repo_branch'] = self._args['repo_branch']
 
-        if self._args.ltd_product is not None:
-            self['ltd_product'] = self._args.ltd_product
+        if 'ltd_product' in self._args:
+            self['ltd_product'] = self._args['ltd_product']
 
     def __getitem__(self, key):
         """Access configurations, first from the explicitly set configurations,
         and secondarily from the command line arguments.
         """
-        try:
-            return self._configs[key]
-        except KeyError:
-            return getattr(self._args, key)
+        return self._chain[key]
 
     def __setitem__(self, key, value):
-        self._configs[key] = value
+        self._chain[key] = value
 
     def _get_series_name(self, series):
         series_names = {
@@ -97,3 +110,21 @@ class Configuration(object):
             'lpm': 'LSST Project Management',
         }
         return series_names.get(series.lower(), '')
+
+    def _init_defaults(self):
+        """Create a `dict` of default configurations."""
+        defaults = {
+            'build_dir': None,
+            'pdf_path': None,
+            'lsstdoc_tex_path': None,
+            'title': None,
+            'authors': None,
+            'authors_json': list(),
+            'series': None,
+            'series_name': None,
+            'abstract': None,
+            'repo_url': None,
+            'repo_branch': None,
+            'ltd_product': None
+        }
+        return defaults
