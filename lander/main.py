@@ -123,7 +123,19 @@ def parse_args():
     parser.add_argument(
         '--keeper-password',
         dest='keeper_password',
-        help='LTD Keeper API passwordname (or $LTD_KEEPER_PASSWORD)'
+        help='LTD Keeper API password (or $LTD_KEEPER_PASSWORD)'
+    )
+
+    parser.add_argument(
+        '--aws-id',
+        dest='aws_id',
+        help='AWS key ID (or $LTD_AWS_ID)'
+    )
+
+    parser.add_argument(
+        '--aws-secret',
+        dest='aws_secret',
+        help='AWS secret key (or $LTD_AWS_SECRET)'
     )
 
     return parser.parse_args()
