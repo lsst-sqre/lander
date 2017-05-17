@@ -138,6 +138,14 @@ def parse_args():
         help='AWS secret key (or $LTD_AWS_SECRET)'
     )
 
+    parser.add_argument(
+        '--upload',
+        dest='upload',
+        default=False,
+        action='store_true',
+        help='Upload built documentation to LSST the Docs'
+    )
+
     return parser.parse_args()
 
 

@@ -3,7 +3,10 @@
 import os
 import shutil
 
+import structlog
+
 from .renderer import create_jinja_env, render_homepage
+from . import ltdclient
 
 
 class Lander(object):
@@ -14,6 +17,7 @@ class Lander(object):
     def __init__(self, config):
         super().__init__()
         self._config = config
+        self._logger = structlog.get_logger(__name__)
         self._jinja_env = create_jinja_env()
 
     def build_site(self):
@@ -47,3 +51,12 @@ class Lander(object):
         shutil.copy(self._config['pdf_path'],
                     os.path.join(self._config['build_dir'],
                                  relative_pdf_path))
+
+    def upload_site(self):
+        """Upload a previously-built site to LSST the Docs."""
+        if not os.path.isdir(self._config['build_dir']):
+            message = 'Site not built at {0}'.format(self._config['build_dir'])
+            self._logger.error(message)
+            raise RuntimeError(message)
+
+        ltdclient.upload(self._config)
