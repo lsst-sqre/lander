@@ -42,7 +42,9 @@ setup(
     packages=find_packages(exclude=['docs', 'tests*', 'data']),
     install_requires=[
         'Jinja2==2.9.6',
-        'structlog==17.1.0'
+        'structlog==17.1.0',
+        'ltd-conveyor==0.3.1',
+        'requests==2.14.2',
         'metaget'
     ],
     include_package_data=True,

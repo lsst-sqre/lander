@@ -138,6 +138,14 @@ def parse_args():
         help='AWS secret key (or $LTD_AWS_SECRET)'
     )
 
+    parser.add_argument(
+        '--upload',
+        dest='upload',
+        default=False,
+        action='store_true',
+        help='Upload built documentation to LSST the Docs'
+    )
+
     return parser.parse_args()
 
 
@@ -158,8 +166,13 @@ def main():
     config = Configuration(args=args)
     lander = Lander(config)
     lander.build_site()
+    logger.info('Build complete')
 
-    logger.info('Complete')
+    if config['upload']:
+        lander.upload_site()
+        logger.info('Upload complete')
+
+    logger.info('Lander complete')
 
 
 def config_logger(args):

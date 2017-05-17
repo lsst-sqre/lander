@@ -102,8 +102,37 @@ class Configuration(object):
         if 'git_branch' in self._args:
             self['git_branch'] = self._args['git_branch']
 
-        if 'ltd_product' in self._args:
-            self['ltd_product'] = self._args['ltd_product']
+        # Post configuration validation
+        if self['upload']:
+            if self['ltd_product'] is None:
+                message = '--ltd-product must be set for uploads'
+                self._logger.error(message)
+                sys.exit(1)
+
+            if self['aws_id'] is None:
+                message = '--aws-id must be set for uploads'
+                self._logger.error(message)
+                sys.exit(1)
+
+            if self['aws_secret'] is None:
+                message = '--aws-secret must be set for uploads'
+                self._logger.error(message)
+                sys.exit(1)
+
+            if self['keeper_url'] is None:
+                message = '--keeper-url must be set for uploads'
+                self._logger.error(message)
+                sys.exit(1)
+
+            if self['keeper_user'] is None:
+                message = '--keeper-user must be set for uploads'
+                self._logger.error(message)
+                sys.exit(1)
+
+            if self['keeper_password'] is None:
+                message = '--keeper-password must be set for uploads'
+                self._logger.error(message)
+                sys.exit(1)
 
     def __getitem__(self, key):
         """Access configurations, first from the explicitly set configurations,
@@ -140,7 +169,7 @@ class Configuration(object):
             'abstract': None,
             'ltd_product': None,
             'github_slug': None,
-            'git_branch': None,
+            'git_branch': 'master',  # so we default to the main LTD edition
             'git_commit': None,
             'git_tag': None,
             'travis_job_number': None,
@@ -148,7 +177,8 @@ class Configuration(object):
             'aws_secret': None,
             'keeper_url': 'https://keeper.lsst.codes',
             'keeper_user': None,
-            'keeper_password': None
+            'keeper_password': None,
+            'upload': False
         }
         return defaults
 
