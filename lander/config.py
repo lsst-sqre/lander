@@ -4,9 +4,18 @@ import json
 import sys
 import os
 from collections import ChainMap
+import re
 
 from metaget.tex.lsstdoc import LsstDoc
 import structlog
+
+
+# Detects a GitHub repo slug from a GitHub URL
+GITHUB_SLUG_PATTERN = re.compile(
+    r"https://github.com"
+    r"/(?P<org>[a-z0-9\-_~%!$&'()*+,;=:@]+)"
+    r"/(?P<name>[a-z0-9\-_~%!$&'()*+,;=:@]+)"
+)
 
 
 class Configuration(object):
@@ -99,7 +108,14 @@ class Configuration(object):
             self['abstract'] = self._args['abstract']
 
         if 'repo_url' in self._args:
-            self['repo_url'] = self._args['rep_url']
+            self['repo_url'] = self._args['repo_url']
+
+            # extract github repo slug from repo_url
+            match = GITHUB_SLUG_PATTERN.match(self['repo_url'])
+            if match:
+                self['github_slug'] = '/'.join((
+                    match.group('org'),
+                    match.group('name')))
 
         if 'git_branch' in self._args:
             self['git_branch'] = self._args['git_branch']
