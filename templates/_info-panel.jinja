@@ -37,3 +37,43 @@
   <p class="lander-abstract">{{ config['abstract'] }}</p>
 </section>
 {% endif %}
+
+<section class="lander-info-metadata">
+  <h2>Details</h2>
+
+  <ul class="o-list-bare">
+    {% if config['github_slug'] %}
+    <li class="o-list-bare__item">
+      <a class="hidden-link" href="https://github.com/{{ config['github_slug'] }}">
+        <span class="svg-icon svg-icon--left svg-baseline">
+          <svg><use xlink:href="#octicon-mark-github" /></svg>
+        </span>
+        {{ config['github_slug'] }}
+      </a>
+    </li>
+    {% endif %}
+
+    {% if config['git_commit'] %}
+    <li class="o-list-bare__item">
+      <a class="hidden-link" href="https://github.com/{{ config['github_slug'] }}/commit/{{ config['git_commit'] }}">
+        <span class="svg-icon svg-icon--left svg-baseline">
+          <svg><use xlink:href="#octicon-git-commit" /></svg>
+        </span>
+        {# show truncated commit sha; GitHub shows 7 characters #}
+        {{ config['git_commit']|truncate(7, killwords=True, end='') }}
+      </a>
+    </li>
+    {% endif %}
+
+    {% if config['travis_job_number'] %}
+    <li class="o-list-bare__item">
+      <a class="hidden-link" href="https://travis-ci.org/{{ config['github_slug'] }}">
+        <span class="svg-icon svg-icon--left svg-baseline">
+          <svg><use xlink:href="#octicon-server" /></svg>
+        </span>
+        Travis CI #{{ config['travis_job_number'] }}
+      </a>
+    </li>
+    {% endif %}
+  </ul>
+</section>
