@@ -70,6 +70,8 @@ class Configuration(object):
                     self['doc_handle'] = lsstdoc.handle
                     self['series'] = lsstdoc.series
                     self['series_name'] = self._get_series_name(self['series'])
+                if lsstdoc.authors is not None:
+                    self['authors'] = lsstdoc.authors
 
         # Get metadata from Travis environment
         if self['environment'] is not None:
