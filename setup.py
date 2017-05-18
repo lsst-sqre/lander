@@ -41,6 +41,7 @@ setup(
     keywords='lsst',
     packages=find_packages(exclude=['docs', 'tests*', 'data']),
     install_requires=[
+        'pytz',
         'Jinja2==2.9.6',
         'structlog==17.1.0',
         'ltd-conveyor==0.3.1',
