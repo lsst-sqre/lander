@@ -18,33 +18,45 @@
   </p>
   {% endif %}
 
-  {% if config['ltd_product'] %}
-  <ul class="o-list-bare lander-info-version">
-    {% if config['git_tag'] %}
-    <li class="lander-info-version__name">
-      <a class="hidden-link" href="https://github.com/{{ config['github_slug'] }}/tree/{{ config['git_tag'] }}">
-        <span class="svg-icon svg-icon--left svg-baseline">
-          <svg><use xlink:href="#octicon-tag" /></svg>
-        </span>
-        {{ config['git_tag'] }}
-      </a>
+  <ul class="o-list-bare">
+    <li>
+      <span class="svg-icon svg-icon--left svg-baseline">
+        <svg><use xlink:href="#octicon-calendar" /></svg>
+      </span>
+      {{ config['build_datetime']|simple_date }}
     </li>
-    {% elif config['git_branch'] %}
-    <li class="lander-info-version__name">
-      <a class="hidden-link" href="https://github.com/{{ config['github_slug'] }}/tree/{{ config['git_branch'] }}">
-        <span class="svg-icon svg-icon--left svg-baseline">
-          <svg><use xlink:href="#octicon-git-branch" /></svg>
-        </span>
-        {{ config['git_branch'] }}
-      </a>
-    </li>
-    {% endif %}
 
-    <li class="lander-info-version__switcher">
-      <a class="c-btn c-btn--small c-btn--ghost c-btn--ghost-faint" href="https://{{ config['ltd_product'] }}.lsst.io/v">Change version</a>
+    <li>
+      {% if config['ltd_product'] %}
+      <ul class="o-list-bare lander-info-version">
+        {% if config['git_tag'] %}
+        <li class="lander-info-version__name">
+          <a class="hidden-link" href="https://github.com/{{ config['github_slug'] }}/tree/{{ config['git_tag'] }}">
+            <span class="svg-icon svg-icon--left svg-baseline">
+              <svg><use xlink:href="#octicon-tag" /></svg>
+            </span>
+            {{ config['git_tag'] }}
+          </a>
+        </li>
+        {% elif config['git_branch'] %}
+        <li class="lander-info-version__name">
+          <a class="hidden-link" href="https://github.com/{{ config['github_slug'] }}/tree/{{ config['git_branch'] }}">
+            <span class="svg-icon svg-icon--left svg-baseline">
+              <svg><use xlink:href="#octicon-git-branch" /></svg>
+            </span>
+            {{ config['git_branch'] }}
+          </a>
+        </li>
+        {% endif %}
+
+        <li class="lander-info-version__switcher">
+          <a class="c-btn c-btn--small c-btn--ghost c-btn--ghost-faint" href="https://{{ config['ltd_product'] }}.lsst.io/v">Change version</a>
+        </li>
+      </ul>
+      {% endif %}
     </li>
   </ul>
-  {% endif %}
+
 </header>
 
 {% if config['authors'] %}
@@ -88,7 +100,6 @@
       </a>
     </li>
     {% endfor %}
-  </ul>
   </ul>
 </section>
 
