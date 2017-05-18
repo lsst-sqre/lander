@@ -102,6 +102,16 @@ def parse_args():
     )
 
     parser.add_argument(
+        '--extra-downloads',
+        dest='extra_downloads',
+        help='JSON array-formatted list of additional files to provide '
+             'download links for from the landing page.\n\n'
+             'List items are relative file paths. These files will be copied '
+             'into the root deployment directory. The main PDF (--pdf) '
+             'should not be included in this list.'
+    )
+
+    parser.add_argument(
         '--ltd-product',
         dest='ltd_product',
         help='Product name on LSST the Docs, such as `ldm-000` '

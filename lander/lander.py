@@ -32,12 +32,6 @@ class Lander(object):
         self._config['page_title'] = self._config['title']
         self._config['page_description'] = self._config['abstract']
 
-        # Write index.html page
-        index_html = render_homepage(self._config, self._jinja_env)
-        index_html_path = os.path.join(self._config['build_dir'], 'index.html')
-        with open(index_html_path, mode='w', encoding='utf-8') as f:
-            f.write(index_html)
-
         # Copy assets (css, js)
         # This algorithm is slightly naieve; we copy the whole built
         # assets directory everytime.
@@ -51,6 +45,41 @@ class Lander(object):
         shutil.copy(self._config['pdf_path'],
                     os.path.join(self._config['build_dir'],
                                  relative_pdf_path))
+
+        # Copy extra downloads. Also determine type for the template to
+        # choose an appropriate icon.
+        relative_extra_downloads = []
+        print('extra_downloads', self._config['extra_downloads'])
+        for download_path in self._config['extra_downloads']:
+            relative_path = os.path.basename(download_path)
+            shutil.copy(download_path,
+                        os.path.join(self._config['build_dir'],
+                                     relative_path))
+            # determine a type to choose the octicon
+            ext = os.path.splitext(relative_path)[-1]
+            if ext == ['.pdf']:
+                download_type = 'pdf'
+            elif ext in ['.tex', '.md', '.txt', '.rst']:
+                download_type = 'text'
+            elif ext in ['.gz', '.zip']:
+                download_type = 'zip'
+            elif ext in ['.tif', '.tiff', '.jpg', '.jpeg', '.png', '.gif']:
+                download_type = 'media'
+            elif ext in ['.py', '.h', '.c', '.cpp', '.ipynb', '.json']:
+                download_type = 'code'
+            else:
+                download_type = 'file'
+            relative_extra_downloads.append({
+                'path': relative_path,
+                'type': download_type
+            })
+        self._config['relative_extra_downloads'] = relative_extra_downloads
+
+        # Write index.html page
+        index_html = render_homepage(self._config, self._jinja_env)
+        index_html_path = os.path.join(self._config['build_dir'], 'index.html')
+        with open(index_html_path, mode='w', encoding='utf-8') as f:
+            f.write(index_html)
 
     def upload_site(self):
         """Upload a previously-built site to LSST the Docs."""
