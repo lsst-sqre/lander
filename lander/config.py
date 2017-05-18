@@ -6,7 +6,7 @@ import os
 from collections import ChainMap
 import re
 
-from metaget.tex.lsstdoc import LsstDoc
+from metald.tex.lsstdoc import LsstDoc
 import structlog
 
 
