@@ -46,12 +46,13 @@
 
 {% if config['abstract'] %}
 <section class="lander-info-abstract">
+  <h2 class="lander-subsection-header">Abstract</h2>
   <p class="lander-abstract">{{ config['abstract'] }}</p>
 </section>
 {% endif %}
 
 <section class="lander-info-metadata">
-  <h2>Details</h2>
+  <h2 class="lander-subsection-header">Details</h2>
 
   <ul class="o-list-bare">
     {% if config['github_slug'] %}
