@@ -54,14 +54,27 @@
 <section>
   <h2 class="lander-subsection-header">Download</h2>
   <ul class="o-list-bare">
+    {# Primary PDF download #}
     <li>
-      <a class="hidden-link" href="{{ relative_pdf_path }}">
+      <a class="hidden-link" href="{{ config['relative_pdf_path'] }}">
         <span class="svg-icon svg-icon--left svg-baseline">
           <svg><use xlink:href="#octicon-file-pdf" /></svg>
         </span>
         {{ config['relative_pdf_path'] }}
       </a>
     </li>
+
+    {# Extra downloads #}
+    {% for download in config['relative_extra_downloads'] %}
+    <li>
+      <a class="hidden-link" href="{{ download['path'] }}">
+        <span class="svg-icon svg-icon--left svg-baseline">
+          <svg><use xlink:href="#octicon-file-{{ download['type'] }}" /></svg>
+        </span>
+        {{ download['path'] }}
+      </a>
+    </li>
+    {% endfor %}
   </ul>
   </ul>
 </section>
