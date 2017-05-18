@@ -95,7 +95,7 @@ gulp.task('icons', function () {
 
 // Runs `lander` render to create development HTML in _build
 gulp.task('html', ['icons'], () => {
-  return run(`lander --pdf tests/data/LDM-nnn.pdf --lsstdoc tests/data/LDM-nnn.tex --build-dir ${dirs.dev} --ltd-product "ldm-nnn" --repo-branch master --repo-url https://github.com/lsst/ldm-nnn.git`).exec()
+  return run(`lander --pdf tests/data/LDM-nnn.pdf --lsstdoc tests/data/LDM-nnn.tex --build-dir ${dirs.dev} --ltd-product "ldm-nnn" --repo-branch master --repo-url https://github.com/lsst/ldm-nnn.git --extra-downloads "[\\"tests/data/LDM-nnn.tex\\"]"`).exec()
     .pipe(gulp.dest(`${dirs.dev}/logs`)) // makes the reload synchronous
     .pipe(reload());
 });
