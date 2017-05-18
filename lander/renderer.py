@@ -19,6 +19,7 @@ def create_jinja_env():
         loader=jinja2.FileSystemLoader(template_dir),
         autoescape=jinja2.select_autoescape(['html'])
     )
+    env.filters['simple_date'] = filter_simple_date
     return env
 
 
@@ -28,3 +29,8 @@ def render_homepage(config, env):
     rendered_page = template.render(
         config=config)
     return rendered_page
+
+
+def filter_simple_date(value):
+    """Filter a `datetime.datetime` into a 'YYYY-MM-DD' string."""
+    return value.strftime('%Y-%m-%d')

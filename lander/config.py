@@ -5,9 +5,11 @@ import sys
 import os
 from collections import ChainMap
 import re
+import datetime
 
 from metald.tex.lsstdoc import LsstDoc
 import structlog
+import pytz
 
 
 # Detects a GitHub repo slug from a GitHub URL
@@ -179,6 +181,7 @@ class Configuration(object):
         """Create a `dict` of default configurations."""
         defaults = {
             'build_dir': None,
+            'build_datetime': datetime.datetime.now(pytz.utc),
             'pdf_path': None,
             'extra_downloads': list(),
             'environment': None,
