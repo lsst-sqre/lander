@@ -1,9 +1,22 @@
 <header class="lander-info-header">
   <img class="lander-info-header__logo" src="assets/lsst_underline_logo.svg" alt="Large Synoptic Survey Telescope">
   {% if config['doc_handle'] %}
-  <span class="lander-info-header__handle">{{ config['doc_handle'] }}</span>
+  <span class="lander-info-header__handle">{{ config['doc_handle'] }}
+    {% if config['docushare_url'] %}
+    DRAFT
+    {% endif %}
+  </span>
   {% endif %}
   <h1 class="lander-info-header__product-name">{{ config['title'] }}</h1>
+
+  {% if config['docushare_url'] %}
+  <p>
+    <span class="svg-icon svg-icon--left svg-baseline">
+      <svg><use xlink:href="#octicon-info" /></svg>
+    </span>
+    This is a draft. The accepted version is in <a href="{{ config['docushare_url'] }}">LSST’s DocuShare</a>.
+  </p>
+  {% endif %}
 
   {% if config['ltd_product'] %}
   <ul class="o-list-bare lander-info-version">

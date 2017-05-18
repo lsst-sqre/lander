@@ -190,6 +190,7 @@ class Configuration(object):
             'series_name': None,
             'abstract': None,
             'ltd_product': None,
+            'docushare_url': None,
             'github_slug': None,
             'git_branch': 'master',  # so we default to the main LTD edition
             'git_commit': None,

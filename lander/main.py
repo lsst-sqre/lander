@@ -112,6 +112,15 @@ def parse_args():
     )
 
     parser.add_argument(
+        '--docushare-url',
+        dest='docushare_url',
+        help='Docushare URL. Prefer the landing page URL in docushare rather '
+             'than the direct PDF link so that users can see metadata about '
+             'the accepted version. Using ls.st, this is the '
+             'https://ls.st/ldm-nnn* URL.'
+    )
+
+    parser.add_argument(
         '--ltd-product',
         dest='ltd_product',
         help='Product name on LSST the Docs, such as `ldm-000` '
