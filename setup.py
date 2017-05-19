@@ -2,6 +2,7 @@ from io import open
 import os
 
 from setuptools import setup, find_packages
+import versioneer
 
 
 packagename = 'lander'
@@ -26,7 +27,7 @@ long_description = read('README.rst')
 
 setup(
     name=packagename,
-    version=version,
+    version=versioneer.get_version(),
     description=description,
     long_description=long_description,
     url=url,
@@ -53,5 +54,6 @@ setup(
         'console_scripts': [
             'lander = lander.main:main'
         ]
-    }
+    },
+    cmdclass=versioneer.get_cmdclass()
 )

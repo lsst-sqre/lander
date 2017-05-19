@@ -3,7 +3,10 @@ LSST the Docs.
 
 https://github.com/lsst-sqre/lander
 """
-import pkg_resources
+from ._version import get_versions
 
 
-__version__ = pkg_resources.get_distribution('lander').version
+# Get version string from versioneer
+# https://github.com/warner/python-versioneer
+__version__ = get_versions()['version']
+del get_versions
