@@ -48,10 +48,10 @@ def register_build(config, keeper_token):
     }
 
     r = requests.post(
-            config['keeper_url'] + '/products/{p}/builds/'.format(
-                p=config['ltd_product']),
-            auth=(keeper_token, ''),
-            json=data)
+        config['keeper_url'] + '/products/{p}/builds/'.format(
+            p=config['ltd_product']),
+        auth=(keeper_token, ''),
+        json=data)
 
     if r.status_code != 201:
         raise RuntimeError(r.json())
