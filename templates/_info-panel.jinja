@@ -9,15 +9,6 @@
   {% endif %}
   <h1 class="lander-info-header__product-name">{{ config['title'] }}</h1>
 
-  {% if config['docushare_url'] %}
-  <p>
-    <span class="svg-icon svg-icon--left svg-baseline">
-      <svg><use xlink:href="#octicon-info" /></svg>
-    </span>
-    This is a draft. The accepted version is in <a href="{{ config['docushare_url'] }}">LSST’s DocuShare</a>.
-  </p>
-  {% endif %}
-
   <ul class="o-list-bare">
     <li>
       <span class="svg-icon svg-icon--left svg-baseline">
@@ -27,33 +18,39 @@
     </li>
 
     <li>
-      {% if config['ltd_product'] %}
-      <ul class="o-list-bare lander-info-version">
-        {% if config['git_tag'] %}
-        <li class="lander-info-version__name">
-          <a class="hidden-link" href="https://github.com/{{ config['github_slug'] }}/tree/{{ config['git_tag'] }}">
-            <span class="svg-icon svg-icon--left svg-baseline">
-              <svg><use xlink:href="#octicon-tag" /></svg>
-            </span>
-            {{ config['git_tag'] }}
-          </a>
-        </li>
-        {% elif config['git_branch'] %}
-        <li class="lander-info-version__name">
-          <a class="hidden-link" href="https://github.com/{{ config['github_slug'] }}/tree/{{ config['git_branch'] }}">
-            <span class="svg-icon svg-icon--left svg-baseline">
-              <svg><use xlink:href="#octicon-git-branch" /></svg>
-            </span>
-            {{ config['git_branch'] }}
-          </a>
+    {% if config['git_tag'] %}
+    <a class="hidden-link" href="https://github.com/{{ config['github_slug'] }}/tree/{{ config['git_tag'] }}">
+      <span class="svg-icon svg-icon--left svg-baseline">
+        <svg><use xlink:href="#octicon-tag" /></svg>
+      </span>
+      {{ config['git_tag'] }}
+    </a>
+    {% elif config['git_branch'] %}
+    <a class="hidden-link" href="https://github.com/{{ config['github_slug'] }}/tree/{{ config['git_branch'] }}">
+      <span class="svg-icon svg-icon--left svg-baseline">
+        <svg><use xlink:href="#octicon-git-branch" /></svg>
+      </span>
+      {{ config['git_branch'] }}
+    </a>
+    {% endif %}
+    </li>
+
+    <li>
+      <ul class="o-list-bare c-lander-btn-row">
+        {% if config['ltd_product'] %}
+        {# LSST the Docs version switcher button #}
+        <li class="c-lander-btn-row__item">
+          <a class="c-btn c-btn--small c-btn--ghost c-btn--ghost-faint" href="https://{{ config['ltd_product'] }}.lsst.io/v">Change version</a>
         </li>
         {% endif %}
 
-        <li class="lander-info-version__switcher">
-          <a class="c-btn c-btn--small c-btn--ghost c-btn--ghost-faint" href="https://{{ config['ltd_product'] }}.lsst.io/v">Change version</a>
+        {% if config['docushare_url'] %}
+        {# DocuShare button #}
+        <li class="c-lander-btn-row__item">
+          <a class="c-btn c-btn--small c-btn--ghost c-btn--ghost-faint" href="{{ config['docushare_url'] }}">DocuShare</a>
         </li>
+        {% endif %}
       </ul>
-      {% endif %}
     </li>
   </ul>
 
