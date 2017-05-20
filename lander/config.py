@@ -7,7 +7,7 @@ from collections import ChainMap
 import re
 import datetime
 
-from metald.tex.lsstdoc import LsstDoc
+from metasrc.tex.lsstdoc import LsstDoc
 import structlog
 import pytz
 

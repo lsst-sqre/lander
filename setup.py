@@ -47,7 +47,7 @@ setup(
         'structlog==17.1.0',
         'ltd-conveyor==0.3.1',
         'requests==2.14.2',
-        'metald'
+        'metasrc>=0.1.0b3'
     ],
     include_package_data=True,
     entry_points={

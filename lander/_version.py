@@ -42,7 +42,7 @@ def get_config():
     cfg.VCS = "git"
     cfg.style = "pep440"
     cfg.tag_prefix = ""
-    cfg.parentdir_prefix = "metald-"
+    cfg.parentdir_prefix = "lander-"
     cfg.versionfile_source = "lander/_version.py"
     cfg.verbose = False
     return cfg
