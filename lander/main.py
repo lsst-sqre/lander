@@ -102,6 +102,13 @@ def parse_args():
     )
 
     parser.add_argument(
+        '--date',
+        dest='build_datetime',
+        help='Datetime string describing when the document was authored '
+             '(metadata override; the current datetime is used by default).'
+    )
+
+    parser.add_argument(
         '--extra-downloads',
         dest='extra_downloads',
         help='JSON array-formatted list of additional files to provide '
