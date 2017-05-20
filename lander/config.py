@@ -9,7 +9,7 @@ import datetime
 
 from metasrc.tex.lsstdoc import LsstDoc
 import structlog
-import pytz
+import dateutil
 
 
 # Detects a GitHub repo slug from a GitHub URL
@@ -125,6 +125,14 @@ class Configuration(object):
         if 'git_branch' in self._args:
             self['git_branch'] = self._args['git_branch']
 
+        if 'build_datetime' in self._args:
+            parsed_datetime = dateutil.parser.parse(
+                self._args['build_datetime'])
+            if parsed_datetime.tzinfo is None:
+                parsed_datetime = parsed_datetime.replace(
+                    tzinfo=dateutil.tz.tzutc())
+            self['build_datetime'] = parsed_datetime
+
         # Post configuration validation
         if self['upload']:
             if self['ltd_product'] is None:
@@ -181,7 +189,7 @@ class Configuration(object):
         """Create a `dict` of default configurations."""
         defaults = {
             'build_dir': None,
-            'build_datetime': datetime.datetime.now(pytz.utc),
+            'build_datetime': datetime.datetime.now(dateutil.tz.tzutc()),
             'pdf_path': None,
             'extra_downloads': list(),
             'environment': None,
