@@ -110,8 +110,87 @@ Lander can upload pages directly to LSST the Docs for you with these configurati
 Note: these are advanced configurations and are typically added to a CI configuration automatically or by a Documentation Engineer.
 Reach out to `#dm-docs <https://lsstc.slack.com/messages/C2B6DQBAL/>`_ on Slack for help.
 
+Development workflow
+====================
+
+You need both Python 3.5+ and `node.js`_ to develop Lander.
+
+Initial set up
+--------------
+
+Clone and install dependencies (use a Python virtual environment of your choice)::
+
+   git clone https://github.com/lsst-sqre/lander
+   cd lander
+   npm install
+   pip install -r requirements.txt
+   python setup.py develop
+
+Run Python tests and linting
+----------------------------
+
+We use pytest::
+
+   pytest
+
+Build a test site
+-----------------
+
+The default gulp_ workflow create website assets and generates a test website::
+
+   gulp
+
+This gulp task runs a browsersync_ server and refreshes the page whenever CSS, JavaScript, or HTML assets change.
+
+Only build assets
+-----------------
+
+If you want to only build CSS, icon, and JavaScript assets, run this task::
+
+   gulp assets --env=deploy
+
+This is how assets are built on CI for releases of Lander.
+
+Developing CSS/Sass with squared
+--------------------------------
+
+Lander uses squared_ for visual design.
+All Lander CSS should be committed to the squared_ repo so that LSST SQuaRE web projects share a common visual language.
+
+To make it easier to write Sass in squared_ while developing landing pages in Lander, we recommend linking a clone of squared_ to Lander's ``node_modules``. 
+Assuming you're starting from the ``lander/`` root directory::
+
+  git clone https://github.com/lsst-sqre/squared ../squared
+  npm link ../squared
+
+Some patterns:
+
+- If you're working on a branch in squared_, then update squared's version in ``package.json`` to that branch.
+  For example: ``"squared": "lsst-sqre/squared#tickets/DM-10503"``.
+  This allows Travis to install the development version of squared_ when testing Lander.
+  Remember to make a release of squared_ before releasing a new version of Lander, see below.
+
+- ``scss/app.scss`` in the lander repo imports Sass partials from squared_ and other packages (including inuitcss_).
+
+Release workflow
+================
+
+1. If squared_ was modified, create a squared_ release first.
+2. Update ``package.json`` with the released version of squared_.
+   Using tagged npm releases is preferred to GitHub branches to make builds of releases repeatable.
+3. Create a signed tag: ``git tag -s 0.1.0 -m "v0.1.0"``. Use the `PEP 440`_ schema.
+4. Push the tag: ``git push --tags``. This will automatically create a Lander release on PyPI.
+5. Merge the development branch as necessary.
+
 License
 =======
 
 This project is open sourced under the MIT license.
 See `LICENSE <./LICENSE>`_ for details.
+
+.. _squared: https://github.com/lsst-sqre/squared
+.. _`PEP 440`: https://www.python.org/dev/peps/pep-0440/
+.. _inuitcss: https://github.com/inuitcss/inuitcss
+.. _browsersync: https://browsersync.io
+.. _gulp: http://gulpjs.com
+.. _node.js: https://nodejs.org/en/
