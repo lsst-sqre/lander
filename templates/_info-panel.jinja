@@ -69,7 +69,7 @@
 {% if config['abstract'] %}
 <section class="lander-info-abstract">
   <h2 class="lander-subsection-header">Abstract</h2>
-  <p class="lander-abstract">{{ config['abstract'] }}</p>
+  {{ config['abstract']|paragraphify }}
 </section>
 {% endif %}
 
