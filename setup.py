@@ -12,7 +12,6 @@ author = 'Association of Universities for Research in Astronomy, Inc.'
 author_email = 'jsick@lsst.org'
 license = 'MIT'
 url = 'https://github.com/lsst-sqre/lander'
-version = '0.1.0'
 
 
 def read(filename):

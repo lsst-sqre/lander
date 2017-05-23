@@ -1,8 +1,8 @@
 include *.rst
 include LICENSE
 include setup.cfg
-recursive-include templates *
-recursive-include assets *
+recursive-include lander/templates *
+recursive-include lander/assets *
 package.json
 gulpfile.babel.js
 
