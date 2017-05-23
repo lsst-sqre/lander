@@ -84,14 +84,13 @@ For example::
 Distributing extra files from the landing page
 ----------------------------------------------
 
-To include ancillary files with the main PDF document, provide their file paths with the ``--extra-downloads`` path.
+To include ancillary files with the main PDF document, provide their file paths with the ``--extra-downloads`` argument.
 These extra files are listed in the **Downloads** section of the landing page.
 The main PDF is always included first in this list.
 
-``--extra-downloads`` should be a JSON-formatted array, even for a single item.
 For example::
 
-   --extra-downloads "[\"demo.ipynb\"]"
+   --extra-downloads demo.ipynb
 
 Uploading to LSST the Docs
 --------------------------

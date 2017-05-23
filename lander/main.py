@@ -104,11 +104,11 @@ def parse_args():
     parser.add_argument(
         '--extra-downloads',
         dest='extra_downloads',
-        help='JSON array-formatted list of additional files to provide '
-             'download links for from the landing page.\n\n'
-             'List items are relative file paths. These files will be copied '
-             'into the root deployment directory. The main PDF (--pdf) '
-             'should not be included in this list.'
+        nargs='*',
+        help='Paths of additional files to provide '
+             'download links for from the landing page. '
+             'These files will be copied into the root deployment directory. '
+             'The main PDF (--pdf) should not be included in this list.'
     )
 
     parser.add_argument(

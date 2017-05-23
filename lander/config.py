@@ -120,7 +120,7 @@ class Configuration(object):
                     match.group('name')))
 
         if 'extra_downloads' in self._args:
-            self['extra_downloads'] = json.loads(self._args['extra_downloads'])
+            self['extra_downloads'] = self._args['extra_downloads']
 
         if 'git_branch' in self._args:
             self['git_branch'] = self._args['git_branch']
