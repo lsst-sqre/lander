@@ -12,6 +12,8 @@ install:
 script:
   - "gulp assets --env=deploy"
   - "pytest"
+  - "ls lander/assets"
+  - "ls lander/templates"
 deploy:
   provider: pypi
   user: sqre-admin
