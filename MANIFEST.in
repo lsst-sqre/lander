@@ -1,10 +1,10 @@
 include *.rst
 include LICENSE
-include setup.cfg
-recursive-include lander/templates *
-recursive-include lander/assets *
-package.json
-gulpfile.babel.js
+recursive-include lander *.svg
+recursive-include lander *.html
+recursive-include lander *.jinja
+recursive-include lander *.css
+recursive-include lander *.js
 
 include versioneer.py
 include lander/_version.py
