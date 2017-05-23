@@ -35,7 +35,7 @@ class Lander(object):
         # Copy assets (css, js)
         # This algorithm is slightly naieve; we copy the whole built
         # assets directory everytime.
-        asset_src_dir = os.path.join(os.path.dirname(__file__), '../assets')
+        asset_src_dir = os.path.join(os.path.dirname(__file__), 'assets')
         asset_dest_dir = os.path.join(self._config['build_dir'], 'assets')
         if os.path.isdir(asset_dest_dir):
             shutil.rmtree(asset_dest_dir)

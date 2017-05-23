@@ -15,7 +15,7 @@ def create_jinja_env():
         Jinja2 template rendering environment, configured to use templates in
         ``templates/``.
     """
-    template_dir = os.path.join(os.path.dirname(__file__), '..', 'templates')
+    template_dir = os.path.join(os.path.dirname(__file__), 'templates')
     env = jinja2.Environment(
         loader=jinja2.FileSystemLoader(template_dir),
         autoescape=jinja2.select_autoescape(['html'])
@@ -46,5 +46,4 @@ def filter_paragraphify(value):
     value = re.sub(r'\r\n|\r|\n', '\n', value)  # Normalize newlines
     paras = re.split('\n{2,}', value)
     paras = ['<p>{0}</p>'.format(p) for p in paras if len(p) > 0]
-    print(paras)
     return jinja2.Markup('\n\n'.join(paras))

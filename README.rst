@@ -123,6 +123,7 @@ Clone and install dependencies (use a Python virtual environment of your choice)
    git clone https://github.com/lsst-sqre/lander
    cd lander
    npm install
+   gulp assets
    pip install -r requirements.txt
    python setup.py develop
 

@@ -1,7 +1,7 @@
 from io import open
 import os
 
-from setuptools import setup, find_packages
+from setuptools import setup
 import versioneer
 
 
@@ -12,7 +12,6 @@ author = 'Association of Universities for Research in Astronomy, Inc.'
 author_email = 'jsick@lsst.org'
 license = 'MIT'
 url = 'https://github.com/lsst-sqre/lander'
-version = '0.1.0'
 
 
 def read(filename):
@@ -40,7 +39,7 @@ setup(
         'Programming Language :: Python :: 3.5',
     ],
     keywords='lsst',
-    packages=find_packages(exclude=['docs', 'tests*', 'data']),
+    packages=['lander'],
     install_requires=[
         'python-dateutil>=2.6.0',
         'Jinja2==2.9.6',
@@ -49,6 +48,12 @@ setup(
         'requests==2.14.2',
         'metasrc>=0.1.0b3'
     ],
+    package_data={'lander': [
+        'assets/*.svg',
+        'assets/*.css',
+        'assets/*.js',
+        'templates/*'
+    ]},
     include_package_data=True,
     entry_points={
         'console_scripts': [

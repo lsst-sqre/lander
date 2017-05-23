@@ -20,13 +20,6 @@ def parse_args():
                "available at https://github.com/lsst-sqre/lander.")
 
     parser.add_argument(
-        '--license',
-        dest='show_license',
-        default=False,
-        action='store_true',
-        help="Show license information and exit.")
-
-    parser.add_argument(
         '--version',
         dest='show_version',
         default=False,
@@ -181,10 +174,6 @@ def main():
     config_logger(args)
     logger = structlog.get_logger(__name__)
 
-    if args.show_license:
-        print_license()
-        sys.exit(0)
-
     if args.show_version:
         print_version()
         sys.exit(0)
@@ -224,14 +213,6 @@ def config_logger(args):
         wrapper_class=structlog.stdlib.BoundLogger,
         cache_logger_on_first_use=True,
     )
-
-
-def print_license():
-    license_txt = pkg_resources.resource_string(
-        __name__,
-        os.path.join("..", "LICENSE"))
-    license = license_txt.decode('utf-8')
-    print(license)
 
 
 def print_version():
