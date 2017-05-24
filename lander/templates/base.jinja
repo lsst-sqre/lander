@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>{{ config['page_title'] }}</title>
+  <meta name="description" content="{{ config['page_description'] }}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% include "_typekit_loader.jinja" %}
+  <link rel="stylesheet" href="assets/app.css">
+</head>
+
+<body class="lander-page">
+
+  <div class="u-hidden">
+    {% include "icons.svg" %}
+  </div>
+
+  <div class="universal-header">
+    <div class="universal-header--lander">
+      <span><a href="https://www.lsst.org">An LSST.org project</a></span>
+    </div>
+  </div>
+
+
+  {% block body %}
+  {% endblock body %}
+
+  {% include "_footer.jinja" %}
+</body>
+
+<script src="assets/app.bundle.js"></script>
+
+</html>

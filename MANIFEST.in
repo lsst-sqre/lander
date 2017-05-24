@@ -1,0 +1,10 @@
+include *.rst
+include LICENSE
+recursive-include lander *.svg
+recursive-include lander *.html
+recursive-include lander *.jinja
+recursive-include lander *.css
+recursive-include lander *.js
+
+include versioneer.py
+include lander/_version.py

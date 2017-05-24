@@ -1,0 +1,141 @@
+<header class="lander-info-header">
+  <img class="lander-info-header__logo" src="assets/lsst_underline_logo.svg" alt="Large Synoptic Survey Telescope">
+  {% if config['doc_handle'] %}
+  <span class="lander-info-header__handle">{{ config['doc_handle'] }}
+    {% if config['docushare_url'] %}
+    DRAFT
+    {% endif %}
+  </span>
+  {% endif %}
+  <h1 class="lander-info-header__product-name">{{ config['title'] }}</h1>
+
+  <ul class="o-list-bare">
+    <li>
+      <span class="svg-icon svg-icon--left svg-baseline">
+        <svg><use xlink:href="#octicon-calendar" /></svg>
+      </span>
+      {{ config['build_datetime']|simple_date }}
+    </li>
+
+    <li>
+    {% if config['git_tag'] %}
+    <a class="hidden-link" href="https://github.com/{{ config['github_slug'] }}/tree/{{ config['git_tag'] }}">
+      <span class="svg-icon svg-icon--left svg-baseline">
+        <svg><use xlink:href="#octicon-tag" /></svg>
+      </span>
+      {{ config['git_tag'] }}
+    </a>
+    {% elif config['git_branch'] %}
+    <a class="hidden-link" href="https://github.com/{{ config['github_slug'] }}/tree/{{ config['git_branch'] }}">
+      <span class="svg-icon svg-icon--left svg-baseline">
+        <svg><use xlink:href="#octicon-git-branch" /></svg>
+      </span>
+      {{ config['git_branch'] }}
+    </a>
+    {% endif %}
+    </li>
+
+    <li>
+      <ul class="o-list-bare c-lander-btn-row">
+        {% if config['ltd_product'] %}
+        {# LSST the Docs version switcher button #}
+        <li class="c-lander-btn-row__item">
+          <a class="c-btn c-btn--small c-btn--ghost c-btn--ghost-faint" href="https://{{ config['ltd_product'] }}.lsst.io/v">Change version</a>
+        </li>
+        {% endif %}
+
+        {% if config['docushare_url'] %}
+        {# DocuShare button #}
+        <li class="c-lander-btn-row__item">
+          <a class="c-btn c-btn--small c-btn--ghost c-btn--ghost-faint" href="{{ config['docushare_url'] }}">DocuShare</a>
+        </li>
+        {% endif %}
+      </ul>
+    </li>
+  </ul>
+
+</header>
+
+{% if config['authors'] %}
+<section class="lander-info-authors">
+  <ul class='comma-list'>
+  {% for author_name in config['authors'] %}
+    <li>{{ author_name }}</li>
+  {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% if config['abstract'] %}
+<section class="lander-info-abstract">
+  <h2 class="lander-subsection-header">Abstract</h2>
+  {{ config['abstract']|paragraphify }}
+</section>
+{% endif %}
+
+<section>
+  <h2 class="lander-subsection-header">Download</h2>
+  <ul class="o-list-bare">
+    {# Primary PDF download #}
+    <li>
+      <a class="hidden-link" href="{{ config['relative_pdf_path'] }}">
+        <span class="svg-icon svg-icon--left svg-baseline">
+          <svg><use xlink:href="#octicon-file-pdf" /></svg>
+        </span>
+        {{ config['relative_pdf_path'] }}
+      </a>
+    </li>
+
+    {# Extra downloads #}
+    {% for download in config['relative_extra_downloads'] %}
+    <li>
+      <a class="hidden-link" href="{{ download['path'] }}">
+        <span class="svg-icon svg-icon--left svg-baseline">
+          <svg><use xlink:href="#octicon-file-{{ download['type'] }}" /></svg>
+        </span>
+        {{ download['path'] }}
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section class="lander-info-metadata">
+  <h2 class="lander-subsection-header">Details</h2>
+
+  <ul class="o-list-bare">
+    {% if config['github_slug'] %}
+    <li class="o-list-bare__item">
+      <a class="hidden-link" href="https://github.com/{{ config['github_slug'] }}">
+        <span class="svg-icon svg-icon--left svg-baseline">
+          <svg><use xlink:href="#octicon-mark-github" /></svg>
+        </span>
+        {{ config['github_slug'] }}
+      </a>
+    </li>
+    {% endif %}
+
+    {% if config['git_commit'] %}
+    <li class="o-list-bare__item">
+      <a class="hidden-link" href="https://github.com/{{ config['github_slug'] }}/commit/{{ config['git_commit'] }}">
+        <span class="svg-icon svg-icon--left svg-baseline">
+          <svg><use xlink:href="#octicon-git-commit" /></svg>
+        </span>
+        {# show truncated commit sha; GitHub shows 7 characters #}
+        {{ config['git_commit']|truncate(7, killwords=True, end='') }}
+      </a>
+    </li>
+    {% endif %}
+
+    {% if config['travis_job_number'] %}
+    <li class="o-list-bare__item">
+      <a class="hidden-link" href="https://travis-ci.org/{{ config['github_slug'] }}">
+        <span class="svg-icon svg-icon--left svg-baseline">
+          <svg><use xlink:href="#octicon-server" /></svg>
+        </span>
+        Travis CI #{{ config['travis_job_number'] }}
+      </a>
+    </li>
+    {% endif %}
+  </ul>
+</section>

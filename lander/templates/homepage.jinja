@@ -1,0 +1,17 @@
+{% extends "base.jinja" %}
+
+{% block body %}
+
+<div class="lander-container lander-container--content">
+
+  <div class="lander-info-item">
+    {% include "_info-panel.jinja" %}
+  </div>
+
+  <div class="lander-pdf-item">
+    <div id="pdf-container" data-pdf-path="{{ config['relative_pdf_path'] }}">
+    </div>
+  </div>
+</div>
+
+{% endblock body %}
