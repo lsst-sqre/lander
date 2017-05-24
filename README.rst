@@ -5,6 +5,9 @@ Lander
 .. image:: https://img.shields.io/pypi/v/lander.svg
    :target: https://pypi.python.org/pypi/lander
    :alt: Python Package Index
+.. image:: https://img.shields.io/travis/lsst-sqre/lander.svg
+   :target: https://travis-ci.org/lsst-sqre/lander
+   :alt: Travis CI build status
 
 **HTML landing page generator for LSST PDF documentation deployed from Git to LSST the Docs.**
 
