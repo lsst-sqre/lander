@@ -8,6 +8,7 @@ import re
 import datetime
 
 from metasrc.tex.lsstdoc import LsstDoc
+from metasrc.tex import texnormalizer
 import structlog
 import dateutil
 
@@ -73,16 +74,22 @@ class Configuration(object):
                 sys.exit(1)
             with open(self['lsstdoc_tex_path']) as f:
                 tex_source = f.read()
-                lsstdoc = LsstDoc(tex_source)
-                self['title'] = lsstdoc.title
-                if lsstdoc.abstract is not None:
-                    self['abstract'] = lsstdoc.abstract
-                if lsstdoc.handle is not None:
-                    self['doc_handle'] = lsstdoc.handle
-                    self['series'] = lsstdoc.series
-                    self['series_name'] = self._get_series_name(self['series'])
-                if lsstdoc.authors is not None:
-                    self['authors'] = lsstdoc.authors
+
+            # Apply source normalization pipeline
+            tex_source = texnormalizer.remove_comments(tex_source)
+            tex_source = texnormalizer.remove_trailing_whitespace(tex_source)
+
+            # Extract metadata from the LsstDoc document
+            lsstdoc = LsstDoc(tex_source)
+            self['title'] = lsstdoc.title
+            if lsstdoc.abstract is not None:
+                self['abstract'] = lsstdoc.abstract
+            if lsstdoc.handle is not None:
+                self['doc_handle'] = lsstdoc.handle
+                self['series'] = lsstdoc.series
+                self['series_name'] = self._get_series_name(self['series'])
+            if lsstdoc.authors is not None:
+                self['authors'] = lsstdoc.authors
 
         # Get metadata from Travis environment
         if self['environment'] is not None:
