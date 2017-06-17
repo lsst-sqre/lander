@@ -2,6 +2,14 @@
 Change Log
 ##########
 
+[0.1.1] - (2017-06-17)
+======================
+
+- Update to ``metasrc>=0.1.1,<0.2``.
+- Use ``remove_comments`` and ``remove_trailing_whitespace`` feature from metasrc.
+  This improves the accuracy of metadata extraction from tex source.
+  For example, comment characters won't appear in extract abstract content.
+
 [0.1.0] - (2017-05-24)
 ======================
 
