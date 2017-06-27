@@ -2,6 +2,12 @@
 Change Log
 ##########
 
+[0.1.2] - (2017-06-27)
+======================
+
+- Detect if running from a Travis PR build (using the ``TRAVIS_PULL_REQUEST`` environment variable) and if so, abort the page build and upload.
+  This is to prevent duplicate uploads from both branch and PR-based Travis jobs.
+
 [0.1.1] - (2017-06-17)
 ======================
 

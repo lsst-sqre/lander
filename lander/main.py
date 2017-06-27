@@ -179,6 +179,12 @@ def main():
         sys.exit(0)
 
     config = Configuration(args=args)
+
+    # disable any build confirmed to be a PR with Travis
+    if config['travis_pull_request']:
+        logger.info('Skipping Travis PR job')
+        sys.exit(0)
+
     lander = Lander(config)
     lander.build_site()
     logger.info('Build complete')

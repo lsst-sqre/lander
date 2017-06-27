@@ -98,6 +98,10 @@ class Configuration(object):
             self['git_tag'] = os.getenv('TRAVIS_TAG')
             self['github_slug'] = os.getenv('TRAVIS_REPO_SLUG')
             self['travis_job_number'] = os.getenv('TRAVIS_JOB_NUMBER')
+            if os.getenv('TRAVIS_PULL_REQUEST').lower() == 'true':
+                self['travis_pull_request'] = True
+            else:
+                self['travis_pull_request'] = False
 
         # Apply metadata overrides
 
@@ -214,6 +218,7 @@ class Configuration(object):
             'git_commit': None,
             'git_tag': None,
             'travis_job_number': None,
+            'travis_pull_request': False,  # If not on Travis, not a PR anyways
             'aws_id': None,
             'aws_secret': None,
             'keeper_url': 'https://keeper.lsst.codes',
