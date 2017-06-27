@@ -7,6 +7,7 @@ Change Log
 
 - Detect if running from a Travis PR build (using the ``TRAVIS_PULL_REQUEST`` environment variable) and if so, abort the page build and upload.
   This is to prevent duplicate uploads from both branch and PR-based Travis jobs.
+- Pin inuitcss to 6.0.0-beta4 because of the removal of rem functions in beta5.
 
 [0.1.1] - (2017-06-17)
 ======================
