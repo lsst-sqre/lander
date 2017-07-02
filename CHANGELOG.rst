@@ -2,6 +2,11 @@
 Change Log
 ##########
 
+[0.1.3] - (2017-07-02)
+======================
+
+- Fixed Travis deployment issue. Used ``skip_cleanup: true`` to ``.travis.yml`` to prevent CSS and JS assets from bring cleaned up before creating a release.
+
 [0.1.2] - (2017-06-27)
 ======================
 
