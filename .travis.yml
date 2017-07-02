@@ -26,3 +26,4 @@ deploy:
     repo: "lsst-sqre/lander"
   skip_upload_docs: true
   distributions: sdist bdist_wheel
+  skip_cleanup: true
