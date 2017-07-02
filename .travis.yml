@@ -13,6 +13,8 @@ install:
 script:
   - "gulp assets --env=deploy"
   - "ls"
+  - "ls lander"
+  - "ls lander/assets"
   - "pytest"
 deploy:
   provider: pypi
