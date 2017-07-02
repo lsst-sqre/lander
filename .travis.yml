@@ -12,7 +12,7 @@ install:
   - "pip install -r requirements.txt"
 script:
   - "gulp assets --env=deploy"
-  - "ls assets"
+  - "ls"
   - "pytest"
 deploy:
   provider: pypi
