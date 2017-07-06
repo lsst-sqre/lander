@@ -181,7 +181,7 @@ def main():
     config = Configuration(args=args)
 
     # disable any build confirmed to be a PR with Travis
-    if config['travis_pull_request']:
+    if config['is_travis_pull_request']:
         logger.info('Skipping Travis PR job')
         sys.exit(0)
 

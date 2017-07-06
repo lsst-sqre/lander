@@ -98,10 +98,10 @@ class Configuration(object):
             self['git_tag'] = os.getenv('TRAVIS_TAG')
             self['github_slug'] = os.getenv('TRAVIS_REPO_SLUG')
             self['travis_job_number'] = os.getenv('TRAVIS_JOB_NUMBER')
-            if os.getenv('TRAVIS_PULL_REQUEST').lower() == 'true':
-                self['travis_pull_request'] = True
+            if os.getenv('TRAVIS_PULL_REQUEST').lower() == 'false':
+                self['is_travis_pull_request'] = False
             else:
-                self['travis_pull_request'] = False
+                self['is_travis_pull_request'] = True
 
         # Apply metadata overrides
 
