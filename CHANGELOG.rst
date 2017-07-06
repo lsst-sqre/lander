@@ -2,6 +2,12 @@
 Change Log
 ##########
 
+[0.1.4] - (2017-07-06)
+======================
+
+- Fix logic for determining it Lander is running in a Travis PR environment.
+- Log the Lander version at startup.
+
 [0.1.3] - (2017-07-02)
 ======================
 

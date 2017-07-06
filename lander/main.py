@@ -175,8 +175,12 @@ def main():
     logger = structlog.get_logger(__name__)
 
     if args.show_version:
+        # only print the version
         print_version()
         sys.exit(0)
+
+    version = pkg_resources.get_distribution('lander').version
+    logger.info('Lander version {0}'.format(version))
 
     config = Configuration(args=args)
 
