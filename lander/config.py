@@ -218,7 +218,7 @@ class Configuration(object):
             'git_commit': None,
             'git_tag': None,
             'travis_job_number': None,
-            'travis_pull_request': False,  # If not on Travis, not a PR anyways
+            'is_travis_pull_request': False,  # If not on Travis, not a PR
             'aws_id': None,
             'aws_secret': None,
             'keeper_url': 'https://keeper.lsst.codes',
