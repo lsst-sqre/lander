@@ -8,7 +8,8 @@ import re
 import datetime
 
 from metasrc.tex.lsstdoc import LsstDoc
-from metasrc.tex import texnormalizer
+from metasrc.tex.texnormalizer import read_tex_file, replace_macros
+from metasrc.tex.scraper import get_macros
 import structlog
 import dateutil
 
@@ -72,12 +73,11 @@ class Configuration(object):
                 self._logger.error('Cannot find {0}'.format(
                     self['lsstdoc_tex_path']))
                 sys.exit(1)
-            with open(self['lsstdoc_tex_path']) as f:
-                tex_source = f.read()
 
-            # Apply source normalization pipeline
-            tex_source = texnormalizer.remove_comments(tex_source)
-            tex_source = texnormalizer.remove_trailing_whitespace(tex_source)
+            # Read and normalize the TeX source, replacing macros with content
+            tex_source = read_tex_file(self['lsstdoc_tex_path'])
+            tex_macros = get_macros(tex_source)
+            tex_source = replace_macros(tex_source, tex_macros)
 
             # Extract metadata from the LsstDoc document
             lsstdoc = LsstDoc(tex_source)

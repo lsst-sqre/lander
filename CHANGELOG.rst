@@ -2,6 +2,11 @@
 Change Log
 ##########
 
+Unreleased
+==========
+
+- Use metasrc 0.1.3,<0.2.0 to for improved LaTeX source processing, including handling of referenced source files and macros.
+
 [0.1.4] - (2017-07-06)
 ======================
 
