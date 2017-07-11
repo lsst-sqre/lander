@@ -6,12 +6,16 @@ import os
 from collections import ChainMap
 import re
 import datetime
+import urllib.parse
 
 from metasrc.tex.lsstdoc import LsstDoc
 from metasrc.tex.texnormalizer import read_tex_file, replace_macros
 from metasrc.tex.scraper import get_macros
 import structlog
 import dateutil
+import requests
+
+from .exceptions import DocuShareError
 
 
 # Detects a GitHub repo slug from a GitHub URL
@@ -145,6 +149,17 @@ class Configuration(object):
                     tzinfo=dateutil.tz.tzutc())
             self['build_datetime'] = parsed_datetime
 
+        # Get the DocuShare URL if not set already
+        if self['doc_handle'] is not None and self['docushare_url'] is None:
+            try:
+                self['docushare_url'] = self._get_docushare_url(
+                    self['doc_handle'], validate=True)
+            except DocuShareError as e:
+                message = 'Could not compute DocuShare URL for {0}'.format(
+                    self['doc_handle'])
+                self._logger.warning(message)
+                self._logger.warning(str(e))
+
         # Post configuration validation
         if self['upload']:
             if self['ltd_product'] is None:
@@ -209,6 +224,59 @@ class Configuration(object):
             'lpm': 'LSST Project Management',
         }
         return series_names.get(series.lower(), '')
+
+    @staticmethod
+    def _get_docushare_url(handle, validate=True):
+        """Get a docushare URL given document's handle.
+
+        Parameters
+        ----------
+        handle : `str`
+            Handle name, such as ``'LDM-151'``.
+        validate : `bool`, optional
+            Set to `True` to request that the link resolves by performing
+            a HEAD request over the network. `False` disables this testing.
+            Default is `True`.
+
+        Returns
+        -------
+        docushare_url : `str`
+            Shortened DocuShare URL for the document corresponding to the
+            handle.
+
+        Raises
+        ------
+        lander.exceptions.DocuShareError
+            Raised for any error related to validating the DocuShare URL.
+        """
+        logger = structlog.get_logger(__name__)
+        logger.debug('Using Configuration._get_docushare_url')
+
+        # Make a short link to the DocuShare version page since
+        # a) It doesn't immediately trigger a PDF download,
+        # b) It gives the user extra information about the document before
+        #    downloading it.
+        url = 'https://ls.st/{handle}*'.format(handle=handle.lower())
+
+        if validate:
+            # Test that the short link successfully resolves to DocuShare
+            logger.debug('Validating {0}'.format(url))
+            try:
+                response = requests.head(url, allow_redirects=True, timeout=30)
+            except requests.exceptions.RequestException as e:
+                raise DocuShareError(str(e))
+
+            error_message = 'URL {0} does not resolve to DocuShare'.format(url)
+            if response.status_code != 200:
+                logger.warning('HEAD {0} status: {1:d}'.format(
+                    url, response.status_code))
+                raise DocuShareError(error_message)
+            redirect_url_parts = urllib.parse.urlsplit(response.url)
+            if redirect_url_parts.netloc != 'docushare.lsstcorp.org':
+                logger.warning('{0} resolved to {1}'.format(url, response.url))
+                raise DocuShareError(error_message)
+
+        return url
 
     def _init_defaults(self):
         """Create a `dict` of default configurations."""
