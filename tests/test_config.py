@@ -2,6 +2,8 @@
 
 import pytest
 
+from metasrc.tex.lsstdoc import LsstDoc
+
 from lander.config import Configuration
 from lander.exceptions import DocuShareError
 
@@ -30,24 +32,31 @@ def test_docushare_url_config(doc_handle, expected_url):
 
 
 @pytest.mark.parametrize(
-    'git_branch, expected',
-    [('u/jonathansick/test', True),
-     ('master', False),
-     ('docushare-v1', False),
-     ('docushare-v10', False),
-     ('docushare-v10-test', True)])
-def test_determine_draft_status(git_branch, expected):
-    assert Configuration._determine_draft_status(git_branch) is expected
+    'git_branch, docclass, expected',
+    [('u/jonathansick/test', r'\documentclass[DM]{lsstdoc}', False),
+     ('u/jonathansick/test', r'\documentclass[DM,lsstdraft]{lsstdoc}', True),
+     ('master', r'\documentclass[DM]{lsstdoc}', False),
+     # master is always considered released
+     ('master', r'\documentclass[DM,lsstdraft]{lsstdoc}', False),
+     ('docushare-v1', r'\documentclass[DM]{lsstdoc}', False),
+     ('docushare-v1', r'\documentclass[DM,lsstdraft]{lsstdoc}', True)])
+def test_determine_draft_status(git_branch, docclass, expected):
+    lsstdoc = LsstDoc(docclass)
+    is_draft = Configuration._determine_draft_status(git_branch,
+                                                     lsstdoc=lsstdoc)
+    assert is_draft == expected
 
 
 @pytest.mark.parametrize(
     'git_branch, expected',
     [('u/jonathansick/test', True),
      ('master', False),
-     ('docushare-v1', False),
-     ('docushare-v10', False),
+     ('docushare-v1', True),
+     ('docushare-v10', True),
      ('docushare-v10-test', True)])
 def test_draft_status(git_branch, expected):
-    """Integrated testing of is_draft_branch computation."""
+    """Integrated testing of is_draft_branch computation. LsstDoc metadata
+    is not available here, only branch information is used.
+    """
     config = Configuration(git_branch=git_branch, _validate_pdf=False)
     assert config['is_draft_branch'] is expected

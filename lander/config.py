@@ -80,6 +80,7 @@ class Configuration(object):
             self._validate_pdf_file()
 
         # Get metadata from the TeX source
+        lsstdoc = None
         if self['lsstdoc_tex_path'] is not None:
             if not os.path.exists(self['lsstdoc_tex_path']):
                 self._logger.error('Cannot find {0}'.format(
@@ -168,7 +169,8 @@ class Configuration(object):
                 self._logger.warning(str(e))
 
         self['is_draft_branch'] = self._determine_draft_status(
-            self['git_branch'])
+            self['git_branch'],
+            lsstdoc=lsstdoc)
 
         # Post configuration validation
         if self['upload']:
@@ -289,14 +291,18 @@ class Configuration(object):
         return url
 
     @staticmethod
-    def _determine_draft_status(git_branch):
+    def _determine_draft_status(git_branch, lsstdoc=None):
         """Determine if the document build is considered a draft based on
-        DM's policies given the Git branch.
+        DM's policies given the Git branch or draft status in the lsstdoc-class
+        LaTeX document.
 
         Parameters
         ----------
         git_branch : `str`
             Git branch or tag name.
+        lsstdoc : `metasrc.tex.lsstdoc.LsstDoc`
+            `~metasrc.tex.lsstdoc.LsstDoc` instance where, if the ``is_draft``
+            argument is `True`, the draft status is True.
 
         Returns
         -------
@@ -309,14 +315,15 @@ class Configuration(object):
         The document **is not** considered a draft if:
 
         - Branch is ``master``
-        - Branch or tag is ``docushare-vN``.
+        - If ``lsstdoc`` is provided and ``lsstdoc.is_draft == False``,
+          meaning that the ``lsstdoc`` option is not included in the document's
+          class options.
         """
         if git_branch == 'master':
             return False
 
-        match = DOCUSHARE_TAG_PATTERN.match(git_branch)
-        if match is not None:
-            return False
+        if lsstdoc is not None:
+            return lsstdoc.is_draft
 
         return True
 
