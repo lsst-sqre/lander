@@ -30,12 +30,14 @@ class Configuration(object):
     args : `argparse.Namespace`
         An argument parser Namespace. This is made by the
         `argparse.ArgumentParser.parse_args` method.
+    _validate_pdf : `bool`, optional
+        Validate that the PDF exists. Default is `True`.
     **config : keyword arguments
         Additional keyword arguments that override configurations from the
         ``args``.
     """
 
-    def __init__(self, args=None, **config):
+    def __init__(self, args=None, _validate_pdf=True, **config):
         super().__init__()
         self._logger = structlog.get_logger(__name__)
 
@@ -63,12 +65,8 @@ class Configuration(object):
                                self._envvars, self._defaults)
 
         # Validate inputs
-        if self['pdf_path'] is None:
-            self._logger.error('--pdf argument must be set')
-            sys.exit(1)
-        if not os.path.exists(self['pdf_path']):
-            self._logger.error('Cannot find PDF ' + self['pdf_path'])
-            sys.exit(1)
+        if _validate_pdf:
+            self._validate_pdf_file()
 
         # Get metadata from the TeX source
         if self['lsstdoc_tex_path'] is not None:
@@ -188,6 +186,19 @@ class Configuration(object):
     def __setitem__(self, key, value):
         self._chain[key] = value
 
+    def _validate_pdf_file(self):
+        """Validate that the pdf_path configuration is set and the referenced
+        file exists.
+
+        Exits the program with status 1 if validation fails.
+        """
+        if self['pdf_path'] is None:
+            self._logger.error('--pdf argument must be set')
+            sys.exit(1)
+        if not os.path.exists(self['pdf_path']):
+            self._logger.error('Cannot find PDF ' + self['pdf_path'])
+            sys.exit(1)
+
     def _get_series_name(self, series):
         series_names = {
             'sqr': 'SQuaRE Technical Note',
@@ -211,6 +222,7 @@ class Configuration(object):
             'title': None,
             'authors': None,
             'authors_json': list(),
+            'doc_handle': None,
             'series': None,
             'series_name': None,
             'abstract': None,
