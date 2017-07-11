@@ -27,3 +27,27 @@ def test_docushare_url_config(doc_handle, expected_url):
         assert config['docushare_url'] is None
     else:
         assert config['docushare_url'] == expected_url
+
+
+@pytest.mark.parametrize(
+    'git_branch, expected',
+    [('u/jonathansick/test', True),
+     ('master', False),
+     ('docushare-v1', False),
+     ('docushare-v10', False),
+     ('docushare-v10-test', True)])
+def test_determine_draft_status(git_branch, expected):
+    assert Configuration._determine_draft_status(git_branch) is expected
+
+
+@pytest.mark.parametrize(
+    'git_branch, expected',
+    [('u/jonathansick/test', True),
+     ('master', False),
+     ('docushare-v1', False),
+     ('docushare-v10', False),
+     ('docushare-v10-test', True)])
+def test_draft_status(git_branch, expected):
+    """Integrated testing of is_draft_branch computation."""
+    config = Configuration(git_branch=git_branch, _validate_pdf=False)
+    assert config['is_draft_branch'] is expected

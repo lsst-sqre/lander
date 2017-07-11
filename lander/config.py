@@ -26,6 +26,13 @@ GITHUB_SLUG_PATTERN = re.compile(
 )
 
 
+# Regular expression that matches docushare release tags
+# E.g. docushare-v1
+DOCUSHARE_TAG_PATTERN = re.compile(
+    r"^docushare-v(?P<number>\d+$)"
+)
+
+
 class Configuration(object):
     """lander configuration container and validator.
 
@@ -160,6 +167,9 @@ class Configuration(object):
                 self._logger.warning(message)
                 self._logger.warning(str(e))
 
+        self['is_draft_branch'] = self._determine_draft_status(
+            self['git_branch'])
+
         # Post configuration validation
         if self['upload']:
             if self['ltd_product'] is None:
@@ -278,6 +288,38 @@ class Configuration(object):
 
         return url
 
+    @staticmethod
+    def _determine_draft_status(git_branch):
+        """Determine if the document build is considered a draft based on
+        DM's policies given the Git branch.
+
+        Parameters
+        ----------
+        git_branch : `str`
+            Git branch or tag name.
+
+        Returns
+        -------
+        is_draft : `bool`
+            Returns `True` if the build is a draft, and `False` if it is
+            not a draft.
+
+        Notes
+        -----
+        The document **is not** considered a draft if:
+
+        - Branch is ``master``
+        - Branch or tag is ``docushare-vN``.
+        """
+        if git_branch == 'master':
+            return False
+
+        match = DOCUSHARE_TAG_PATTERN.match(git_branch)
+        if match is not None:
+            return False
+
+        return True
+
     def _init_defaults(self):
         """Create a `dict` of default configurations."""
         defaults = {
@@ -302,6 +344,7 @@ class Configuration(object):
             'git_tag': None,
             'travis_job_number': None,
             'is_travis_pull_request': False,  # If not on Travis, not a PR
+            'is_draft_branch': True,
             'aws_id': None,
             'aws_secret': None,
             'keeper_url': 'https://keeper.lsst.codes',
