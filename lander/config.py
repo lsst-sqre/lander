@@ -40,7 +40,10 @@ class Configuration(object):
         self._logger = structlog.get_logger(__name__)
 
         # Make dict from argparse namespace
-        self._args = {k: v for k, v in vars(args).items() if v}
+        if args is not None:
+            self._args = {k: v for k, v in vars(args).items() if v}
+        else:
+            self._args = {}
 
         # Holds configuration overrides and computed configurations
         self._configs = dict(config)
