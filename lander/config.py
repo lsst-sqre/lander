@@ -6,12 +6,16 @@ import os
 from collections import ChainMap
 import re
 import datetime
+import urllib.parse
 
 from metasrc.tex.lsstdoc import LsstDoc
 from metasrc.tex.texnormalizer import read_tex_file, replace_macros
 from metasrc.tex.scraper import get_macros
 import structlog
 import dateutil
+import requests
+
+from .exceptions import DocuShareError
 
 
 # Detects a GitHub repo slug from a GitHub URL
@@ -19,6 +23,13 @@ GITHUB_SLUG_PATTERN = re.compile(
     r"https://github.com"
     r"/(?P<org>[a-z0-9\-_~%!$&'()*+,;=:@]+)"
     r"/(?P<name>[a-z0-9\-_~%!$&'()*+,;=:@]+)"
+)
+
+
+# Regular expression that matches docushare release tags
+# E.g. docushare-v1
+DOCUSHARE_TAG_PATTERN = re.compile(
+    r"^docushare-v(?P<number>\d+$)"
 )
 
 
@@ -30,17 +41,22 @@ class Configuration(object):
     args : `argparse.Namespace`
         An argument parser Namespace. This is made by the
         `argparse.ArgumentParser.parse_args` method.
+    _validate_pdf : `bool`, optional
+        Validate that the PDF exists. Default is `True`.
     **config : keyword arguments
         Additional keyword arguments that override configurations from the
         ``args``.
     """
 
-    def __init__(self, args=None, **config):
+    def __init__(self, args=None, _validate_pdf=True, **config):
         super().__init__()
         self._logger = structlog.get_logger(__name__)
 
         # Make dict from argparse namespace
-        self._args = {k: v for k, v in vars(args).items() if v}
+        if args is not None:
+            self._args = {k: v for k, v in vars(args).items() if v}
+        else:
+            self._args = {}
 
         # Holds configuration overrides and computed configurations
         self._configs = dict(config)
@@ -60,14 +76,11 @@ class Configuration(object):
                                self._envvars, self._defaults)
 
         # Validate inputs
-        if self['pdf_path'] is None:
-            self._logger.error('--pdf argument must be set')
-            sys.exit(1)
-        if not os.path.exists(self['pdf_path']):
-            self._logger.error('Cannot find PDF ' + self['pdf_path'])
-            sys.exit(1)
+        if _validate_pdf:
+            self._validate_pdf_file()
 
         # Get metadata from the TeX source
+        lsstdoc = None
         if self['lsstdoc_tex_path'] is not None:
             if not os.path.exists(self['lsstdoc_tex_path']):
                 self._logger.error('Cannot find {0}'.format(
@@ -144,6 +157,21 @@ class Configuration(object):
                     tzinfo=dateutil.tz.tzutc())
             self['build_datetime'] = parsed_datetime
 
+        # Get the DocuShare URL if not set already
+        if self['doc_handle'] is not None and self['docushare_url'] is None:
+            try:
+                self['docushare_url'] = self._get_docushare_url(
+                    self['doc_handle'], validate=True)
+            except DocuShareError as e:
+                message = 'Could not compute DocuShare URL for {0}'.format(
+                    self['doc_handle'])
+                self._logger.warning(message)
+                self._logger.warning(str(e))
+
+        self['is_draft_branch'] = self._determine_draft_status(
+            self['git_branch'],
+            lsstdoc=lsstdoc)
+
         # Post configuration validation
         if self['upload']:
             if self['ltd_product'] is None:
@@ -185,6 +213,19 @@ class Configuration(object):
     def __setitem__(self, key, value):
         self._chain[key] = value
 
+    def _validate_pdf_file(self):
+        """Validate that the pdf_path configuration is set and the referenced
+        file exists.
+
+        Exits the program with status 1 if validation fails.
+        """
+        if self['pdf_path'] is None:
+            self._logger.error('--pdf argument must be set')
+            sys.exit(1)
+        if not os.path.exists(self['pdf_path']):
+            self._logger.error('Cannot find PDF ' + self['pdf_path'])
+            sys.exit(1)
+
     def _get_series_name(self, series):
         series_names = {
             'sqr': 'SQuaRE Technical Note',
@@ -195,6 +236,96 @@ class Configuration(object):
             'lpm': 'LSST Project Management',
         }
         return series_names.get(series.lower(), '')
+
+    @staticmethod
+    def _get_docushare_url(handle, validate=True):
+        """Get a docushare URL given document's handle.
+
+        Parameters
+        ----------
+        handle : `str`
+            Handle name, such as ``'LDM-151'``.
+        validate : `bool`, optional
+            Set to `True` to request that the link resolves by performing
+            a HEAD request over the network. `False` disables this testing.
+            Default is `True`.
+
+        Returns
+        -------
+        docushare_url : `str`
+            Shortened DocuShare URL for the document corresponding to the
+            handle.
+
+        Raises
+        ------
+        lander.exceptions.DocuShareError
+            Raised for any error related to validating the DocuShare URL.
+        """
+        logger = structlog.get_logger(__name__)
+        logger.debug('Using Configuration._get_docushare_url')
+
+        # Make a short link to the DocuShare version page since
+        # a) It doesn't immediately trigger a PDF download,
+        # b) It gives the user extra information about the document before
+        #    downloading it.
+        url = 'https://ls.st/{handle}*'.format(handle=handle.lower())
+
+        if validate:
+            # Test that the short link successfully resolves to DocuShare
+            logger.debug('Validating {0}'.format(url))
+            try:
+                response = requests.head(url, allow_redirects=True, timeout=30)
+            except requests.exceptions.RequestException as e:
+                raise DocuShareError(str(e))
+
+            error_message = 'URL {0} does not resolve to DocuShare'.format(url)
+            if response.status_code != 200:
+                logger.warning('HEAD {0} status: {1:d}'.format(
+                    url, response.status_code))
+                raise DocuShareError(error_message)
+            redirect_url_parts = urllib.parse.urlsplit(response.url)
+            if redirect_url_parts.netloc != 'docushare.lsstcorp.org':
+                logger.warning('{0} resolved to {1}'.format(url, response.url))
+                raise DocuShareError(error_message)
+
+        return url
+
+    @staticmethod
+    def _determine_draft_status(git_branch, lsstdoc=None):
+        """Determine if the document build is considered a draft based on
+        DM's policies given the Git branch or draft status in the lsstdoc-class
+        LaTeX document.
+
+        Parameters
+        ----------
+        git_branch : `str`
+            Git branch or tag name.
+        lsstdoc : `metasrc.tex.lsstdoc.LsstDoc`
+            `~metasrc.tex.lsstdoc.LsstDoc` instance where, if the ``is_draft``
+            argument is `True`, the draft status is True.
+
+        Returns
+        -------
+        is_draft : `bool`
+            Returns `True` if the build is a draft, and `False` if it is
+            not a draft.
+
+        Notes
+        -----
+        The document **is not** considered a draft if:
+
+        - Branch is ``master``
+        - If ``lsstdoc`` is provided and ``lsstdoc.is_draft == False``,
+          meaning that the ``lsstdoc`` option is not included in the document's
+          class options.
+        """
+        if git_branch == 'master':
+            return False
+
+        if lsstdoc is not None:
+            return lsstdoc.is_draft
+
+        return True
 
     def _init_defaults(self):
         """Create a `dict` of default configurations."""
@@ -208,6 +339,7 @@ class Configuration(object):
             'title': None,
             'authors': None,
             'authors_json': list(),
+            'doc_handle': None,
             'series': None,
             'series_name': None,
             'abstract': None,
@@ -219,6 +351,7 @@ class Configuration(object):
             'git_tag': None,
             'travis_job_number': None,
             'is_travis_pull_request': False,  # If not on Travis, not a PR
+            'is_draft_branch': True,
             'aws_id': None,
             'aws_secret': None,
             'keeper_url': 'https://keeper.lsst.codes',

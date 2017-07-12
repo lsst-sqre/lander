@@ -2,7 +2,7 @@
   <img class="lander-info-header__logo" src="assets/lsst_underline_logo.svg" alt="Large Synoptic Survey Telescope">
   {% if config['doc_handle'] %}
   <span class="lander-info-header__handle">{{ config['doc_handle'] }}
-    {% if config['docushare_url'] %}
+    {% if config['is_draft_branch'] %}
     DRAFT
     {% endif %}
   </span>
