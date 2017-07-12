@@ -2,6 +2,37 @@
 Change Log
 ##########
 
+Unreleased
+==========
+
+- Use metasrc 0.1.3rc1 to for improved LaTeX source processing, including handling of referenced source files and macros.
+
+[0.1.4] - (2017-07-06)
+======================
+
+- Fix logic for determining it Lander is running in a Travis PR environment.
+- Log the Lander version at startup.
+
+[0.1.3] - (2017-07-02)
+======================
+
+- Fixed Travis deployment issue. Used ``skip_cleanup: true`` to ``.travis.yml`` to prevent CSS and JS assets from bring cleaned up before creating a release.
+
+[0.1.2] - (2017-06-27)
+======================
+
+- Detect if running from a Travis PR build (using the ``TRAVIS_PULL_REQUEST`` environment variable) and if so, abort the page build and upload.
+  This is to prevent duplicate uploads from both branch and PR-based Travis jobs.
+- Pin inuitcss to 6.0.0-beta4 because of the removal of rem functions in beta5.
+
+[0.1.1] - (2017-06-17)
+======================
+
+- Update to ``metasrc>=0.1.1,<0.2``.
+- Use ``remove_comments`` and ``remove_trailing_whitespace`` feature from metasrc.
+  This improves the accuracy of metadata extraction from tex source.
+  For example, comment characters won't appear in extract abstract content.
+
 [0.1.0] - (2017-05-24)
 ======================
 

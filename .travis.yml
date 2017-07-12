@@ -8,6 +8,7 @@ install:
   - "nvm install node"  # latest version of node
   - "nvm use node"
   - "npm install"
+  - "npm install gulp --global"
   - "pip install -r requirements.txt"
 script:
   - "gulp assets --env=deploy"
@@ -22,3 +23,4 @@ deploy:
     repo: "lsst-sqre/lander"
   skip_upload_docs: true
   distributions: sdist bdist_wheel
+  skip_cleanup: true

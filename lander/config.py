@@ -8,6 +8,8 @@ import re
 import datetime
 
 from metasrc.tex.lsstdoc import LsstDoc
+from metasrc.tex.texnormalizer import read_tex_file, replace_macros
+from metasrc.tex.scraper import get_macros
 import structlog
 import dateutil
 
@@ -71,18 +73,23 @@ class Configuration(object):
                 self._logger.error('Cannot find {0}'.format(
                     self['lsstdoc_tex_path']))
                 sys.exit(1)
-            with open(self['lsstdoc_tex_path']) as f:
-                tex_source = f.read()
-                lsstdoc = LsstDoc(tex_source)
-                self['title'] = lsstdoc.title
-                if lsstdoc.abstract is not None:
-                    self['abstract'] = lsstdoc.abstract
-                if lsstdoc.handle is not None:
-                    self['doc_handle'] = lsstdoc.handle
-                    self['series'] = lsstdoc.series
-                    self['series_name'] = self._get_series_name(self['series'])
-                if lsstdoc.authors is not None:
-                    self['authors'] = lsstdoc.authors
+
+            # Read and normalize the TeX source, replacing macros with content
+            tex_source = read_tex_file(self['lsstdoc_tex_path'])
+            tex_macros = get_macros(tex_source)
+            tex_source = replace_macros(tex_source, tex_macros)
+
+            # Extract metadata from the LsstDoc document
+            lsstdoc = LsstDoc(tex_source)
+            self['title'] = lsstdoc.title
+            if lsstdoc.abstract is not None:
+                self['abstract'] = lsstdoc.abstract
+            if lsstdoc.handle is not None:
+                self['doc_handle'] = lsstdoc.handle
+                self['series'] = lsstdoc.series
+                self['series_name'] = self._get_series_name(self['series'])
+            if lsstdoc.authors is not None:
+                self['authors'] = lsstdoc.authors
 
         # Get metadata from Travis environment
         if self['environment'] is not None:
@@ -91,6 +98,10 @@ class Configuration(object):
             self['git_tag'] = os.getenv('TRAVIS_TAG')
             self['github_slug'] = os.getenv('TRAVIS_REPO_SLUG')
             self['travis_job_number'] = os.getenv('TRAVIS_JOB_NUMBER')
+            if os.getenv('TRAVIS_PULL_REQUEST').lower() == 'false':
+                self['is_travis_pull_request'] = False
+            else:
+                self['is_travis_pull_request'] = True
 
         # Apply metadata overrides
 
@@ -207,6 +218,7 @@ class Configuration(object):
             'git_commit': None,
             'git_tag': None,
             'travis_job_number': None,
+            'is_travis_pull_request': False,  # If not on Travis, not a PR
             'aws_id': None,
             'aws_secret': None,
             'keeper_url': 'https://keeper.lsst.codes',
