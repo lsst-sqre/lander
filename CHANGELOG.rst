@@ -2,10 +2,13 @@
 Change Log
 ##########
 
-Unreleased
-==========
+[0.1.5] - (2017-07-12)
+======================
 
-- Use metasrc 0.1.3rc1 to for improved LaTeX source processing, including handling of referenced source files and macros.
+- Pin to metasrc 0.1.3
+- Via metasrc, Lander has improved LaTeX source processing, including handling of referenced source files (``\input`` and ``\include``) and macros (``\def`` and ``\newcommand``).
+- Improved treatment of draft status.
+  The heuristic is that a document is considered a draft if the branch is not ``master`` and ``lsstdraft`` is not present in a lsstdoc document's options.
 
 [0.1.4] - (2017-07-06)
 ======================
