@@ -8,6 +8,7 @@ from lander.config import Configuration
 from lander.exceptions import DocuShareError
 
 
+@pytest.mark.skip(reason='Fails because ls.st+DocuShare is broken (2017-09-07')
 def test_get_docushare_url():
     url = Configuration._get_docushare_url('LDM-151')
     assert url == 'https://ls.st/ldm-151*'
@@ -18,6 +19,7 @@ def test_get_docushare_url_bad_handle():
         Configuration._get_docushare_url('FOOBAR-1')
 
 
+@pytest.mark.skip(reason='Fails because ls.st+DocuShare is broken (2017-09-07')
 @pytest.mark.parametrize(
     'doc_handle, expected_url',
     [('LDM-151', 'https://ls.st/ldm-151*'),

@@ -8,6 +8,7 @@ Change Log
 - Update metasrc to 0.1.4.
   This update provides improved LaTeX command metadata extraction.
   (`DM-11821 <https://jira.lsstcorp.org/browse/DM-11821>`_)
+- Temporarily skip ls.st and DocuShare-related unit tests because ls.st links to DocuShare are broken due to the DocuShare upgrade.
 
 0.1.5 (2017-07-12)
 ==================
