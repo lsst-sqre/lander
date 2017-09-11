@@ -29,8 +29,8 @@ class Lander(object):
         self._config['relative_pdf_path'] = relative_pdf_path
 
         # Add data for HTML title/description tags
-        self._config['page_title'] = self._config['title']
-        self._config['page_description'] = self._config['abstract']
+        self._config['page_title'] = self._config['title_plain']
+        self._config['page_description'] = self._config['abstract_plain']
 
         # Copy assets (css, js)
         # This algorithm is slightly naieve; we copy the whole built

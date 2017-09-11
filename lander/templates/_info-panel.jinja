@@ -7,7 +7,7 @@
     {% endif %}
   </span>
   {% endif %}
-  <h1 class="lander-info-header__product-name">{{ config['title'] }}</h1>
+  <h1 class="lander-info-header__product-name">{{ config['title_html']|safe }}</h1>
 
   <ul class="o-list-bare">
     <li>
@@ -59,8 +59,8 @@
 {% if config['authors'] %}
 <section class="lander-info-authors">
   <ul class='comma-list'>
-  {% for author_name in config['authors'] %}
-    <li>{{ author_name }}</li>
+  {% for author_name in config['authors_html'] %}
+    <li>{{ author_name|safe }}</li>
   {% endfor %}
   </ul>
 </section>
@@ -69,7 +69,7 @@
 {% if config['abstract'] %}
 <section class="lander-info-abstract">
   <h2 class="lander-subsection-header">Abstract</h2>
-  {{ config['abstract']|paragraphify }}
+  {{ config['abstract_html']|safe }}
 </section>
 {% endif %}
 

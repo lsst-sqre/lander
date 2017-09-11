@@ -8,9 +8,7 @@ import re
 import datetime
 import urllib.parse
 
-from metasrc.tex.lsstdoc import LsstDoc
-from metasrc.tex.texnormalizer import read_tex_file, replace_macros
-from metasrc.tex.scraper import get_macros
+from metasrc.tex.lsstdoc import LsstLatexDoc
 import structlog
 import dateutil
 import requests
@@ -87,22 +85,23 @@ class Configuration(object):
                     self['lsstdoc_tex_path']))
                 sys.exit(1)
 
-            # Read and normalize the TeX source, replacing macros with content
-            tex_source = read_tex_file(self['lsstdoc_tex_path'])
-            tex_macros = get_macros(tex_source)
-            tex_source = replace_macros(tex_source, tex_macros)
-
-            # Extract metadata from the LsstDoc document
-            lsstdoc = LsstDoc(tex_source)
+            # Extract metadata from the LsstLatexDoc document
+            lsstdoc = LsstLatexDoc.read(self['lsstdoc_tex_path'])
             self['title'] = lsstdoc.title
+            self['title_html'] = lsstdoc.html_title
+            self['title_plain'] = lsstdoc.plain_title
             if lsstdoc.abstract is not None:
                 self['abstract'] = lsstdoc.abstract
+                self['abstract_html'] = lsstdoc.html_abstract
+                self['abstract_plain'] = lsstdoc.plain_abstract
             if lsstdoc.handle is not None:
                 self['doc_handle'] = lsstdoc.handle
                 self['series'] = lsstdoc.series
                 self['series_name'] = self._get_series_name(self['series'])
             if lsstdoc.authors is not None:
                 self['authors'] = lsstdoc.authors
+                self['authors_html'] = lsstdoc.html_authors
+                self['authors_plain'] = lsstdoc.plain_authors
 
         # Get metadata from Travis environment
         if self['environment'] is not None:
@@ -300,9 +299,9 @@ class Configuration(object):
         ----------
         git_branch : `str`
             Git branch or tag name.
-        lsstdoc : `metasrc.tex.lsstdoc.LsstDoc`
-            `~metasrc.tex.lsstdoc.LsstDoc` instance where, if the ``is_draft``
-            argument is `True`, the draft status is True.
+        lsstdoc : `metasrc.tex.lsstdoc.LsstLatexDoc`
+            `~metasrc.tex.lsstdoc.LsstLatexDoc` instance where, if the
+            ``is_draft`` argument is `True`, the draft status is True.
 
         Returns
         -------
