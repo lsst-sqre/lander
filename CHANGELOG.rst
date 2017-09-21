@@ -2,6 +2,13 @@
 Change Log
 ##########
 
+0.1.7 (2017-09-28)
+==================
+
+- Update metasrc to 0.2.0.
+  This provides Pandoc integration for improved HTML rendering of content extracted from LaTeX documents.
+- Improve how loggers are configured (warning level for third-party loggers, and info/debug levels for first-party LSST SQuaRE code).
+
 0.1.6 (2017-09-07)
 ==================
 
