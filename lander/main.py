@@ -201,12 +201,29 @@ def main():
 
 
 def config_logger(args):
-    if args.verbose:
-        level = logging.DEBUG
-    else:
-        level = logging.INFO
-    logging.basicConfig(level=level)
+    # Configure the root logger
+    stream_handler = logging.StreamHandler()
+    stream_formatter = logging.Formatter(
+        '%(asctime)s %(levelname)8s %(name)s | %(message)s')
+    stream_handler.setFormatter(stream_formatter)
+    root_logger = logging.getLogger()
+    root_logger.addHandler(stream_handler)
+    root_logger.setLevel(logging.WARNING)
 
+    # Setup first-party logging
+    app_logger = logging.getLogger('lander')
+    metasrc_logger = logging.getLogger('metasrc')
+    ltdconveyor_logger = logging.getLogger('ltdconveyor')
+    if args.verbose:
+        app_logger.setLevel(logging.DEBUG)
+        metasrc_logger.setLevel(logging.DEBUG)
+        ltdconveyor_logger.setLevel(logging.DEBUG)
+    else:
+        app_logger.setLevel(logging.INFO)
+        metasrc_logger.setLevel(logging.INFO)
+        ltdconveyor_logger.setLevel(logging.INFO)
+
+    # Configure structlog
     structlog.configure(
         processors=[
             structlog.stdlib.filter_by_level,

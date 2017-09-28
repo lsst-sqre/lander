@@ -2,7 +2,7 @@
 
 import pytest
 
-from metasrc.tex.lsstdoc import LsstDoc
+from metasrc.tex.lsstdoc import LsstLatexDoc
 
 from lander.config import Configuration
 from lander.exceptions import DocuShareError
@@ -43,7 +43,7 @@ def test_docushare_url_config(doc_handle, expected_url):
      ('docushare-v1', r'\documentclass[DM]{lsstdoc}', False),
      ('docushare-v1', r'\documentclass[DM,lsstdraft]{lsstdoc}', True)])
 def test_determine_draft_status(git_branch, docclass, expected):
-    lsstdoc = LsstDoc(docclass)
+    lsstdoc = LsstLatexDoc(docclass)
     is_draft = Configuration._determine_draft_status(git_branch,
                                                      lsstdoc=lsstdoc)
     assert is_draft == expected
@@ -57,7 +57,7 @@ def test_determine_draft_status(git_branch, docclass, expected):
      ('docushare-v10', True),
      ('docushare-v10-test', True)])
 def test_draft_status(git_branch, expected):
-    """Integrated testing of is_draft_branch computation. LsstDoc metadata
+    """Integrated testing of is_draft_branch computation. LsstLatexDoc metadata
     is not available here, only branch information is used.
     """
     config = Configuration(git_branch=git_branch, _validate_pdf=False)
