@@ -90,6 +90,7 @@ class Configuration(object):
             self['title'] = lsstdoc.title
             self['title_html'] = lsstdoc.html_title
             self['title_plain'] = lsstdoc.plain_title
+            self['build_datetime'] = lsstdoc.revision_datetime
             if lsstdoc.abstract is not None:
                 self['abstract'] = lsstdoc.abstract
                 self['abstract_html'] = lsstdoc.html_abstract
