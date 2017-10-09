@@ -2,6 +2,14 @@
 Change Log
 ##########
 
+0.1.8 (2017-10-09)
+==================
+
+- Update metasrc to 0.2.1
+- Use metasrc's ``LsstLatexDoc.revision_datetime`` to obtain the date of a document.
+  This method uses a combination of parsing the ``\date`` LaTeX command, looking at content
+  Git commits, and falling back to 'now' to get an appropriate timestamp.
+
 0.1.7 (2017-09-28)
 ==================
 
