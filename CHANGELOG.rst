@@ -2,6 +2,12 @@
 Change Log
 ##########
 
+0.1.9 (2017-11-20)
+==================
+
+- Update metasrc to 0.2.2 to resolve issues with auto-downloading Pandoc in Travis CI (`DM-12569 <https://jira.lsstcorp.org/browse/DM-12569>`_).
+- Update pytest to 3.2.5 and pytest-flake8 to 0.9.1 to fix incompatibilities in the floating indirect dependencies.
+
 0.1.8 (2017-10-09)
 ==================
 
