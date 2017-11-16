@@ -46,7 +46,7 @@ setup(
         'structlog==17.1.0',
         'ltd-conveyor==0.3.1',
         'requests==2.14.2',
-        'metasrc==0.2.1'
+        'metasrc==0.2.2'
     ],
     package_data={'lander': [
         'assets/*.svg',
