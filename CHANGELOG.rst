@@ -2,6 +2,14 @@
 Change Log
 ##########
 
+0.1.10 (2017-12-11)
+===================
+
+- Change known domain for DocuShare from ``docushare.lsstcorp.org`` to ``docushare.lsst.org``.
+  This ensures that ``ls.st`` short links can continue to be verified.
+- Create default values for ``abstract_plain`` and ``title_plain``.
+  This fixes cases where the abstract is not set in the underlying LaTeX document.
+
 0.1.9 (2017-11-20)
 ==================
 
