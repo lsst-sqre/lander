@@ -284,7 +284,7 @@ class Configuration(object):
                     url, response.status_code))
                 raise DocuShareError(error_message)
             redirect_url_parts = urllib.parse.urlsplit(response.url)
-            if redirect_url_parts.netloc != 'docushare.lsstcorp.org':
+            if redirect_url_parts.netloc != 'docushare.lsst.org':
                 logger.warning('{0} resolved to {1}'.format(url, response.url))
                 raise DocuShareError(error_message)
 
@@ -337,12 +337,14 @@ class Configuration(object):
             'environment': None,
             'lsstdoc_tex_path': None,
             'title': None,
+            'title_plain': "",
             'authors': None,
             'authors_json': list(),
             'doc_handle': None,
             'series': None,
             'series_name': None,
             'abstract': None,
+            'abstract_plain': "",
             'ltd_product': None,
             'docushare_url': None,
             'github_slug': None,
