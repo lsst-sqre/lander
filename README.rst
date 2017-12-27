@@ -66,12 +66,11 @@ If you're running on Travis CI, set the ``--env=travis`` to get metadata from Tr
 Overriding metadata
 -------------------
 
-Lander tries to get as much metadata from the environment as possible, but sometimes this isn't possible or usable.
-For example, Lander can't (yet) convert LaTeX expressions into HTML.
+Lander tries to get as much metadata from the environment as possible (including from the Git repository and the LaTeX document itself), but sometimes this isn't possible.
 In this case you can explicitly set metadata with these flags (see ``lander -h`` for more information):
 
 - ``--abstract``
-- ``--authors``
+- ``--authors`` (see note)
 - ``--title``
 - ``--handle`` (such as ``LDM-151``)
 - ``--repo-url`` (such as ``https://github.com/lsst/ldm-151``)
