@@ -1,8 +1,0 @@
---index-url https://pypi.python.org/simple/
-
--e .
-
-# Development/testing dependencies
-pytest==3.2.5
-pytest-cov==2.5.0
-pytest-flake8==0.9.1

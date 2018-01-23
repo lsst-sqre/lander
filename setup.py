@@ -37,6 +37,7 @@ setup(
         'Development Status :: 4 - Beta',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
     ],
     keywords='lsst',
     packages=['lander'],
@@ -48,6 +49,13 @@ setup(
         'requests==2.14.2',
         'metasrc==0.2.2'
     ],
+    extras_require={
+        'dev': [
+            # Development/testing dependencies
+            'pytest==3.2.5',
+            'pytest-cov==2.5.0',
+            'pytest-flake8==0.9.1'
+        ]},
     package_data={'lander': [
         'assets/*.svg',
         'assets/*.css',

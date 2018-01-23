@@ -9,7 +9,7 @@ install:
   - "nvm use node"
   - "npm install"
   - "npm install gulp --global"
-  - "pip install -r requirements.txt"
+  - "pip install -e .[dev]"
 script:
   - "gulp assets --env=deploy"
   - "pytest"
