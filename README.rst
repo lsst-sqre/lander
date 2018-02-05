@@ -130,9 +130,13 @@ Clone and install dependencies (use a Python virtual environment of your choice)
 Run Python tests and linting
 ----------------------------
 
-We use pytest::
+We use pytest for unit testing::
 
    pytest
+
+You can also run an end-to-end trial of a landing page build::
+
+   make ldm151
 
 Build a test site
 -----------------
