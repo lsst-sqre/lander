@@ -2,8 +2,13 @@ sudo: false
 dist: trusty
 language: python
 python:
+  # General Python matrix
   - "3.5"
-  - "3.6"
+matrix:
+  include:
+    # Additional job that can also deploy to PyPI
+    - python: "3.6"
+      env: "PYPI_DEPLOY=true"
 install:
   - "nvm install node"  # latest version of node
   - "nvm use node"
@@ -13,6 +18,9 @@ install:
 script:
   - "gulp assets --env=deploy"
   - "pytest"
+env:
+  global:
+    - "PYPI_DEPLOY=false"
 deploy:
   provider: pypi
   user: sqre-admin
@@ -21,6 +29,7 @@ deploy:
   on:
     tags: true
     repo: "lsst-sqre/lander"
+    condition: "$PYPI_DEPLOY = true"
   skip_upload_docs: true
   distributions: sdist bdist_wheel
   skip_cleanup: true
