@@ -212,15 +212,15 @@ def config_logger(args):
 
     # Setup first-party logging
     app_logger = logging.getLogger('lander')
-    metasrc_logger = logging.getLogger('metasrc')
+    lsstprojectmeta_logger = logging.getLogger('lsstprojectmeta')
     ltdconveyor_logger = logging.getLogger('ltdconveyor')
     if args.verbose:
         app_logger.setLevel(logging.DEBUG)
-        metasrc_logger.setLevel(logging.DEBUG)
+        lsstprojectmeta_logger.setLevel(logging.DEBUG)
         ltdconveyor_logger.setLevel(logging.DEBUG)
     else:
         app_logger.setLevel(logging.INFO)
-        metasrc_logger.setLevel(logging.INFO)
+        lsstprojectmeta_logger.setLevel(logging.INFO)
         ltdconveyor_logger.setLevel(logging.INFO)
 
     # Configure structlog

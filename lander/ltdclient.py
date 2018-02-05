@@ -66,3 +66,15 @@ def confirm_build(config, keeper_token, build_resource):
                        json={'uploaded': True})
     if r.status_code != 200:
         raise RuntimeError(r)
+
+
+def get_product(config):
+    """Get the /product/<product> resource from LTD Keeper.
+    """
+    product_url = config['keeper_url'] + '/products/{p}'.format(
+        p=config['ltd_product'])
+    r = requests.get(product_url)
+    if r.status_code != 200:
+        raise RuntimeError(r.json())
+    product_info = r.json()
+    return product_info

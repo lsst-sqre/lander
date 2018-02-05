@@ -4,6 +4,7 @@ import os
 import shutil
 
 import structlog
+from lsstprojectmeta.jsonld import encode_jsonld
 
 from .renderer import create_jinja_env, render_homepage
 from . import ltdclient
@@ -79,6 +80,41 @@ class Lander(object):
         index_html_path = os.path.join(self._config['build_dir'], 'index.html')
         with open(index_html_path, mode='w', encoding='utf-8') as f:
             f.write(index_html)
+
+        # Write metadata file
+        jsonld_path = os.path.join(self._config['build_dir'],
+                                   'metadata.jsonld')
+        self.write_metadata(jsonld_path)
+
+    def write_metadata(self, output_path):
+        """Build a JSON-LD dataset for LSST Projectmeta.
+
+        Parameters
+        ----------
+        output_path : `str`
+            File path where the ``metadata.jsonld`` should be written for the
+            build.
+        """
+        if self._config.lsstdoc is None:
+            self._logger.info('No known LSST LaTeX source (--tex argument). '
+                              'Not writing a metadata.jsonld file.')
+            return
+
+        # Build a JSON-LD dataset for the report+source repository.
+        product_data = ltdclient.get_product(self._config)
+        metadata = self._config.lsstdoc.build_jsonld(
+            url=product_data['published_url'],
+            code_url=product_data['doc_repo'],
+            ci_url='https://travis-ci.org/' + self._config['github_slug'],
+            readme_url=None,
+            license_id=None)
+
+        json_text = encode_jsonld(
+            metadata,
+            separators=(',', ':'),  # compact
+            ensure_ascii=False)  # unicode output
+        with open(output_path, 'w') as f:
+            f.write(json_text)
 
     def upload_site(self):
         """Upload a previously-built site to LSST the Docs."""
