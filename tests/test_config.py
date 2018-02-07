@@ -2,7 +2,7 @@
 
 import pytest
 
-from metasrc.tex.lsstdoc import LsstLatexDoc
+from lsstprojectmeta.tex.lsstdoc import LsstLatexDoc
 
 from lander.config import Configuration
 from lander.exceptions import DocuShareError

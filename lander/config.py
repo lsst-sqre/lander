@@ -8,7 +8,7 @@ import re
 import datetime
 import urllib.parse
 
-from metasrc.tex.lsstdoc import LsstLatexDoc
+from lsstprojectmeta.tex.lsstdoc import LsstLatexDoc
 import structlog
 import dateutil
 import requests
@@ -78,7 +78,7 @@ class Configuration(object):
             self._validate_pdf_file()
 
         # Get metadata from the TeX source
-        lsstdoc = None
+        self.lsstdoc = None
         if self['lsstdoc_tex_path'] is not None:
             if not os.path.exists(self['lsstdoc_tex_path']):
                 self._logger.error('Cannot find {0}'.format(
@@ -86,23 +86,23 @@ class Configuration(object):
                 sys.exit(1)
 
             # Extract metadata from the LsstLatexDoc document
-            lsstdoc = LsstLatexDoc.read(self['lsstdoc_tex_path'])
-            self['title'] = lsstdoc.title
-            self['title_html'] = lsstdoc.html_title
-            self['title_plain'] = lsstdoc.plain_title
-            self['build_datetime'] = lsstdoc.revision_datetime
-            if lsstdoc.abstract is not None:
-                self['abstract'] = lsstdoc.abstract
-                self['abstract_html'] = lsstdoc.html_abstract
-                self['abstract_plain'] = lsstdoc.plain_abstract
-            if lsstdoc.handle is not None:
-                self['doc_handle'] = lsstdoc.handle
-                self['series'] = lsstdoc.series
+            self.lsstdoc = LsstLatexDoc.read(self['lsstdoc_tex_path'])
+            self['title'] = self.lsstdoc.title
+            self['title_html'] = self.lsstdoc.html_title
+            self['title_plain'] = self.lsstdoc.plain_title
+            self['build_datetime'] = self.lsstdoc.revision_datetime
+            if self.lsstdoc.abstract is not None:
+                self['abstract'] = self.lsstdoc.abstract
+                self['abstract_html'] = self.lsstdoc.html_abstract
+                self['abstract_plain'] = self.lsstdoc.plain_abstract
+            if self.lsstdoc.handle is not None:
+                self['doc_handle'] = self.lsstdoc.handle
+                self['series'] = self.lsstdoc.series
                 self['series_name'] = self._get_series_name(self['series'])
-            if lsstdoc.authors is not None:
-                self['authors'] = lsstdoc.authors
-                self['authors_html'] = lsstdoc.html_authors
-                self['authors_plain'] = lsstdoc.plain_authors
+            if self.lsstdoc.authors is not None:
+                self['authors'] = self.lsstdoc.authors
+                self['authors_html'] = self.lsstdoc.html_authors
+                self['authors_plain'] = self.lsstdoc.plain_authors
 
         # Get metadata from Travis environment
         if self['environment'] is not None:
@@ -170,7 +170,7 @@ class Configuration(object):
 
         self['is_draft_branch'] = self._determine_draft_status(
             self['git_branch'],
-            lsstdoc=lsstdoc)
+            lsstdoc=self.lsstdoc)
 
         # Post configuration validation
         if self['upload']:
@@ -300,8 +300,8 @@ class Configuration(object):
         ----------
         git_branch : `str`
             Git branch or tag name.
-        lsstdoc : `metasrc.tex.lsstdoc.LsstLatexDoc`
-            `~metasrc.tex.lsstdoc.LsstLatexDoc` instance where, if the
+        lsstdoc : `lsstprojectmeta.tex.lsstdoc.LsstLatexDoc`
+            `~lsstprojectmeta.tex.lsstdoc.LsstLatexDoc` instance where, if the
             ``is_draft`` argument is `True`, the draft status is True.
 
         Returns

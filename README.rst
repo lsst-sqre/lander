@@ -125,15 +125,18 @@ Clone and install dependencies (use a Python virtual environment of your choice)
    cd lander
    npm install
    gulp assets
-   pip install -r requirements.txt
-   python setup.py develop
+   pip install -e ".[dev]"
 
 Run Python tests and linting
 ----------------------------
 
-We use pytest::
+We use pytest for unit testing::
 
    pytest
+
+You can also run an end-to-end trial of a landing page build::
+
+   make ldm151
 
 Build a test site
 -----------------

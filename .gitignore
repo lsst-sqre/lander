@@ -96,3 +96,5 @@ lander/assets
 lander/templates/icons.svg
 # Automatically built by gulp (development mode)
 _build
+# Integration tests
+_tests
