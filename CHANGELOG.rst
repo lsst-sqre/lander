@@ -2,6 +2,14 @@
 Change Log
 ##########
 
+0.1.11 (2018-02-07)
+===================
+
+- Lander now creates and uploads a ``metadata.jsonld`` document alongside the landing page content (e.g., ``index.html``).
+  This content can be ingested by other tools into the LSST Projectmeta database.
+- Switch from metasrc to lsst-projectmeta-kit 0.3.0.
+  It's the same package, but the new and rebranded lsst-projectmeta-kit includes the ability to generate JSON-LD from an ``LsstLatexDoc`` object.
+
 0.1.10 (2017-12-11)
 ===================
 
