@@ -46,10 +46,6 @@ With the ``--lsstdoc <tex path>`` argument, Lander will attempt to scrape metada
 - document handle
 - title
 
-Note that Lander does not convert LaTeX commands to HTML.
-In these cases, the metadata needs to be added explicitly.
-We plan to address this in future releases.
-
 See https://lsst-texmf.lsst.io for information about the ``lsstdoc`` class.
 
 Get metadata from the Travis environment
