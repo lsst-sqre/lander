@@ -7,3 +7,7 @@ help:
 ldm151:
 	# End-to-end smoke integration test with LDM-151
 	bash integration-tests/test_ldm151.bash
+
+dmtn070:
+	# End-to-end smoke integration test with DMTN-070
+	bash integration-tests/test_dmtn070.bash
