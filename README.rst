@@ -130,18 +130,21 @@ Clone and install dependencies (use a Python virtual environment of your choice)
 Run Python tests and linting
 ----------------------------
 
-We use pytest for unit testing::
+We use pytest for unit testing and style checks::
 
-   pytest
+   make pytest
 
-You can also run an end-to-end trial of a landing page build::
+You can also run end-to-end trials of landing page builds::
 
-   make ldm151
+   make test
 
-Build a test site
------------------
+These integration tests clone real LSST documents, compiles them with Docker, and builds landing pages to simulate continuous delivery workflows in production.
+Look for sites in ``_tests``.
 
-The default gulp_ workflow create website assets and generates a test website::
+Build a development site
+------------------------
+
+The default gulp_ workflow creates website assets and generates a test website::
 
    gulp
 
