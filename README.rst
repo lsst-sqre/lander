@@ -46,10 +46,6 @@ With the ``--lsstdoc <tex path>`` argument, Lander will attempt to scrape metada
 - document handle
 - title
 
-Note that Lander does not convert LaTeX commands to HTML.
-In these cases, the metadata needs to be added explicitly.
-We plan to address this in future releases.
-
 See https://lsst-texmf.lsst.io for information about the ``lsstdoc`` class.
 
 Get metadata from the Travis environment
@@ -130,18 +126,21 @@ Clone and install dependencies (use a Python virtual environment of your choice)
 Run Python tests and linting
 ----------------------------
 
-We use pytest for unit testing::
+We use pytest for unit testing and style checks::
 
-   pytest
+   make pytest
 
-You can also run an end-to-end trial of a landing page build::
+You can also run end-to-end trials of landing page builds::
 
-   make ldm151
+   make test
 
-Build a test site
------------------
+These integration tests clone real LSST documents, compiles them with Docker, and builds landing pages to simulate continuous delivery workflows in production.
+Look for sites in ``_tests``.
 
-The default gulp_ workflow create website assets and generates a test website::
+Build a development site
+------------------------
+
+The default gulp_ workflow creates website assets and generates a test website::
 
    gulp
 

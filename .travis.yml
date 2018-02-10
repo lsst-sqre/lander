@@ -17,7 +17,7 @@ install:
   - "pip install -e .[dev]"
 script:
   - "gulp assets --env=deploy"
-  - "pytest"
+  - "make pytest"
 env:
   global:
     - "PYPI_DEPLOY=false"
