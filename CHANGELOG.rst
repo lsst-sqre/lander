@@ -2,6 +2,11 @@
 Change Log
 ##########
 
+0.1.12 (2018-02-10)
+===================
+
+- Update to ``lsst-projectmeta-kit`` 0.3.1 for more reliable ``metadata.jsonld`` generation (works around pandoc issues converting some documents to plain text).
+
 0.1.11 (2018-02-07)
 ===================
 
