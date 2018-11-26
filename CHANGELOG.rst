@@ -2,6 +2,11 @@
 Change Log
 ##########
 
+0.1.13 (2018-11-26)
+===================
+
+- Update to lsst-projectmeta-kit 0.3.3 for improved detection of ``\input`` and ``\include`` commands in TeX source.
+
 0.1.12 (2018-02-10)
 ===================
 
