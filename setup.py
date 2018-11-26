@@ -47,7 +47,7 @@ setup(
         'structlog==17.1.0',
         'ltd-conveyor==0.3.1',
         'requests==2.14.2',
-        'lsst-projectmeta-kit==0.3.1'
+        'lsst-projectmeta-kit==0.3.3'
     ],
     extras_require={
         'dev': [
