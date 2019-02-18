@@ -129,7 +129,7 @@
 
     {% if config['travis_job_number'] %}
     <li class="o-list-bare__item">
-      <a class="hidden-link" href="https://travis-ci.org/{{ config['github_slug'] }}">
+      <a class="hidden-link" href="{{ config['travis_build_web_url'] }}">
         <span class="svg-icon svg-icon--left svg-baseline">
           <svg><use xlink:href="#octicon-server" /></svg>
         </span>

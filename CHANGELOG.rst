@@ -2,6 +2,16 @@
 Change Log
 ##########
 
+0.1.14 (2019-02-18)
+===================
+
+- Lander will now cleanly abort when building on Travis CI, but the secure environment variables are not available.
+  This happens if the build is triggered by a fork.
+- Switched to use ``$TRAVIS_BUILD_WEB_URL`` to get a URL to the build.
+  This is better than computing the build URL during the travis-ci.org to travis-ci.com transition.
+- Updated test dependencies to pytest 4.2.1.
+- Switched to ``setuptools_scm`` for version string management.
+
 0.1.13 (2018-11-26)
 ===================
 

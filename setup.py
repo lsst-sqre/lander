@@ -1,8 +1,6 @@
-from io import open
-import os
+from pathlib import Path
 
 from setuptools import setup
-import versioneer
 
 
 packagename = 'lander'
@@ -12,21 +10,11 @@ author = 'Association of Universities for Research in Astronomy, Inc.'
 author_email = 'jsick@lsst.org'
 license = 'MIT'
 url = 'https://github.com/lsst-sqre/lander'
-
-
-def read(filename):
-    full_filename = os.path.join(
-        os.path.abspath(os.path.dirname(__file__)),
-        filename)
-    return open(full_filename, mode='r', encoding='utf-8').read()
-
-
-long_description = read('README.rst')
+long_description = (Path(__file__).parent / 'README.rst').read_text()
 
 
 setup(
     name=packagename,
-    version=versioneer.get_version(),
     description=description,
     long_description=long_description,
     url=url,
@@ -41,6 +29,8 @@ setup(
     ],
     keywords='lsst',
     packages=['lander'],
+    use_scm_version=True,
+    setup_requires=['setuptools_scm'],
     install_requires=[
         'python-dateutil>=2.6.0',
         'Jinja2==2.9.6',
@@ -52,9 +42,9 @@ setup(
     extras_require={
         'dev': [
             # Development/testing dependencies
-            'pytest==3.2.5',
-            'pytest-cov==2.5.0',
-            'pytest-flake8==0.9.1'
+            'pytest==4.2.1',
+            'pytest-cov==2.6.1',
+            'pytest-flake8==1.0.4'
         ]},
     package_data={'lander': [
         'assets/*.svg',
@@ -67,6 +57,5 @@ setup(
         'console_scripts': [
             'lander = lander.main:main'
         ]
-    },
-    cmdclass=versioneer.get_cmdclass()
+    }
 )

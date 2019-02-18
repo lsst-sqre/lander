@@ -3,10 +3,9 @@ LSST the Docs.
 
 https://github.com/lsst-sqre/lander
 """
-from ._version import get_versions
-
-
-# Get version string from versioneer
-# https://github.com/warner/python-versioneer
-__version__ = get_versions()['version']
-del get_versions
+from pkg_resources import get_distribution, DistributionNotFound
+try:
+    __version__ = get_distribution('lander').version
+except DistributionNotFound:
+    # package is not installed
+    pass
