@@ -2,7 +2,6 @@ from io import open
 import os
 
 from setuptools import setup
-import versioneer
 
 
 packagename = 'lander'
@@ -26,7 +25,6 @@ long_description = read('README.rst')
 
 setup(
     name=packagename,
-    version=versioneer.get_version(),
     description=description,
     long_description=long_description,
     url=url,
@@ -41,6 +39,8 @@ setup(
     ],
     keywords='lsst',
     packages=['lander'],
+    use_scm_version=True,
+    setup_requires=['setuptools_scm'],
     install_requires=[
         'python-dateutil>=2.6.0',
         'Jinja2==2.9.6',
@@ -67,6 +67,5 @@ setup(
         'console_scripts': [
             'lander = lander.main:main'
         ]
-    },
-    cmdclass=versioneer.get_cmdclass()
+    }
 )
