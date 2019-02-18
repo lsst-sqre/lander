@@ -1,5 +1,4 @@
-from io import open
-import os
+from pathlib import Path
 
 from setuptools import setup
 
@@ -11,16 +10,7 @@ author = 'Association of Universities for Research in Astronomy, Inc.'
 author_email = 'jsick@lsst.org'
 license = 'MIT'
 url = 'https://github.com/lsst-sqre/lander'
-
-
-def read(filename):
-    full_filename = os.path.join(
-        os.path.abspath(os.path.dirname(__file__)),
-        filename)
-    return open(full_filename, mode='r', encoding='utf-8').read()
-
-
-long_description = read('README.rst')
+long_description = (Path(__file__).parent / 'README.rst').read_text()
 
 
 setup(
