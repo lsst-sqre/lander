@@ -180,6 +180,10 @@ class Configuration(object):
                 self._logger.error(message)
                 sys.exit(1)
 
+            if self['environment'] == 'travis' and self['aws_secret'] is None:
+                self._logger.info('Skipping build from fork or PR.')
+                sys.exit(0)
+
             if self['aws_id'] is None:
                 message = '--aws-id must be set for uploads'
                 self._logger.error(message)
