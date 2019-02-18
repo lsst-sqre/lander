@@ -182,11 +182,6 @@ def main():
     version = pkg_resources.get_distribution('lander').version
     logger.info('Lander version {0}'.format(version))
 
-    # Disable any build from a fork that doesn't have access to secure configs
-    if os.getenv('TRAVIS_SECURE_ENV_VARS') == 'true':
-        logger.info('Skipping build from fork.')
-        sys.exit(0)
-
     config = Configuration(args=args)
 
     # disable any build confirmed to be a PR with Travis
