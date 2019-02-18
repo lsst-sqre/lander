@@ -52,9 +52,9 @@ setup(
     extras_require={
         'dev': [
             # Development/testing dependencies
-            'pytest==3.2.5',
-            'pytest-cov==2.5.0',
-            'pytest-flake8==0.9.1'
+            'pytest==4.2.1',
+            'pytest-cov==2.6.1',
+            'pytest-flake8==1.0.4'
         ]},
     package_data={'lander': [
         'assets/*.svg',
