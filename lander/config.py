@@ -111,6 +111,7 @@ class Configuration(object):
             self['git_tag'] = os.getenv('TRAVIS_TAG')
             self['github_slug'] = os.getenv('TRAVIS_REPO_SLUG')
             self['travis_job_number'] = os.getenv('TRAVIS_JOB_NUMBER')
+            self['travis_build_web_url'] = os.getenv('TRAVIS_BUILD_WEB_URL')
             if os.getenv('TRAVIS_PULL_REQUEST').lower() == 'false':
                 self['is_travis_pull_request'] = False
             else:
