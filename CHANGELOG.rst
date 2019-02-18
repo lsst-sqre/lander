@@ -2,6 +2,16 @@
 Change Log
 ##########
 
+0.1.14 (2019-02-18)
+===================
+
+- Lander will now cleanly abort when ``$TRAVIS_SECURE_ENV_VARS`` is "``true``."
+  This is the best way of detecting if the build is happening from a fork and the encrypted build configurations aren't available.
+- Switched to use ``$TRAVIS_BUILD_WEB_URL`` to get a URL to the build.
+  This is better than computing the build URL during the travis-ci.org to travis-ci.com transition.
+- Updated test dependencies to pytest 4.2.1.
+- Switched to ``setuptools_scm`` for version string management.
+
 0.1.13 (2018-11-26)
 ===================
 
