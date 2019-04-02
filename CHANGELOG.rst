@@ -2,6 +2,11 @@
 Change Log
 ##########
 
+0.1.15 (2019-04-02)
+===================
+
+- Update to ``lsst-projectmeta-kit`` to 0.3.5 for better author parsing.
+
 0.1.14 (2019-02-18)
 ===================
 
