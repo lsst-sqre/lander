@@ -6,6 +6,7 @@ Change Log
 ===================
 
 - Update to ``lsst-projectmeta-kit`` to 0.3.5 for better author parsing.
+- Update ``requests`` to 2.20.0 (security).
 
 0.1.14 (2019-02-18)
 ===================
