@@ -36,8 +36,8 @@ setup(
         'Jinja2==2.9.6',
         'structlog==17.1.0',
         'ltd-conveyor==0.3.1',
-        'requests==2.14.2',
-        'lsst-projectmeta-kit==0.3.3'
+        'requests==2.20.0',
+        'lsst-projectmeta-kit==0.3.5'
     ],
     extras_require={
         'dev': [
