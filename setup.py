@@ -33,7 +33,7 @@ setup(
     setup_requires=['setuptools_scm'],
     install_requires=[
         'python-dateutil>=2.6.0',
-        'Jinja2==2.9.6',
+        'Jinja2>=2.10.1',
         'structlog==17.1.0',
         'ltd-conveyor==0.3.1',
         'requests==2.20.0',
