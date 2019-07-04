@@ -119,6 +119,7 @@ Clone and install dependencies (use a Python virtual environment of your choice)
 
    git clone https://github.com/lsst-sqre/lander
    cd lander
+   npm install -g gulp-cli
    npm install
    gulp assets
    pip install -e ".[dev]"
