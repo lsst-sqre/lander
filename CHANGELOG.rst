@@ -2,6 +2,12 @@
 Change Log
 ##########
 
+0.1.16 (2019-07-04)
+===================
+
+- Update Jinja to >=2.10.1 to address CVE-2019-10906.
+- Update asset build pipeline to Gulp 4 and update all other npm dependencies at the same time.
+
 0.1.15 (2019-04-02)
 ===================
 
