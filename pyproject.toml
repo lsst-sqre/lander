@@ -32,3 +32,25 @@ multi_line_output = 3
 known_first_party = "lander"
 known_third_party = ["dateutil", "jinja2", "lsstprojectmeta", "ltdconveyor", "pkg_resources", "pytest", "requests", "setuptools", "structlog"]
 skip = ["docs/conf.py"]
+
+[tool.coverage.run]
+parallel = true
+branch = true
+source = ["lander"]
+
+[tool.coverage.paths]
+source = ["src", ".tox/*/site-packages"]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:"
+]
