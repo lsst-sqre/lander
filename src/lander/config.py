@@ -1,21 +1,20 @@
 """Configuration facilities.
 """
-import json
-import sys
-import os
-from collections import ChainMap
-import re
 import datetime
+import json
+import os
+import re
+import sys
 import urllib.parse
+from collections import ChainMap
 
-from lsstprojectmeta.tex.lsstdoc import LsstLatexDoc
-import structlog
 import dateutil
 import dateutil.tz
 import requests
+import structlog
+from lsstprojectmeta.tex.lsstdoc import LsstLatexDoc
 
 from .exceptions import DocuShareError
-
 
 # Detects a GitHub repo slug from a GitHub URL
 GITHUB_SLUG_PATTERN = re.compile(
@@ -27,9 +26,7 @@ GITHUB_SLUG_PATTERN = re.compile(
 
 # Regular expression that matches docushare release tags
 # E.g. docushare-v1
-DOCUSHARE_TAG_PATTERN = re.compile(
-    r"^docushare-v(?P<number>\d+$)"
-)
+DOCUSHARE_TAG_PATTERN = re.compile(r"^docushare-v(?P<number>\d+$)")
 
 
 class Configuration(object):
@@ -71,8 +68,9 @@ class Configuration(object):
         # 2. Command line variables.
         # 3. Environment variables.
         # 4. Defaults.
-        self._chain = ChainMap(self._configs, self._args,
-                               self._envvars, self._defaults)
+        self._chain = ChainMap(
+            self._configs, self._args, self._envvars, self._defaults
+        )
 
         # Validate inputs
         if _validate_pdf:
@@ -80,133 +78,138 @@ class Configuration(object):
 
         # Get metadata from the TeX source
         self.lsstdoc = None
-        if self['lsstdoc_tex_path'] is not None:
-            if not os.path.exists(self['lsstdoc_tex_path']):
-                self._logger.error('Cannot find {0}'.format(
-                    self['lsstdoc_tex_path']))
+        if self["lsstdoc_tex_path"] is not None:
+            if not os.path.exists(self["lsstdoc_tex_path"]):
+                self._logger.error(
+                    "Cannot find {0}".format(self["lsstdoc_tex_path"])
+                )
                 sys.exit(1)
 
             # Extract metadata from the LsstLatexDoc document
-            self.lsstdoc = LsstLatexDoc.read(self['lsstdoc_tex_path'])
-            self['title'] = self.lsstdoc.title
-            self['title_html'] = self.lsstdoc.html_title
-            self['title_plain'] = self.lsstdoc.plain_title
-            self['build_datetime'] = self.lsstdoc.revision_datetime
+            self.lsstdoc = LsstLatexDoc.read(self["lsstdoc_tex_path"])
+            self["title"] = self.lsstdoc.title
+            self["title_html"] = self.lsstdoc.html_title
+            self["title_plain"] = self.lsstdoc.plain_title
+            self["build_datetime"] = self.lsstdoc.revision_datetime
             if self.lsstdoc.abstract is not None:
-                self['abstract'] = self.lsstdoc.abstract
-                self['abstract_html'] = self.lsstdoc.html_abstract
-                self['abstract_plain'] = self.lsstdoc.plain_abstract
+                self["abstract"] = self.lsstdoc.abstract
+                self["abstract_html"] = self.lsstdoc.html_abstract
+                self["abstract_plain"] = self.lsstdoc.plain_abstract
             if self.lsstdoc.handle is not None:
-                self['doc_handle'] = self.lsstdoc.handle
-                self['series'] = self.lsstdoc.series
-                self['series_name'] = self._get_series_name(self['series'])
+                self["doc_handle"] = self.lsstdoc.handle
+                self["series"] = self.lsstdoc.series
+                self["series_name"] = self._get_series_name(self["series"])
             if self.lsstdoc.authors is not None:
-                self['authors'] = self.lsstdoc.authors
-                self['authors_html'] = self.lsstdoc.html_authors
-                self['authors_plain'] = self.lsstdoc.plain_authors
+                self["authors"] = self.lsstdoc.authors
+                self["authors_html"] = self.lsstdoc.html_authors
+                self["authors_plain"] = self.lsstdoc.plain_authors
 
         # Get metadata from Travis environment
-        if self['environment'] is not None:
-            self['git_commit'] = os.getenv('TRAVIS_COMMIT')
-            self['git_branch'] = os.getenv('TRAVIS_BRANCH')
-            self['git_tag'] = os.getenv('TRAVIS_TAG')
-            self['github_slug'] = os.getenv('TRAVIS_REPO_SLUG')
-            self['travis_job_number'] = os.getenv('TRAVIS_JOB_NUMBER')
-            self['travis_build_web_url'] = os.getenv('TRAVIS_BUILD_WEB_URL')
-            if os.getenv('TRAVIS_PULL_REQUEST').lower() == 'false':
-                self['is_travis_pull_request'] = False
+        if self["environment"] is not None:
+            self["git_commit"] = os.getenv("TRAVIS_COMMIT")
+            self["git_branch"] = os.getenv("TRAVIS_BRANCH")
+            self["git_tag"] = os.getenv("TRAVIS_TAG")
+            self["github_slug"] = os.getenv("TRAVIS_REPO_SLUG")
+            self["travis_job_number"] = os.getenv("TRAVIS_JOB_NUMBER")
+            self["travis_build_web_url"] = os.getenv("TRAVIS_BUILD_WEB_URL")
+            if os.getenv("TRAVIS_PULL_REQUEST").lower() == "false":
+                self["is_travis_pull_request"] = False
             else:
-                self['is_travis_pull_request'] = True
+                self["is_travis_pull_request"] = True
 
         # Apply metadata overrides
 
-        if 'title' in self._args:
-            self['title'] = self._args['title']
+        if "title" in self._args:
+            self["title"] = self._args["title"]
 
-        if 'authors_json' in self._args:
-            author_list = json.loads(self._args['authors_json'])
-            self['authors'] = author_list
+        if "authors_json" in self._args:
+            author_list = json.loads(self._args["authors_json"])
+            self["authors"] = author_list
 
-        if 'doc_handle' in self._args:
-            self['doc_handle'] = self._args['doc_handle']
-            self['series'] = self['doc_handle'].split('-', 1)[0]
-            self['series_name'] = self._get_series_name(self['series'])
+        if "doc_handle" in self._args:
+            self["doc_handle"] = self._args["doc_handle"]
+            self["series"] = self["doc_handle"].split("-", 1)[0]
+            self["series_name"] = self._get_series_name(self["series"])
 
-        if 'abstract' in self._args:
-            self['abstract'] = self._args['abstract']
+        if "abstract" in self._args:
+            self["abstract"] = self._args["abstract"]
 
-        if 'repo_url' in self._args:
-            self['repo_url'] = self._args['repo_url']
+        if "repo_url" in self._args:
+            self["repo_url"] = self._args["repo_url"]
 
             # extract github repo slug from repo_url
-            match = GITHUB_SLUG_PATTERN.match(self['repo_url'])
+            match = GITHUB_SLUG_PATTERN.match(self["repo_url"])
             if match:
-                self['github_slug'] = '/'.join((
-                    match.group('org'),
-                    match.group('name')))
+                self["github_slug"] = "/".join(
+                    (match.group("org"), match.group("name"))
+                )
 
-        if 'extra_downloads' in self._args:
-            self['extra_downloads'] = self._args['extra_downloads']
+        if "extra_downloads" in self._args:
+            self["extra_downloads"] = self._args["extra_downloads"]
 
-        if 'git_branch' in self._args:
-            self['git_branch'] = self._args['git_branch']
+        if "git_branch" in self._args:
+            self["git_branch"] = self._args["git_branch"]
 
-        if 'build_datetime' in self._args:
+        if "build_datetime" in self._args:
             parsed_datetime = dateutil.parser.parse(
-                self._args['build_datetime'])
+                self._args["build_datetime"]
+            )
             if parsed_datetime.tzinfo is None:
                 parsed_datetime = parsed_datetime.replace(
-                    tzinfo=dateutil.tz.tzutc())
-            self['build_datetime'] = parsed_datetime
+                    tzinfo=dateutil.tz.tzutc()
+                )
+            self["build_datetime"] = parsed_datetime
 
         # Get the DocuShare URL if not set already
-        if self['doc_handle'] is not None and self['docushare_url'] is None:
+        if self["doc_handle"] is not None and self["docushare_url"] is None:
             try:
-                self['docushare_url'] = self._get_docushare_url(
-                    self['doc_handle'], validate=True)
+                self["docushare_url"] = self._get_docushare_url(
+                    self["doc_handle"], validate=True
+                )
             except DocuShareError as e:
-                message = 'Could not compute DocuShare URL for {0}'.format(
-                    self['doc_handle'])
+                message = "Could not compute DocuShare URL for {0}".format(
+                    self["doc_handle"]
+                )
                 self._logger.warning(message)
                 self._logger.warning(str(e))
 
-        self['is_draft_branch'] = self._determine_draft_status(
-            self['git_branch'],
-            lsstdoc=self.lsstdoc)
+        self["is_draft_branch"] = self._determine_draft_status(
+            self["git_branch"], lsstdoc=self.lsstdoc
+        )
 
         # Post configuration validation
-        if self['upload']:
-            if self['ltd_product'] is None:
-                message = '--ltd-product must be set for uploads'
+        if self["upload"]:
+            if self["ltd_product"] is None:
+                message = "--ltd-product must be set for uploads"
                 self._logger.error(message)
                 sys.exit(1)
 
-            if self['environment'] == 'travis' and self['aws_secret'] is None:
-                self._logger.info('Skipping build from fork or PR.')
+            if self["environment"] == "travis" and self["aws_secret"] is None:
+                self._logger.info("Skipping build from fork or PR.")
                 sys.exit(0)
 
-            if self['aws_id'] is None:
-                message = '--aws-id must be set for uploads'
+            if self["aws_id"] is None:
+                message = "--aws-id must be set for uploads"
                 self._logger.error(message)
                 sys.exit(1)
 
-            if self['aws_secret'] is None:
-                message = '--aws-secret must be set for uploads'
+            if self["aws_secret"] is None:
+                message = "--aws-secret must be set for uploads"
                 self._logger.error(message)
                 sys.exit(1)
 
-            if self['keeper_url'] is None:
-                message = '--keeper-url must be set for uploads'
+            if self["keeper_url"] is None:
+                message = "--keeper-url must be set for uploads"
                 self._logger.error(message)
                 sys.exit(1)
 
-            if self['keeper_user'] is None:
-                message = '--keeper-user must be set for uploads'
+            if self["keeper_user"] is None:
+                message = "--keeper-user must be set for uploads"
                 self._logger.error(message)
                 sys.exit(1)
 
-            if self['keeper_password'] is None:
-                message = '--keeper-password must be set for uploads'
+            if self["keeper_password"] is None:
+                message = "--keeper-password must be set for uploads"
                 self._logger.error(message)
                 sys.exit(1)
 
@@ -225,23 +228,23 @@ class Configuration(object):
 
         Exits the program with status 1 if validation fails.
         """
-        if self['pdf_path'] is None:
-            self._logger.error('--pdf argument must be set')
+        if self["pdf_path"] is None:
+            self._logger.error("--pdf argument must be set")
             sys.exit(1)
-        if not os.path.exists(self['pdf_path']):
-            self._logger.error('Cannot find PDF ' + self['pdf_path'])
+        if not os.path.exists(self["pdf_path"]):
+            self._logger.error("Cannot find PDF " + self["pdf_path"])
             sys.exit(1)
 
     def _get_series_name(self, series):
         series_names = {
-            'sqr': 'SQuaRE Technical Note',
-            'dmtn': 'Data Management Technical Note',
-            'smtn': 'Simulations Technical Note',
-            'ldm': 'LSST Data Management',
-            'lse': 'LSST Systems Engineering',
-            'lpm': 'LSST Project Management',
+            "sqr": "SQuaRE Technical Note",
+            "dmtn": "Data Management Technical Note",
+            "smtn": "Simulations Technical Note",
+            "ldm": "LSST Data Management",
+            "lse": "LSST Systems Engineering",
+            "lpm": "LSST Project Management",
         }
-        return series_names.get(series.lower(), '')
+        return series_names.get(series.lower(), "")
 
     @staticmethod
     def _get_docushare_url(handle, validate=True):
@@ -268,30 +271,31 @@ class Configuration(object):
             Raised for any error related to validating the DocuShare URL.
         """
         logger = structlog.get_logger(__name__)
-        logger.debug('Using Configuration._get_docushare_url')
+        logger.debug("Using Configuration._get_docushare_url")
 
         # Make a short link to the DocuShare version page since
         # a) It doesn't immediately trigger a PDF download,
         # b) It gives the user extra information about the document before
         #    downloading it.
-        url = 'https://ls.st/{handle}*'.format(handle=handle.lower())
+        url = "https://ls.st/{handle}*".format(handle=handle.lower())
 
         if validate:
             # Test that the short link successfully resolves to DocuShare
-            logger.debug('Validating {0}'.format(url))
+            logger.debug("Validating {0}".format(url))
             try:
                 response = requests.head(url, allow_redirects=True, timeout=30)
             except requests.exceptions.RequestException as e:
                 raise DocuShareError(str(e))
 
-            error_message = 'URL {0} does not resolve to DocuShare'.format(url)
+            error_message = "URL {0} does not resolve to DocuShare".format(url)
             if response.status_code != 200:
-                logger.warning('HEAD {0} status: {1:d}'.format(
-                    url, response.status_code))
+                logger.warning(
+                    "HEAD {0} status: {1:d}".format(url, response.status_code)
+                )
                 raise DocuShareError(error_message)
             redirect_url_parts = urllib.parse.urlsplit(response.url)
-            if redirect_url_parts.netloc != 'docushare.lsst.org':
-                logger.warning('{0} resolved to {1}'.format(url, response.url))
+            if redirect_url_parts.netloc != "docushare.lsst.org":
+                logger.warning("{0} resolved to {1}".format(url, response.url))
                 raise DocuShareError(error_message)
 
         return url
@@ -325,7 +329,7 @@ class Configuration(object):
           meaning that the ``lsstdoc`` option is not included in the document's
           class options.
         """
-        if git_branch == 'master':
+        if git_branch == "master":
             return False
 
         if lsstdoc is not None:
@@ -336,46 +340,46 @@ class Configuration(object):
     def _init_defaults(self):
         """Create a `dict` of default configurations."""
         defaults = {
-            'build_dir': None,
-            'build_datetime': datetime.datetime.now(dateutil.tz.tzutc()),
-            'pdf_path': None,
-            'extra_downloads': list(),
-            'environment': None,
-            'lsstdoc_tex_path': None,
-            'title': None,
-            'title_plain': "",
-            'authors': None,
-            'authors_json': list(),
-            'doc_handle': None,
-            'series': None,
-            'series_name': None,
-            'abstract': None,
-            'abstract_plain': "",
-            'ltd_product': None,
-            'docushare_url': None,
-            'github_slug': None,
-            'git_branch': 'master',  # so we default to the main LTD edition
-            'git_commit': None,
-            'git_tag': None,
-            'travis_job_number': None,
-            'is_travis_pull_request': False,  # If not on Travis, not a PR
-            'is_draft_branch': True,
-            'aws_id': None,
-            'aws_secret': None,
-            'keeper_url': 'https://keeper.lsst.codes',
-            'keeper_user': None,
-            'keeper_password': None,
-            'upload': False
+            "build_dir": None,
+            "build_datetime": datetime.datetime.now(dateutil.tz.tzutc()),
+            "pdf_path": None,
+            "extra_downloads": list(),
+            "environment": None,
+            "lsstdoc_tex_path": None,
+            "title": None,
+            "title_plain": "",
+            "authors": None,
+            "authors_json": list(),
+            "doc_handle": None,
+            "series": None,
+            "series_name": None,
+            "abstract": None,
+            "abstract_plain": "",
+            "ltd_product": None,
+            "docushare_url": None,
+            "github_slug": None,
+            "git_branch": "master",  # so we default to the main LTD edition
+            "git_commit": None,
+            "git_tag": None,
+            "travis_job_number": None,
+            "is_travis_pull_request": False,  # If not on Travis, not a PR
+            "is_draft_branch": True,
+            "aws_id": None,
+            "aws_secret": None,
+            "keeper_url": "https://keeper.lsst.codes",
+            "keeper_user": None,
+            "keeper_password": None,
+            "upload": False,
         }
         return defaults
 
     def _get_environment_variables(self):
         var_keys = {
-            'aws_id': 'LTD_AWS_ID',
-            'aws_secret': 'LTD_AWS_SECRET',
-            'keeper_url': 'LTD_KEEPER_URL',
-            'keeper_user': 'LTD_KEEPER_USER',
-            'keeper_password': 'LTD_KEEPER_PASSWORD',
+            "aws_id": "LTD_AWS_ID",
+            "aws_secret": "LTD_AWS_SECRET",
+            "keeper_url": "LTD_KEEPER_URL",
+            "keeper_user": "LTD_KEEPER_USER",
+            "keeper_password": "LTD_KEEPER_PASSWORD",
         }
         env_configs = {}
         for config_key, var_name in var_keys.items():
