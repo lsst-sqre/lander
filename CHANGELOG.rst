@@ -35,8 +35,7 @@ Change Log
 - Update to ``lsst-projectmeta-kit`` 0.3.1 for more reliable ``metadata.jsonld`` generation (works around pandoc issues converting some documents to plain text).
   There's a new integration test ``make dmtn070`` that demos this.
 - Improve the testing strategy:
-  - Run ``make pytest`` to run pytest with the correct arguments instead of using ``--add-opts`` in setup.cfg.
-    This lets us run ``pytest`` directly with ad hoc arguments.
+  - Run ``make pytest`` to run pytest with the correct arguments instead of using ``--add-opts`` in setup.cfg. This lets us run ``pytest`` directly with ad hoc arguments.
   - Run ``make test`` to run both pytest and the integration tests.
 
 0.1.11 (2018-02-07)
