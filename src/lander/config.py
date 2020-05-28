@@ -11,6 +11,7 @@ import urllib.parse
 from lsstprojectmeta.tex.lsstdoc import LsstLatexDoc
 import structlog
 import dateutil
+import dateutil.tz
 import requests
 
 from .exceptions import DocuShareError
