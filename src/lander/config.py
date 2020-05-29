@@ -1,20 +1,25 @@
-"""Configuration facilities.
-"""
+"""Lander's configuration."""
+
 import datetime
-import json
 import os
 import re
 import sys
 import urllib.parse
-from collections import ChainMap
+from enum import Enum
+from typing import Any, Dict, List, Optional
 
-import dateutil
-import dateutil.tz
 import requests
-import structlog
 from lsstprojectmeta.tex.lsstdoc import LsstLatexDoc
-
-from .exceptions import DocuShareError
+from pydantic import (
+    BaseModel,
+    Field,
+    HttpUrl,
+    SecretStr,
+    ValidationError,
+    root_validator,
+    validator,
+)
+from structlog import get_logger
 
 # Detects a GitHub repo slug from a GitHub URL
 GITHUB_SLUG_PATTERN = re.compile(
@@ -29,361 +34,408 @@ GITHUB_SLUG_PATTERN = re.compile(
 DOCUSHARE_TAG_PATTERN = re.compile(r"^docushare-v(?P<number>\d+$)")
 
 
-class Configuration(object):
-    """lander configuration container and validator.
+HANDLE_PATTERN = re.compile(r"^(?P<series>[a-zA-Z]+)-(?P<number>[0-9]+)")
+"""Regular expression that matches a Rubin Observatory document handle
+``<series>-<number>`` format.
+"""
 
-    Parameters
-    ----------
-    args : `argparse.Namespace`
-        An argument parser Namespace. This is made by the
-        `argparse.ArgumentParser.parse_args` method.
-    _validate_pdf : `bool`, optional
-        Validate that the PDF exists. Default is `True`.
-    **config : keyword arguments
-        Additional keyword arguments that override configurations from the
-        ``args``.
+GIT_REF_PATTERN = re.compile(r"refs/(?P<kind>heads|tags|pull)/(?P<ref>.+)")
+"""Regular expression that matches a GitHub Actions ``GITHUB_REF`` environment
+variable.
+"""
+
+
+SERIES_NAMES = {
+    "dmtn": "Data Management Technical Note",
+    "ittn": "LSST IT Technical Note",
+    "ldm": "LSST Data Management",
+    "lse": "LSST Systems Engineering",
+    "lpm": "LSST Project Management",
+    "opstn": "LSST Operations Technical Note",
+    "pstn": "Project Science Team Technical Note",
+    "rtn": "Rubin Observatory Technical Note",
+    "smtn": "Simulations Technical Note",
+    "sqr": "SQuaRE Technical Note",
+    "tstn": "Telescope & Site Technical Note",
+    "testn": "Documentation Testing Technical Note",
+}
+"""Map of the handles of document series to their full names."""
+
+
+def _build_ci_url() -> Optional[str]:
+    if os.getenv("GITHUB_RUN_ID") and os.getenv("GITHUB_REPOSITORY"):
+        run_id = os.getenv("GITHUB_RUN_ID")
+        repo = os.getenv("GITHUB_REPOSITORY")
+        return "https://github.com/{repo}/actions/runs/{run_id}".format(
+            repo=repo, run_id=run_id
+        )
+    elif os.getenv("TRAVIS_BUILD_WEB_URL"):
+        return os.getenv("TRAVIS_BUILD_WEB_URL")
+    else:
+        return None
+
+
+def build_configuration(
+    build_dir: str,
+    pdf_path: str,
+    lsstdoc_tex_path: Optional[str],
+    cli_configs: Dict[str, Any],
+    extra_downloads: List[str],
+    ltd_product: Optional[str],
+    ltd_url: str,
+    ltd_user: Optional[str],
+    ltd_password: Optional[str],
+    upload: bool,
+) -> "Configuration":
+    """Compile the configuration from the command line and document inspection
+    sources.
+    """
+    configs: Dict[str, Any] = {
+        "build_dir": build_dir,
+        "pdf_path": pdf_path,
+        "extra_downloads": extra_downloads,
+        "ltd_product": ltd_product,
+        "ltd_url": ltd_url,
+        "ltd_user": ltd_user,
+        "ltd_password": ltd_password,
+        "upload": upload,
+    }
+
+    # Set configurations from document metadata
+    if lsstdoc_tex_path is not None:
+        configs.update(_get_lsstdoc_configuration(lsstdoc_tex_path))
+
+    # Override with configurations from the CLI
+    configs.update(cli_configs)
+
+    # Build and validation configurations
+    return Configuration(**configs)
+
+
+def _get_lsstdoc_configuration(path: str) -> Dict[str, Any]:
+    """Get configuration from the lsstdoc-formatted LaTeX source."""
+    logger = get_logger("lander")
+
+    if not os.path.exists(path):
+        # FIXME raise exception instead
+        logger.error("Cannot find {0}".format(path))
+        sys.exit(1)
+
+    config = {}
+
+    lsstdoc = LsstLatexDoc.read(path)
+    config["lsstdoc"] = lsstdoc
+
+    config["title"] = {
+        "html": lsstdoc.html_title,
+        "plain": lsstdoc.plain_title,
+    }
+    config["build_datetime"] = lsstdoc.revision_datetime
+
+    if lsstdoc.abstract is not None:
+        config["abstract"] = {
+            "html": lsstdoc.html_abstract,
+            "plain": lsstdoc.plain_abstract,
+        }
+    if lsstdoc.handle is not None:
+        config["handle"] = lsstdoc.handle
+        config["series"] = lsstdoc.series
+
+    if lsstdoc.authors is not None:
+        config["authors"] = [
+            {"html": html_author, "plain": plain_author}
+            for html_author, plain_author in zip(
+                lsstdoc.html_authors, lsstdoc.plain_authors
+            )
+        ]
+
+    return config
+
+
+class EncodedString(BaseModel):
+    """A string with plain and HTML encodings."""
+
+    plain: Optional[str]
+    """Plain encoding."""
+
+    html: Optional[str]
+    """HTML encoding."""
+
+
+class GitRefType(str, Enum):
+
+    tag = "tag"
+    branch = "branch"
+
+
+class Configuration(BaseModel):
+    """Lander configuration container and validator."""
+
+    lsstdoc: Optional[LsstLatexDoc]
+    """The reduced lsstdoc document."""
+
+    build_dir: str
+    """Build directory."""
+
+    pdf_path: str
+    """Path of the PDF file."""
+
+    title: EncodedString
+    """Document title."""
+
+    abstract: Optional[EncodedString]
+    """Document abstract or summary."""
+
+    handle: Optional[str]
+    """Document handle."""
+
+    authors: Optional[List[EncodedString]]
+    """Document authors."""
+
+    ci_build: Optional[str] = Field(
+        env=["GITHUB_RUN_NUMBER", "TRAVIS_JOB_NUMBER"]
+    )
+    """CI build number."""
+
+    ci_url: Optional[HttpUrl] = Field(default_factory=_build_ci_url)
+    """CI build URL."""
+
+    git_sha: Optional[str] = Field(env=["GITHUB_SHA", "TRAVIS_COMMIT"])
+    """The SHA1 of the Git commit."""
+
+    git_ref: Optional[str] = Field(env=["GITHUB_REF", "TRAVIS_BRANCH"])
+    """Git reference: branch or tag name."""
+
+    git_ref_type: GitRefType = GitRefType.branch
+    """Type of git reference: branch or tag."""
+
+    is_travis_pull_request: bool = Field(
+        env="TRAVIS_PULL_REQUEST", default=False
+    )
+    """Flag that is true in a Travis CI PR build.
+
+    This is used to abort PR builds on Travis CI (see the main app runner).
     """
 
-    def __init__(self, args=None, _validate_pdf=True, **config):
-        super().__init__()
-        self._logger = structlog.get_logger(__name__)
+    github_slug: Optional[str]
+    """Slug of the GitHub repository (``org/repo``)."""
 
-        # Make dict from argparse namespace
-        if args is not None:
-            self._args = {k: v for k, v in vars(args).items() if v}
+    extra_downloads: Optional[List[str]]
+    """Paths of additional files to include for download."""
+
+    build_datetime: datetime.datetime = Field(
+        default_factory=lambda: datetime.datetime.now()
+    )
+    """Timestamp of the build."""
+
+    is_draft_branch: bool = False
+    """A flag whether a document is a draft."""
+
+    upload: bool = False
+    """A flag whether to perform an LSST the Docs upload."""
+
+    ltd_url: HttpUrl = "https://keeper.lsst.codes"
+    """URL of the LTD Keeper API."""
+
+    ltd_user: Optional[str]
+    """Username of the LTD Keeper account."""
+
+    ltd_password: Optional[SecretStr]
+    """Password of the LTD Keeper account."""
+
+    ltd_product: Optional[str]
+    """LSST the Docs product slug."""
+
+    @property
+    def series(self) -> Optional[str]:
+        """The series, if the handle is set."""
+        if self.handle is None:
+            return None
+
+        m = HANDLE_PATTERN.match(self.handle)
+        try:
+            return m["series"].upper()
+        except Exception:
+            return None
+
+    @property
+    def series_name(self) -> Optional[str]:
+        """The name of the series (if known)."""
+        if self.series is None:
+            return None
+
+        try:
+            return SERIES_NAMES[self.series.lower()]
+        except KeyError:
+            return None
+
+    @property
+    def repo_url(self) -> Optional[str]:
+        """GitHub repository URL."""
+        if self.github_slug:
+            return "https://github.com/{slug}".format(slug=self.github_slug)
         else:
-            self._args = {}
+            return None
 
-        # Holds configuration overrides and computed configurations
-        self._configs = dict(config)
-
-        # Default configurations
-        self._defaults = self._init_defaults()
-
-        # Configurations from environment variables
-        self._envvars = self._get_environment_variables()
-
-        # Configurations are merged in a ChainMap. Priority is
-        # 1. Computed configurations.
-        # 2. Command line variables.
-        # 3. Environment variables.
-        # 4. Defaults.
-        self._chain = ChainMap(
-            self._configs, self._args, self._envvars, self._defaults
-        )
-
-        # Validate inputs
-        if _validate_pdf:
-            self._validate_pdf_file()
-
-        # Get metadata from the TeX source
-        self.lsstdoc = None
-        if self["lsstdoc_tex_path"] is not None:
-            if not os.path.exists(self["lsstdoc_tex_path"]):
-                self._logger.error(
-                    "Cannot find {0}".format(self["lsstdoc_tex_path"])
-                )
-                sys.exit(1)
-
-            # Extract metadata from the LsstLatexDoc document
-            self.lsstdoc = LsstLatexDoc.read(self["lsstdoc_tex_path"])
-            self["title"] = self.lsstdoc.title
-            self["title_html"] = self.lsstdoc.html_title
-            self["title_plain"] = self.lsstdoc.plain_title
-            self["build_datetime"] = self.lsstdoc.revision_datetime
-            if self.lsstdoc.abstract is not None:
-                self["abstract"] = self.lsstdoc.abstract
-                self["abstract_html"] = self.lsstdoc.html_abstract
-                self["abstract_plain"] = self.lsstdoc.plain_abstract
-            if self.lsstdoc.handle is not None:
-                self["doc_handle"] = self.lsstdoc.handle
-                self["series"] = self.lsstdoc.series
-                self["series_name"] = self._get_series_name(self["series"])
-            if self.lsstdoc.authors is not None:
-                self["authors"] = self.lsstdoc.authors
-                self["authors_html"] = self.lsstdoc.html_authors
-                self["authors_plain"] = self.lsstdoc.plain_authors
-
-        # Get metadata from Travis environment
-        if self["environment"] is not None:
-            self["git_commit"] = os.getenv("TRAVIS_COMMIT")
-            self["git_branch"] = os.getenv("TRAVIS_BRANCH")
-            self["git_tag"] = os.getenv("TRAVIS_TAG")
-            self["github_slug"] = os.getenv("TRAVIS_REPO_SLUG")
-            self["travis_job_number"] = os.getenv("TRAVIS_JOB_NUMBER")
-            self["travis_build_web_url"] = os.getenv("TRAVIS_BUILD_WEB_URL")
-            if os.getenv("TRAVIS_PULL_REQUEST").lower() == "false":
-                self["is_travis_pull_request"] = False
-            else:
-                self["is_travis_pull_request"] = True
-
-        # Apply metadata overrides
-
-        if "title" in self._args:
-            self["title"] = self._args["title"]
-
-        if "authors_json" in self._args:
-            author_list = json.loads(self._args["authors_json"])
-            self["authors"] = author_list
-
-        if "doc_handle" in self._args:
-            self["doc_handle"] = self._args["doc_handle"]
-            self["series"] = self["doc_handle"].split("-", 1)[0]
-            self["series_name"] = self._get_series_name(self["series"])
-
-        if "abstract" in self._args:
-            self["abstract"] = self._args["abstract"]
-
-        if "repo_url" in self._args:
-            self["repo_url"] = self._args["repo_url"]
-
-            # extract github repo slug from repo_url
-            match = GITHUB_SLUG_PATTERN.match(self["repo_url"])
-            if match:
-                self["github_slug"] = "/".join(
-                    (match.group("org"), match.group("name"))
-                )
-
-        if "extra_downloads" in self._args:
-            self["extra_downloads"] = self._args["extra_downloads"]
-
-        if "git_branch" in self._args:
-            self["git_branch"] = self._args["git_branch"]
-
-        if "build_datetime" in self._args:
-            parsed_datetime = dateutil.parser.parse(
-                self._args["build_datetime"]
-            )
-            if parsed_datetime.tzinfo is None:
-                parsed_datetime = parsed_datetime.replace(
-                    tzinfo=dateutil.tz.tzutc()
-                )
-            self["build_datetime"] = parsed_datetime
-
-        # Get the DocuShare URL if not set already
-        if self["doc_handle"] is not None and self["docushare_url"] is None:
-            try:
-                self["docushare_url"] = self._get_docushare_url(
-                    self["doc_handle"], validate=True
-                )
-            except DocuShareError as e:
-                message = "Could not compute DocuShare URL for {0}".format(
-                    self["doc_handle"]
-                )
-                self._logger.warning(message)
-                self._logger.warning(str(e))
-
-        self["is_draft_branch"] = self._determine_draft_status(
-            self["git_branch"], lsstdoc=self.lsstdoc
-        )
-
-        # Post configuration validation
-        if self["upload"]:
-            if self["ltd_product"] is None:
-                message = "--ltd-product must be set for uploads"
-                self._logger.error(message)
-                sys.exit(1)
-
-            if self["environment"] == "travis" and self["aws_secret"] is None:
-                self._logger.info("Skipping build from fork or PR.")
-                sys.exit(0)
-
-            if self["aws_id"] is None:
-                message = "--aws-id must be set for uploads"
-                self._logger.error(message)
-                sys.exit(1)
-
-            if self["aws_secret"] is None:
-                message = "--aws-secret must be set for uploads"
-                self._logger.error(message)
-                sys.exit(1)
-
-            if self["keeper_url"] is None:
-                message = "--keeper-url must be set for uploads"
-                self._logger.error(message)
-                sys.exit(1)
-
-            if self["keeper_user"] is None:
-                message = "--keeper-user must be set for uploads"
-                self._logger.error(message)
-                sys.exit(1)
-
-            if self["keeper_password"] is None:
-                message = "--keeper-password must be set for uploads"
-                self._logger.error(message)
-                sys.exit(1)
-
-    def __getitem__(self, key):
-        """Access configurations, first from the explicitly set configurations,
-        and secondarily from the command line arguments.
-        """
-        return self._chain[key]
-
-    def __setitem__(self, key, value):
-        self._chain[key] = value
-
-    def _validate_pdf_file(self):
-        """Validate that the pdf_path configuration is set and the referenced
-        file exists.
-
-        Exits the program with status 1 if validation fails.
-        """
-        if self["pdf_path"] is None:
-            self._logger.error("--pdf argument must be set")
-            sys.exit(1)
-        if not os.path.exists(self["pdf_path"]):
-            self._logger.error("Cannot find PDF " + self["pdf_path"])
-            sys.exit(1)
-
-    def _get_series_name(self, series):
-        series_names = {
-            "sqr": "SQuaRE Technical Note",
-            "dmtn": "Data Management Technical Note",
-            "smtn": "Simulations Technical Note",
-            "ldm": "LSST Data Management",
-            "lse": "LSST Systems Engineering",
-            "lpm": "LSST Project Management",
-        }
-        return series_names.get(series.lower(), "")
-
-    @staticmethod
-    def _get_docushare_url(handle, validate=True):
-        """Get a docushare URL given document's handle.
-
-        Parameters
-        ----------
-        handle : `str`
-            Handle name, such as ``'LDM-151'``.
-        validate : `bool`, optional
-            Set to `True` to request that the link resolves by performing
-            a HEAD request over the network. `False` disables this testing.
-            Default is `True`.
-
-        Returns
-        -------
-        docushare_url : `str`
-            Shortened DocuShare URL for the document corresponding to the
-            handle.
-
-        Raises
-        ------
-        lander.exceptions.DocuShareError
-            Raised for any error related to validating the DocuShare URL.
-        """
-        logger = structlog.get_logger(__name__)
-        logger.debug("Using Configuration._get_docushare_url")
-
-        # Make a short link to the DocuShare version page since
-        # a) It doesn't immediately trigger a PDF download,
-        # b) It gives the user extra information about the document before
-        #    downloading it.
-        url = "https://ls.st/{handle}*".format(handle=handle.lower())
-
-        if validate:
-            # Test that the short link successfully resolves to DocuShare
-            logger.debug("Validating {0}".format(url))
+    @property
+    def docushare_url(self) -> Optional[str]:
+        """The canonical URL of the document in DocuShare."""
+        if self.handle is not None:
+            # Make a short link to the DocuShare version page since
+            # a) It doesn't immediately trigger a PDF download,
+            # b) It gives the user extra information about the document before
+            #    downloading it.
+            url = "https://ls.st/{}".format(self.handle)
             try:
                 response = requests.head(url, allow_redirects=True, timeout=30)
-            except requests.exceptions.RequestException as e:
-                raise DocuShareError(str(e))
+                if response.status_url != 200:
+                    return None
+                redirect_url_parts = urllib.parse.urlsplit(response.url)
+                if redirect_url_parts.netloc != "docushare.lsst.org":
+                    return None
+            except requests.exceptions.RequestException:
+                return None
+        else:
+            return None
 
-            error_message = "URL {0} does not resolve to DocuShare".format(url)
-            if response.status_code != 200:
-                logger.warning(
-                    "HEAD {0} status: {1:d}".format(url, response.status_code)
+    @property
+    def relative_pdf_path(self) -> str:
+        """The ``pdf_path`` relative to the site root."""
+        return os.path.basename(self.pdf_path)
+
+    @property
+    def relative_extra_downloads(self) -> List[Dict[str, str]]:
+        """Extra downloads: information for the HTML template."""
+        data: List[Dict[str, str]] = []
+
+        for download_path in self.extra_downloads:
+            relative_path = os.path.basename(download_path)
+            # determine a type to choose the octicon
+            ext = os.path.splitext(relative_path)[-1]
+            if ext == [".pdf"]:
+                download_type = "pdf"
+            elif ext in [".tex", ".md", ".txt", ".rst"]:
+                download_type = "text"
+            elif ext in [".gz", ".zip"]:
+                download_type = "zip"
+            elif ext in [".tif", ".tiff", ".jpg", ".jpeg", ".png", ".gif"]:
+                download_type = "media"
+            elif ext in [".py", ".h", ".c", ".cpp", ".ipynb", ".json"]:
+                download_type = "code"
+            else:
+                download_type = "file"
+            data.append({"path": relative_path, "type": download_type})
+
+        return data
+
+    @validator("pdf_path", always=True)
+    def check_pdf_path(cls, v: str) -> str:
+        """Validate the pdf_path field."""
+        if not os.path.exists(v):
+            raise ValidationError(
+                'PDF "{}" not found. Check --pdf-path'.format(v)
+            )
+
+        ext = os.path.splitext(v)[-1]
+        if ext.lower() != ".pdf":
+            raise ValidationError(
+                "--pdf-path must be a PDF. "
+                "The detected extension is {}".format(ext)
+            )
+
+        return v
+
+    @validator("title", always=True)
+    def check_title(cls, v: EncodedString) -> EncodedString:
+        """Validate the title field."""
+        if v.plain is None and v.html is None:
+            raise ValidationError("--title must be set.")
+
+        # Ensure both html and plain encodings are set
+        if v.html is None:
+            v.html = v.plain
+        if v.plain is None:
+            v.plain = v.html
+
+        return v
+
+    @validator("abstract", always=True)
+    def check_abstract(
+        cls, v: Optional[EncodedString]
+    ) -> Optional[EncodedString]:
+        """Validate the abstract field."""
+        if v is None:
+            return
+
+        # Ensure both html and plain encodings are set
+        if v.html is None:
+            v.html = v.plain
+        if v.plain is None:
+            v.plain = v.html
+
+        return v
+
+    @validator("authors", always=True, each_item=True)
+    def check_author(cls, v: EncodedString) -> EncodedString:
+        """Check individual author names."""
+        if v.plain is None and v.html is None:
+            raise ValidationError("Author name is empty.")
+
+        # Ensure both html and plain encodings are set
+        if v.html is None:
+            v.html = v.plain
+        if v.plain is None:
+            v.plain = v.html
+
+        return v
+
+    @root_validator
+    def validate_git_ref(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate the ``git_ref`` field and set ``git_ref_type``."""
+        if values["git_ref"] is None:
+            return values
+
+        m = GIT_REF_PATTERN.match(values["git_ref"])
+        if m is not None:
+            # Must be in GitHub Actions
+            values["git_ref"] = m["ref"]
+            if m["kind"] == "heads":
+                values["git_ref_type"] = GitRefType.branch
+            else:
+                values["git_ref_type"] = GitRefType.tag
+        else:
+            # Not in GitHub Actions
+            if os.getenv("TRAVIS_TAG") is not None:
+                values["git_ref_type"] = GitRefType.tag
+
+        return values
+
+    @root_validator
+    def validate_upload(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate LTD upload configurations."""
+        if values["upload"]:
+            if values["ltd_user"] is None:
+                raise ValidationError(
+                    "An LSST the Docs username must be set with the "
+                    "--ltd-user option or LTD_USERNAME environment variable "
+                    "to upload to LSST the Docs."
                 )
-                raise DocuShareError(error_message)
-            redirect_url_parts = urllib.parse.urlsplit(response.url)
-            if redirect_url_parts.netloc != "docushare.lsst.org":
-                logger.warning("{0} resolved to {1}".format(url, response.url))
-                raise DocuShareError(error_message)
 
-        return url
+            if values["ltd_password"] is None:
+                raise ValidationError(
+                    "An LSST the Docs password must be set with the "
+                    "--ltd-password option or LTD_PASSWORD environment "
+                    "variable to upload to LSST the Docs."
+                )
 
-    @staticmethod
-    def _determine_draft_status(git_branch, lsstdoc=None):
-        """Determine if the document build is considered a draft based on
-        DM's policies given the Git branch or draft status in the lsstdoc-class
-        LaTeX document.
+            if values["ltd_product"] is None:
+                raise ValidationError(
+                    "An LSST the Docs product slug must be set with the "
+                    "--ltd-product option to upload to LSST the Docs."
+                )
 
-        Parameters
-        ----------
-        git_branch : `str`
-            Git branch or tag name.
-        lsstdoc : `lsstprojectmeta.tex.lsstdoc.LsstLatexDoc`
-            `~lsstprojectmeta.tex.lsstdoc.LsstLatexDoc` instance where, if the
-            ``is_draft`` argument is `True`, the draft status is True.
+        return values
 
-        Returns
-        -------
-        is_draft : `bool`
-            Returns `True` if the build is a draft, and `False` if it is
-            not a draft.
-
-        Notes
-        -----
-        The document **is not** considered a draft if:
-
-        - Branch is ``master``
-        - If ``lsstdoc`` is provided and ``lsstdoc.is_draft == False``,
-          meaning that the ``lsstdoc`` option is not included in the document's
-          class options.
-        """
-        if git_branch == "master":
-            return False
-
-        if lsstdoc is not None:
-            return lsstdoc.is_draft
-
-        return True
-
-    def _init_defaults(self):
-        """Create a `dict` of default configurations."""
-        defaults = {
-            "build_dir": None,
-            "build_datetime": datetime.datetime.now(dateutil.tz.tzutc()),
-            "pdf_path": None,
-            "extra_downloads": list(),
-            "environment": None,
-            "lsstdoc_tex_path": None,
-            "title": None,
-            "title_plain": "",
-            "authors": None,
-            "authors_json": list(),
-            "doc_handle": None,
-            "series": None,
-            "series_name": None,
-            "abstract": None,
-            "abstract_plain": "",
-            "ltd_product": None,
-            "docushare_url": None,
-            "github_slug": None,
-            "git_branch": "master",  # so we default to the main LTD edition
-            "git_commit": None,
-            "git_tag": None,
-            "travis_job_number": None,
-            "is_travis_pull_request": False,  # If not on Travis, not a PR
-            "is_draft_branch": True,
-            "aws_id": None,
-            "aws_secret": None,
-            "keeper_url": "https://keeper.lsst.codes",
-            "keeper_user": None,
-            "keeper_password": None,
-            "upload": False,
-        }
-        return defaults
-
-    def _get_environment_variables(self):
-        var_keys = {
-            "aws_id": "LTD_AWS_ID",
-            "aws_secret": "LTD_AWS_SECRET",
-            "keeper_url": "LTD_KEEPER_URL",
-            "keeper_user": "LTD_KEEPER_USER",
-            "keeper_password": "LTD_KEEPER_PASSWORD",
-        }
-        env_configs = {}
-        for config_key, var_name in var_keys.items():
-            env_value = os.getenv(var_name)
-            if env_value is not None:
-                env_configs[config_key] = env_value
-        return env_configs
+    class Config:
+        validate_assignment = True
+        arbitrary_types_allowed = True

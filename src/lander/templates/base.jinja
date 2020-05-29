@@ -4,8 +4,10 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <title>{{ config['page_title'] }}</title>
-  <meta name="description" content="{{ config['page_description'] }}">
+  <title>{{ config.title.plain }}</title>
+  {% if config.abstract %}
+  <meta name="description" content="{{ config.abstract.plain }}">
+  {% endif %}
   <meta name="viewport" content="width=device-width, initial-scale=1">
   {% include "_typekit_loader.jinja" %}
   <link rel="stylesheet" href="assets/app.css">
