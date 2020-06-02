@@ -1,0 +1,63 @@
+\documentclass[DM,TN,lsstdraft]{lsstdoc}
+% lsstdoc documentation: https://lsst-texmf.lsst.io/lsstdoc.html
+
+\input{meta}
+
+% Package imports go here.
+
+% Local commands go here.
+\input{aglossary.tex}
+\makeglossaries
+
+
+\title{When  clouds might be good  for LSST}
+
+% Optional subtitle
+% \setDocSubtitle{A subtitle}
+
+\author{%
+William O'Mullane
+}
+
+\setDocRef{DMTN-131}
+\setDocUpstreamLocation{\url{https://github.com/lsst-dm/dmtn-131}}
+
+\date{\vcsDate}
+
+% Optional: name of the document's curator
+% \setDocCurator{The Curator of this Document}
+
+\setDocAbstract{%
+In this short note we would like to consider potential annual operating costs for LSST as well as discuss long term archiving. The goal would be to see if we can come to an agreement with a major cloud provider.
+}
+
+% Change history defined here.
+% Order: oldest first.
+% Fields: VERSION, DATE, DESCRIPTION, OWNER NAME.
+% See LPM-51 for version number policy.
+\setDocChangeRecord{%
+  \addtohist{1}{YYYY-MM-DD}{Unreleased.}{William O'Mullane}
+}
+
+\setDocCompact{true}
+\begin{document}
+
+% Create the title page.
+\mkshorttitle
+
+% ADD CONTENT HERE
+% You can also use the \input command to include several content files.
+\input{body}
+\appendix
+% Include all the relevant bib files.
+% https://lsst-texmf.lsst.io/lsstdoc.html#bibliographies
+\label{sec:bib}
+\bibliography{local,lsst,lsst-dm,refs_ads,refs,books}
+
+% Make sure lsst-texmf/bin/generateAcronyms.py is in your path
+%\section{Acronyms} \label{sec:acronyms}
+%\input{acronyms.tex}
+\printglossaries
+
+
+\end{document}
