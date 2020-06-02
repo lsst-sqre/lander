@@ -2,6 +2,7 @@
 
 __all__ = ["main"]
 
+import getpass
 import logging
 import os
 import sys
@@ -158,6 +159,9 @@ def main(
 
     version = pkg_resources.get_distribution("lander").version
     logger.info("Lander version {0}".format(version))
+
+    if upload and ltd_password is None:
+        ltd_password = getpass.getpass(prompt="LSST the Docs password: ")
 
     # Collect CLI-based configurations
     cli_configs: Dict[str, Any] = {}
