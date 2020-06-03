@@ -28,7 +28,7 @@ def upload(config: "Configuration") -> None:
         config.ltd_user,
         config.ltd_password.get_secret_value(),
     )
-    dirnames = prescan_directory(config.build_dir)
+    dirnames = prescan_directory(Path(config.build_dir))
     build_resource = register_build(
         config.ltd_url,
         token,
