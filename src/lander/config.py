@@ -15,7 +15,6 @@ from pydantic import (
     Field,
     HttpUrl,
     SecretStr,
-    ValidationError,
     root_validator,
     validator,
 )
@@ -220,7 +219,7 @@ class Configuration(BaseModel):
     github_slug: Optional[str]
     """Slug of the GitHub repository (``org/repo``)."""
 
-    extra_downloads: Optional[List[str]]
+    extra_downloads: List[str] = Field(default_factory=list)
     """Paths of additional files to include for download."""
 
     build_datetime: datetime.datetime = Field(
@@ -234,7 +233,7 @@ class Configuration(BaseModel):
     upload: bool = False
     """A flag whether to perform an LSST the Docs upload."""
 
-    ltd_url: HttpUrl = "https://keeper.lsst.codes"
+    ltd_url: HttpUrl = Field(default="https://keeper.lsst.codes")
     """URL of the LTD Keeper API."""
 
     ltd_user: Optional[str]
@@ -253,6 +252,8 @@ class Configuration(BaseModel):
             return None
 
         m = HANDLE_PATTERN.match(self.handle)
+        if m is None:
+            return None
         try:
             return m["series"].upper()
         except Exception:
@@ -285,16 +286,18 @@ class Configuration(BaseModel):
             # a) It doesn't immediately trigger a PDF download,
             # b) It gives the user extra information about the document before
             #    downloading it.
-            url = "https://ls.st/{}".format(self.handle)
+            url = "https://ls.st/{}*".format(self.handle)
             try:
                 response = requests.head(url, allow_redirects=True, timeout=30)
-                if response.status_url != 200:
+                if response.status_code != 200:
                     return None
                 redirect_url_parts = urllib.parse.urlsplit(response.url)
                 if redirect_url_parts.netloc != "docushare.lsst.org":
                     return None
             except requests.exceptions.RequestException:
                 return None
+
+            return url
         else:
             return None
 
@@ -312,7 +315,7 @@ class Configuration(BaseModel):
             relative_path = os.path.basename(download_path)
             # determine a type to choose the octicon
             ext = os.path.splitext(relative_path)[-1]
-            if ext == [".pdf"]:
+            if ext == ".pdf":
                 download_type = "pdf"
             elif ext in [".tex", ".md", ".txt", ".rst"]:
                 download_type = "text"
@@ -332,13 +335,11 @@ class Configuration(BaseModel):
     def check_pdf_path(cls, v: str) -> str:
         """Validate the pdf_path field."""
         if not os.path.exists(v):
-            raise ValidationError(
-                'PDF "{}" not found. Check --pdf-path'.format(v)
-            )
+            raise ValueError('PDF "{}" not found. Check --pdf-path'.format(v))
 
         ext = os.path.splitext(v)[-1]
         if ext.lower() != ".pdf":
-            raise ValidationError(
+            raise ValueError(
                 "--pdf-path must be a PDF. "
                 "The detected extension is {}".format(ext)
             )
@@ -349,7 +350,7 @@ class Configuration(BaseModel):
     def check_title(cls, v: EncodedString) -> EncodedString:
         """Validate the title field."""
         if v.plain is None and v.html is None:
-            raise ValidationError("--title must be set.")
+            raise ValueError("--title must be set.")
 
         # Ensure both html and plain encodings are set
         if v.html is None:
@@ -365,7 +366,7 @@ class Configuration(BaseModel):
     ) -> Optional[EncodedString]:
         """Validate the abstract field."""
         if v is None:
-            return
+            return None
 
         # Ensure both html and plain encodings are set
         if v.html is None:
@@ -379,7 +380,7 @@ class Configuration(BaseModel):
     def check_author(cls, v: EncodedString) -> EncodedString:
         """Check individual author names."""
         if v.plain is None and v.html is None:
-            raise ValidationError("Author name is empty.")
+            raise ValueError("Author name is empty.")
 
         # Ensure both html and plain encodings are set
         if v.html is None:
@@ -415,21 +416,21 @@ class Configuration(BaseModel):
         """Validate LTD upload configurations."""
         if values["upload"]:
             if values["ltd_user"] is None:
-                raise ValidationError(
+                raise ValueError(
                     "An LSST the Docs username must be set with the "
                     "--ltd-user option or LTD_USERNAME environment variable "
                     "to upload to LSST the Docs."
                 )
 
             if values["ltd_password"] is None:
-                raise ValidationError(
+                raise ValueError(
                     "An LSST the Docs password must be set with the "
                     "--ltd-password option or LTD_PASSWORD environment "
                     "variable to upload to LSST the Docs."
                 )
 
             if values["ltd_product"] is None:
-                raise ValidationError(
+                raise ValueError(
                     "An LSST the Docs product slug must be set with the "
                     "--ltd-product option to upload to LSST the Docs."
                 )

@@ -1,7 +1,10 @@
 """Coordination infrastructure for making a landing page."""
 
+__all__ = ["Lander"]
+
 import os
 import shutil
+from typing import TYPE_CHECKING
 
 import structlog
 from lsstprojectmeta.jsonld import encode_jsonld
@@ -9,19 +12,22 @@ from lsstprojectmeta.jsonld import encode_jsonld
 from . import ltdclient
 from .renderer import create_jinja_env, render_homepage
 
+if TYPE_CHECKING:
+    from lander.config import Configuration
 
-class Lander(object):
+
+class Lander:
     """Lander coordinates the creation and upload of a landing page for
     a PDF document.
     """
 
-    def __init__(self, config):
+    def __init__(self, config: "Configuration") -> None:
         super().__init__()
         self._config = config
         self._logger = structlog.get_logger("lander")
         self._jinja_env = create_jinja_env()
 
-    def build_site(self):
+    def build_site(self) -> None:
         if not os.path.isdir(self._config.build_dir):
             os.makedirs(self._config.build_dir)
 
@@ -63,7 +69,7 @@ class Lander(object):
         jsonld_path = os.path.join(self._config.build_dir, "metadata.jsonld")
         self.write_metadata(jsonld_path)
 
-    def write_metadata(self, output_path):
+    def write_metadata(self, output_path: str) -> None:
         """Build a JSON-LD dataset for LSST Projectmeta.
 
         Parameters
@@ -95,7 +101,7 @@ class Lander(object):
         with open(output_path, "w") as f:
             f.write(json_text)
 
-    def upload_site(self):
+    def upload_site(self) -> None:
         """Upload a previously-built site to LSST the Docs."""
         if not os.path.isdir(self._config.build_dir):
             message = "Site not built at {0}".format(self._config.build_dir)

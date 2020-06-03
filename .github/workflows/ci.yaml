@@ -40,7 +40,7 @@ jobs:
         run: gulp assets --env=deploy
 
       - name: Run tests
-        run: tox -e py,lint
+        run: tox -e py,lint,typing,coverage-report
 
   pypi:
 
