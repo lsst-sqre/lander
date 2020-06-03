@@ -1,7 +1,14 @@
 include *.rst
 include LICENSE
-recursive-include lander *.svg
-recursive-include lander *.html
-recursive-include lander *.jinja
-recursive-include lander *.css
-recursive-include lander *.js
+recursive-include src *.svg
+recursive-include src *.jinja
+recursive-include src *.css
+recursive-include src *.js
+prune tests*
+exclude gulpfile.js
+exclude package-lock.json
+exclude package.json
+exclude webpack.config.js
+prune js*
+prune scss*
+prune integration-tests*

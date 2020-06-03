@@ -162,7 +162,7 @@ Developing CSS/Sass with squared
 Lander uses squared_ for visual design.
 All Lander CSS should be committed to the squared_ repo so that LSST SQuaRE web projects share a common visual language.
 
-To make it easier to write Sass in squared_ while developing landing pages in Lander, we recommend linking a clone of squared_ to Lander's ``node_modules``. 
+To make it easier to write Sass in squared_ while developing landing pages in Lander, we recommend linking a clone of squared_ to Lander's ``node_modules``.
 Assuming you're starting from the ``lander/`` root directory::
 
   git clone https://github.com/lsst-sqre/squared ../squared

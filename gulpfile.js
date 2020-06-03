@@ -27,8 +27,8 @@ const dirs = {
   squaredScss: 'node_modules/squared/scss',
   svg: 'node_modules/squared/svg',
   icons: 'node_modules/squared/icons',
-  assets: 'lander/assets',
-  templates: 'lander/templates',
+  assets: 'src/lander/assets',
+  templates: 'src/lander/templates',
   dev: '_build',
 };
 

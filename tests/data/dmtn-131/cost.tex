@@ -1,0 +1,12 @@
+
+\section{Cost}
+Currently the cloud computing cost models do  not align well with federal research computing plans. We believe this gap will narrow or disappear in five years or so, however in the meantime LSST and Google may miss an opportunity to move a major research project on to commodity cloud computing.
+
+Using the information from the Google study where we ran some of our real processes, we have come to a price for running the \gls{Science Platform} and storing data on Google. For 15PB of storage and a modest K8S cluster to host the platform the projected 2022 cost is around \$3M of which more than $\frac{2}{3}$ are storage costs.
+
+Though a good price this is not a sustainable price for \gls{LSST}, we can construct petascale storage we would own and use for 5 years for under \$200K a petabyte (the implied \emph{annual} price at google).  We require about 50 Petabytes a year for 10 years. The out year costs look prohibitive on the cloud.
+
+The cost of compute is probably not an issue in comparison - we can use spot/interuptable instance pricing for \gls{DRP}.
+
+%Based on the proof of concept some prices were calculated in \tabref{tab:Google}.
+%\input{Google}

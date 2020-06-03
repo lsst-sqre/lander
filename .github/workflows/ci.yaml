@@ -1,0 +1,86 @@
+name: CI
+
+"on": [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # full history for setuptools_scm
+
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - uses: actions/setup-node@v1
+        name: Use Node.js
+        with:
+          node-version: 13.3.0 # known to be compatible with current build
+
+      - name: NPM install
+        run: |
+          npm install -g gulp-cli
+          npm install
+
+      - name: Python install
+        run: |
+          python -m pip install --upgrade pip
+          pip install .[dev]
+          pip install tox
+
+      - name: Build assets
+        run: gulp assets --env=deploy
+
+      - name: Run tests
+        run: tox -e py,lint,typing
+
+  pypi:
+
+    runs-on: ubuntu-latest
+    needs: [test]
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # full history for setuptools_scm
+
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - uses: actions/setup-node@v1
+        name: Use Node.js
+        with:
+          node-version: 13.3.0 # known to be compatible with current build
+
+      - name: NPM install
+        run: |
+          npm install -g gulp-cli
+          npm install
+
+      - name: Python install
+        run: |
+          python -m pip install --upgrade pip
+          pip install .[dev]
+          pip install --upgrade setuptools wheel twine
+
+      - name: Build assets
+        run: gulp assets --env=deploy
+
+      - name: Build and publish
+        env:
+          TWINE_USERNAME: "__token__"
+          TWINE_PASSWORD: ${{ secrets.PYPI_SQRE_ADMIN }}
+        run: |
+          python setup.py sdist bdist_wheel
+          twine upload dist/*

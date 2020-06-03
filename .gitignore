@@ -91,10 +91,12 @@ ENV/
 # Automatically created by npm install
 node_modules
 # Assets is automatically built by gulp assets
-lander/assets
+src/lander/assets
 # Automatically built by gulp assets
-lander/templates/icons.svg
+src/lander/templates/icons.svg
 # Automatically built by gulp (development mode)
 _build
 # Integration tests
 _tests
+
+.mypy_cache
