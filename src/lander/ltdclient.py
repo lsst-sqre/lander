@@ -20,15 +20,20 @@ def upload(config: "Configuration") -> None:
     config : `lander.config.Configuration`
         Site configuration, which includes upload information and credentials.
     """
+    if config.ltd_user is None or config.ltd_password is None:
+        raise RuntimeError("LSST the Docs credentials are not available.")
+
     token = get_keeper_token(
-        config["keeper_url"], config["keeper_user"], config["keeper_password"]
+        config.ltd_url,
+        config.ltd_user,
+        config.ltd_password.get_secret_value(),
     )
     dirnames = prescan_directory(config.build_dir)
     build_resource = register_build(
         config.ltd_url,
         token,
         config.ltd_product,
-        git_refs=[config.github_ref],
+        git_refs=[config.git_ref],
         dirnames=dirnames,
     )
 

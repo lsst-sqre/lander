@@ -176,9 +176,9 @@ def main(
     if github_slug:
         cli_configs["github_slug"] = github_slug
     if github_branch:
-        cli_configs["github_ref"] = github_branch
+        cli_configs["git_ref"] = github_branch
     if github_sha:
-        cli_configs["github_sha"] = github_sha
+        cli_configs["git_sha"] = github_sha
     if date:
         cli_configs["date"] = date
 
@@ -257,6 +257,6 @@ def configure_logger(verbose: bool = False) -> None:
     )
 
 
-def print_version():
+def print_version() -> None:
     version = pkg_resources.get_distribution("lander").version
     print(version)

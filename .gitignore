@@ -98,3 +98,5 @@ src/lander/templates/icons.svg
 _build
 # Integration tests
 _tests
+
+.mypy_cache
