@@ -197,6 +197,8 @@ def main(
         upload=upload,
     )
 
+    logger.info(config.dict())
+
     # disable any build confirmed to be a PR with Travis
     if config.is_travis_pull_request:
         logger.info("Skipping build from PR.")
