@@ -74,6 +74,15 @@ def _build_ci_url() -> Optional[str]:
         return None
 
 
+def _build_ci_number() -> Optional[str]:
+    envvars = ["GITHUB_RUN_NUMBER", "TRAVIS_JOB_NUMBER"]
+    for envvar in envvars:
+        v = os.getenv(envvar)
+        if v:
+            return v
+    return None
+
+
 def build_configuration(
     build_dir: str,
     pdf_path: str,
@@ -191,18 +200,16 @@ class Configuration(BaseModel):
     authors: Optional[List[EncodedString]]
     """Document authors."""
 
-    ci_build: Optional[str] = Field(
-        env=["GITHUB_RUN_NUMBER", "TRAVIS_JOB_NUMBER"]
-    )
+    ci_build: Optional[str] = Field(default_factory=_build_ci_number)
     """CI build number."""
 
     ci_url: Optional[HttpUrl] = Field(default_factory=_build_ci_url)
     """CI build URL."""
 
-    git_sha: Optional[str] = Field(env=["GITHUB_SHA", "TRAVIS_COMMIT"])
+    git_sha: Optional[str]
     """The SHA1 of the Git commit."""
 
-    git_ref: Optional[str] = Field(env=["GITHUB_REF", "TRAVIS_BRANCH"])
+    git_ref: Optional[str]
     """Git reference: branch or tag name."""
 
     git_ref_type: GitRefType = GitRefType.branch
