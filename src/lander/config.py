@@ -314,7 +314,7 @@ class Configuration(BaseModel):
         for download_path in self.extra_downloads:
             relative_path = os.path.basename(download_path)
             # determine a type to choose the octicon
-            ext = os.path.splitext(relative_path)[-1]
+            ext = os.path.splitext(relative_path)[-1].lower()
             if ext == ".pdf":
                 download_type = "pdf"
             elif ext in [".tex", ".md", ".txt", ".rst"]:
