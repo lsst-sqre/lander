@@ -1,12 +1,20 @@
 from __future__ import annotations
 
 import datetime
+import re
 from typing import List, Optional
 
 import bleach
 from pydantic import BaseModel, EmailStr, HttpUrl, validator
 
 __all__ = ["EncodedString", "Person", "DocumentMetadata"]
+
+WHITESPACE_PATTERN = re.compile(r"\s+")
+
+
+def collapse_whitespace(text: str) -> str:
+    """Replace any whitespace character, or group, with a single space."""
+    return WHITESPACE_PATTERN.sub(" ", text).strip()
 
 
 class EncodedString(BaseModel):
@@ -23,6 +31,10 @@ class EncodedString(BaseModel):
         """Ensure that the HTML is safe for injecting into templates."""
         return bleach.clean(v, strip=True)
 
+    @validator("*")
+    def clean_whitespace(cls, v: str) -> str:
+        return collapse_whitespace(v)
+
 
 class Person(BaseModel):
     """Data about a person."""
@@ -38,6 +50,10 @@ class Person(BaseModel):
 
     email: Optional[EmailStr]
     """Email associated with the person."""
+
+    @validator("name", "affiliations", each_item=True)
+    def clean_whitespace(cls, v: str) -> str:
+        return collapse_whitespace(v)
 
 
 class DocumentMetadata(BaseModel):
@@ -75,3 +91,7 @@ class DocumentMetadata(BaseModel):
 
     See https://spdx.org/licenses/ for a list of licenses.
     """
+
+    @validator("title", "version", "keywords", "copyright", each_item=True)
+    def clean_whitespace(cls, v: str) -> str:
+        return collapse_whitespace(v)
