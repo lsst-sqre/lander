@@ -29,7 +29,27 @@ class EncodedString(BaseModel):
     @validator("html")
     def santize_html(cls, v: str) -> str:
         """Ensure that the HTML is safe for injecting into templates."""
-        return bleach.clean(v, strip=True)
+        # Add <p> to the default list of allowed tags, which is useful for
+        # abstracts.
+        return bleach.clean(
+            v,
+            strip=True,
+            tags=[
+                "p",
+                "a",
+                "abbr",
+                "acronym",
+                "b",
+                "blockquote",
+                "code",
+                "em",
+                "i",
+                "li",
+                "ol",
+                "strong",
+                "ul",
+            ],
+        )
 
     @validator("*")
     def clean_whitespace(cls, v: str) -> str:
