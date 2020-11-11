@@ -55,7 +55,6 @@ def convert_text(
     output_fmt: str,
     deparagraph: bool = False,
     mathjax: bool = False,
-    smart: bool = True,
     extra_args: Optional[List[str]] = None,
 ) -> str:
     """Convert text from one markup format to another using pandoc.
@@ -95,13 +94,9 @@ def convert_text(
         If `True` then Pandoc will markup output content to work with MathJax.
         Default is False.
 
-    smart : `bool`, optional
-        If `True` (default) then ascii characters will be converted to unicode
-        characters like smart quotes and em dashes.
-
     extra_args : `list`, optional
         Sequence of Pandoc arguments command line arguments (such as
-        ``'--normalize'``). The ``deparagraph``, ``mathjax``, and ``smart``
+        ``'--normalize'``). The ``deparagraph``, and ``mathjax``
         arguments are convenience arguments that are equivalent to items
         in ``extra_args``.
 
@@ -124,9 +119,6 @@ def convert_text(
 
     if mathjax:
         extra_args.append("--mathjax")
-
-    if smart:
-        output_fmt = f"{output_fmt}+smart"
 
     if deparagraph:
         extra_args.append("--filter=lsstprojectmeta-deparagraph")
