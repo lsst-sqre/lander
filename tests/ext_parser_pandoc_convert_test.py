@@ -9,7 +9,7 @@ from lander.ext.parser.pandoc import convert_text
 
 def test_convert() -> None:
     source = r"Hello \emph{world}"
-    expected = "Hello _world_\n"
+    expected = "Hello world\n"
 
     assert expected == convert_text(
         content=source, source_fmt="latex", output_fmt="plain"
