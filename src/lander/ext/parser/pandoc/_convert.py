@@ -75,7 +75,7 @@ def convert_text(
 
     deparagraph : `bool`, optional
         If `True`, then the
-        `lsstprojectmeta.pandoc.filters.deparagraph.deparagraph` filter is
+        `lander.parse.pandoc.filters.deparagraph.deparagraph` filter is
         used to remove paragraph (``<p>``, for example) tags around a single
         paragraph of content. That filter does not affect content that
         consists of multiple blocks (several paragraphs, or lists, for
@@ -121,7 +121,7 @@ def convert_text(
         extra_args.append("--mathjax")
 
     if deparagraph:
-        extra_args.append("--filter=lsstprojectmeta-deparagraph")
+        extra_args.append("--filter=lander-deparagraph")
 
     extra_args.append("--wrap=none")
 
