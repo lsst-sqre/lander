@@ -7,7 +7,7 @@ from typing import List, Optional
 import bleach
 from pydantic import BaseModel, EmailStr, HttpUrl, validator
 
-__all__ = ["EncodedString", "Person", "DocumentMetadata"]
+__all__ = ["FormattedString", "Person", "DocumentMetadata"]
 
 WHITESPACE_PATTERN = re.compile(r"\s+")
 
@@ -17,7 +17,7 @@ def collapse_whitespace(text: str) -> str:
     return WHITESPACE_PATTERN.sub(" ", text).strip()
 
 
-class EncodedString(BaseModel):
+class FormattedString(BaseModel):
     """A string with plain and HTML encodings."""
 
     html: str
@@ -85,7 +85,7 @@ class DocumentMetadata(BaseModel):
     identifier: Optional[str]
     """Document identifier."""
 
-    abstract: Optional[EncodedString]
+    abstract: Optional[FormattedString]
     """Document abstract or summary."""
 
     authors: Optional[List[Person]]

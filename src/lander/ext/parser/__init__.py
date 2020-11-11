@@ -1,10 +1,10 @@
 """Support the Lander parsing extensions."""
 
-__all__ = ["DocumentMetadata", "Person", "EncodedString", "Parser"]
+__all__ = ["DocumentMetadata", "Person", "FormattedString", "Parser"]
 
 from lander.ext.parser._datamodel import (
     DocumentMetadata,
-    EncodedString,
+    FormattedString,
     Person,
 )
 from lander.ext.parser._parser import Parser
