@@ -7,6 +7,8 @@ from typing import List, Optional
 import bleach
 from pydantic import BaseModel, EmailStr, HttpUrl, validator
 
+from lander.ext.parser.pandoc import convert_text
+
 __all__ = ["FormattedString", "Person", "DocumentMetadata"]
 
 WHITESPACE_PATTERN = re.compile(r"\s+")
@@ -25,6 +27,38 @@ class FormattedString(BaseModel):
 
     plain: str
     """Plain (unicode) version of the string."""
+
+    latex: Optional[str]
+    """LaTeX version of the string, if available."""
+
+    @classmethod
+    def from_latex(cls, tex: str, fragment: bool = False) -> FormattedString:
+        """Created a FormattedString from LaTeX-encoded content.
+
+        The LaTeX content is transformed to HTML and plain encodings
+        via pandoc.
+        """
+        try:
+            plain = convert_text(
+                content=tex,
+                source_fmt="latex",
+                output_fmt="plain",
+                deparagraph=fragment,
+            )
+        except Exception:
+            plain = tex  # fallback in case conversion didn't work
+
+        try:
+            html = convert_text(
+                content=tex,
+                source_fmt="latex",
+                output_fmt="html",
+                deparagraph=fragment,
+            )
+        except Exception:
+            html = tex  # fallback in case conversion didn't work
+
+        return cls(html=html, plain=plain, latex=tex)
 
     @validator("html")
     def santize_html(cls, v: str) -> str:
