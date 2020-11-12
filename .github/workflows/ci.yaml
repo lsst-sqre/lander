@@ -15,6 +15,9 @@ jobs:
         with:
           fetch-depth: 0 # full history for setuptools_scm
 
+      - name: Install pandoc
+        run: sudo apt-get install pandoc
+
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
