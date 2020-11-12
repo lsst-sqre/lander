@@ -26,19 +26,8 @@ def ensure_pandoc(func: F) -> Callable[..., Any]:
             result = func(*args, **kwargs)
         except OSError:
             # Install pandoc and retry
-            message = (
-                "pandoc is required but not found. Lander is installing it "
-                "for you."
-            )
+            message = "Pandoc is required but not found."
             logger.warning(message)
-
-            # This version of pandoc is known to be compatible with both
-            # pypandoc.download_pandoc and the functionality that
-            # lsstprojectmeta needs. CI tests are useful for ensuring
-            # download_pandoc works since the CI environment generally
-            # doesn't have pandoc preinstalled.
-            pypandoc.download_pandoc()
-            logger.debug("pandoc download complete")
 
             result = func(*args, **kwargs)
 
