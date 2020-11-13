@@ -6,6 +6,8 @@ __all__ = [
     "Person",
     "FormattedString",
     "ParsingPlugins",
+    "GitFile",
+    "GitRepository",
 ]
 
 from lander.ext.parser._datamodel import (
@@ -14,4 +16,5 @@ from lander.ext.parser._datamodel import (
     Person,
 )
 from lander.ext.parser._discovery import ParsingPlugins
+from lander.ext.parser._gitdata import GitFile, GitRepository
 from lander.ext.parser._parser import Parser

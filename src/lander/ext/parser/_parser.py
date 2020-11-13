@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from lander.ext.parser._datamodel import DocumentMetadata
+from lander.ext.parser._gitdata import GitRepository
 from lander.ext.parser.texutils.extract import get_macros
 from lander.ext.parser.texutils.normalize import read_tex_file, replace_macros
 
@@ -26,6 +27,13 @@ class Parser(metaclass=ABCMeta):
     def __init__(self, tex_path: Path) -> None:
         self._tex_path = tex_path
         self._tex_source = self.normalize_source(read_tex_file(self.tex_path))
+
+        try:
+            self.git_repository: Optional[
+                GitRepository
+            ] = GitRepository.create(self._tex_path.parent)
+        except Exception:
+            self.git_repository = None
 
         self._metadata = self.extract_metadata(self.tex_source)
 
