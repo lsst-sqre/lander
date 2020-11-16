@@ -8,8 +8,12 @@ __all__ = [
     "ParsingPlugins",
     "GitFile",
     "GitRepository",
+    "GitRefType",
+    "CiPlatform",
+    "CiMetadata",
 ]
 
+from lander.ext.parser._cidata import CiMetadata, CiPlatform, GitRefType
 from lander.ext.parser._datamodel import (
     DocumentMetadata,
     FormattedString,

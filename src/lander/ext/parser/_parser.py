@@ -3,6 +3,7 @@ from __future__ import annotations
 from abc import ABCMeta, abstractmethod
 from typing import TYPE_CHECKING, Optional
 
+from lander.ext.parser._cidata import CiMetadata
 from lander.ext.parser._datamodel import DocumentMetadata
 from lander.ext.parser._gitdata import GitRepository
 from lander.ext.parser.texutils.extract import get_macros
@@ -29,11 +30,13 @@ class Parser(metaclass=ABCMeta):
         self._tex_source = self.normalize_source(read_tex_file(self.tex_path))
 
         try:
-            self.git_repository: Optional[
+            self._git_repository: Optional[
                 GitRepository
             ] = GitRepository.create(self._tex_path.parent)
         except Exception:
-            self.git_repository = None
+            self._git_repository = None
+
+        self._ci_metadata = CiMetadata.create()
 
         self._metadata = self.extract_metadata(self.tex_source)
 
@@ -46,6 +49,24 @@ class Parser(metaclass=ABCMeta):
     def tex_source(self) -> str:
         """TeX source, which has been normalized."""
         return self._tex_source
+
+    @property
+    def ci_metadata(self) -> CiMetadata:
+        """Metadata from the CI environment
+
+        This attribute is instantiate automatically and is available to the
+        `extract_metadata` hook for use by parser implementations.
+        """
+        return self._ci_metadata
+
+    @property
+    def git_repository(self) -> Optional[GitRepository]:
+        """Metadata from the local Git repository
+
+        This attribute is instantiate automatically and is available to the
+        `extract_metadata` hook for use by parser implementations.
+        """
+        return self._git_repository
 
     @property
     def metadata(self) -> DocumentMetadata:
