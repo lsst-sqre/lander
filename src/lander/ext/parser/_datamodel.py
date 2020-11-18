@@ -5,7 +5,7 @@ import re
 from typing import List, Optional
 
 import bleach
-from pydantic import BaseModel, EmailStr, HttpUrl, validator
+from pydantic import BaseModel, EmailStr, Field, HttpUrl, validator
 
 from lander.ext.parser.pandoc import convert_text
 
@@ -96,13 +96,13 @@ class Person(BaseModel):
     name: str
     """Display name of the person."""
 
-    orcid: Optional[str]
+    orcid: Optional[str] = None
     """The ORCiD of the person."""
 
-    affiliations: Optional[List[str]]
+    affiliations: Optional[List[str]] = Field(default_factory=lambda: [])
     """Names of the person's affiliations."""
 
-    email: Optional[EmailStr]
+    email: Optional[EmailStr] = None
     """Email associated with the person."""
 
     @validator("name", "affiliations", each_item=True)
@@ -116,22 +116,22 @@ class DocumentMetadata(BaseModel):
     title: str
     """Document title."""
 
-    identifier: Optional[str]
+    identifier: Optional[str] = None
     """Document identifier."""
 
-    abstract: Optional[FormattedString]
+    abstract: Optional[FormattedString] = None
     """Document abstract or summary."""
 
-    authors: Optional[List[Person]]
+    authors: List[Person] = Field(default_factory=lambda: [])
     """Authors of the document."""
 
-    date_modified: Optional[datetime.datetime]
+    date_modified: Optional[datetime.datetime] = None
     """Time when the document was last modified."""
 
-    version: Optional[str]
+    version: Optional[str] = None
     """Version of this document."""
 
-    keywords: Optional[List[str]]
+    keywords: List[str] = Field(default_factory=lambda: [])
     """Keywords associated with the document."""
 
     repository_url: Optional[HttpUrl]
