@@ -146,6 +146,12 @@ class DocumentMetadata(BaseModel):
     See https://spdx.org/licenses/ for a list of licenses.
     """
 
+    full_text: Optional[FormattedString] = None
+    """The full text content document."""
+
+    ci_url: Optional[HttpUrl] = None
+    """The URL of the continuous integration build for the document."""
+
     @validator("title", "version", "keywords", "copyright", each_item=True)
     def clean_whitespace(cls, v: str) -> str:
         return collapse_whitespace(v)
