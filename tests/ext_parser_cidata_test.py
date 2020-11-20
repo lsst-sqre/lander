@@ -41,6 +41,9 @@ def test_github_actions_branch(monkeypatch: MonkeyPatch) -> None:
         "https://github.com/lsst-sqre/lander/actions/runs/1234"
     )
     assert ci_metadata.github_slug == "lsst-sqre/lander"
+    assert ci_metadata.github_repository == (
+        "https://github.com/lsst-sqre/lander"
+    )
 
 
 def test_github_actions_tag(monkeypatch: MonkeyPatch) -> None:
@@ -53,6 +56,7 @@ def test_github_actions_tag(monkeypatch: MonkeyPatch) -> None:
     assert ci_metadata.platform == "github_actions"
     assert ci_metadata.git_ref == "1.0.0"
     assert ci_metadata.git_ref_type == "tag"
+    assert ci_metadata.github_repository is None
 
 
 def test_travis_branch(monkeypatch: MonkeyPatch) -> None:
@@ -74,6 +78,9 @@ def test_travis_branch(monkeypatch: MonkeyPatch) -> None:
     assert ci_metadata.build_id == "1234"
     assert ci_metadata.build_url == "https://example.com/1234"
     assert ci_metadata.github_slug == "lsst-sqre/lander"
+    assert ci_metadata.github_repository == (
+        "https://github.com/lsst-sqre/lander"
+    )
 
 
 def test_travis_tag(monkeypatch: MonkeyPatch) -> None:
@@ -95,3 +102,6 @@ def test_travis_tag(monkeypatch: MonkeyPatch) -> None:
     assert ci_metadata.build_id == "1234"
     assert ci_metadata.build_url == "https://example.com/1234"
     assert ci_metadata.github_slug == "lsst-sqre/lander"
+    assert ci_metadata.github_repository == (
+        "https://github.com/lsst-sqre/lander"
+    )

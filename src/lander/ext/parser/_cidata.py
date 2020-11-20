@@ -59,6 +59,14 @@ class CiMetadata:
     github_slug: Optional[str] = None
     """Slug of the GitHub repository (``org/repo``)."""
 
+    @property
+    def github_repository(self) -> Optional[str]:
+        """URL of the GitHub repository homepage."""
+        if self.github_slug:
+            return f"https://github.com/{self.github_slug}"
+        else:
+            return None
+
     @classmethod
     def create(cls) -> CiMetadata:
         """Gather CI metadata, automatically inferring the CI platform."""
