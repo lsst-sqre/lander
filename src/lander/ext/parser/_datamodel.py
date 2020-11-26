@@ -8,6 +8,7 @@ import bleach
 from pydantic import BaseModel, EmailStr, Field, HttpUrl, validator
 
 from lander.ext.parser.pandoc import convert_text
+from lander.spdx import Licenses
 
 __all__ = ["FormattedString", "Person", "DocumentMetadata"]
 
@@ -155,3 +156,13 @@ class DocumentMetadata(BaseModel):
     @validator("title", "version", "keywords", "copyright", each_item=True)
     def clean_whitespace(cls, v: str) -> str:
         return collapse_whitespace(v)
+
+    @validator("license_identifier")
+    def validate_spdx(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None:
+            licenses = Licenses.load()
+            if v not in licenses:
+                raise ValueError(
+                    f"License ID '{v}' is not a valid SPDX license identifier."
+                )
+        return v
