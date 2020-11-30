@@ -1,21 +1,10 @@
-.PHONY: help test pytest ldm151 dmtn070
-
+.PHONY: help
 help:
 	@echo "Make command reference"
-	@echo "  make test ........ (run all unit and integration tests)"
-	@echo "  make pytest ...... (run pytest unit tests)"
-	@echo "  make ldm151 ...... (run LDM-151 integration test)"
-	@echo "  make ldm070 ...... (run DMTN-070 integration test)"
+	@echo "  make init ........ (initialize for development)"
 
-test: pytest ldm151 dmtn070
-
-pytest:
-	pytest --flake8 --doctest-modules lander tests
-
-ldm151:
-	# End-to-end smoke integration test with LDM-151
-	bash integration-tests/test_ldm151.bash
-
-dmtn070:
-	# End-to-end smoke integration test with DMTN-070
-	bash integration-tests/test_dmtn070.bash
+.PHONY: init
+init:
+	pip install -e ".[dev]"
+	pip install tox tox-pyenv pre-commit
+	pre-commit install

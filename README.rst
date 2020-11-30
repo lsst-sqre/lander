@@ -5,9 +5,9 @@ Lander
 .. image:: https://img.shields.io/pypi/v/lander.svg
    :target: https://pypi.python.org/pypi/lander
    :alt: Python Package Index
-.. image:: https://img.shields.io/travis/lsst-sqre/lander.svg
-   :target: https://travis-ci.org/lsst-sqre/lander
-   :alt: Travis CI build status
+.. image:: https://github.com/lsst-sqre/lander/workflows/CI/badge.svg
+   :target: https://github.com/lsst-sqre/lander/actions
+   :alt: GitHub Actions build status
 
 **HTML landing page generator for LSST PDF documentation deployed from Git to LSST the Docs.**
 
@@ -122,21 +122,14 @@ Clone and install dependencies (use a Python virtual environment of your choice)
    npm install -g gulp-cli
    npm install
    gulp assets
-   pip install -e ".[dev]"
+   make init
 
 Run Python tests and linting
 ----------------------------
 
 We use pytest for unit testing and style checks::
 
-   make pytest
-
-You can also run end-to-end trials of landing page builds::
-
-   make test
-
-These integration tests clone real LSST documents, compiles them with Docker, and builds landing pages to simulate continuous delivery workflows in production.
-Look for sites in ``_tests``.
+   tox
 
 Build a development site
 ------------------------

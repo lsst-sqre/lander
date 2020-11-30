@@ -1,0 +1,45 @@
+\documentclass[DM,lsstdraft,toc]{lsstdoc}
+
+% Package imports go here
+
+% Local commands go here
+
+\title[Short title]{Title of document}
+
+\author{
+A.~Author,
+B.~Author,
+and
+C.~Author}
+
+\setDocRef{LDM-nnn}
+\date{\today}
+
+% Optional
+\setDocCurator{The Curator of this Document}
+
+\input{abstract.tex}
+
+% Change history defined here. Will be inserted into
+% correct place with \maketitle
+% OLDEST FIRST: VERSION, DATE, DESCRIPTION, OWNER NAME
+\setDocChangeRecord{%
+\addtohist{1}{2017-09-10}{Initial release. Based on Gaia examples.}{Tim Jenness}
+\addtohist{2}{yyyy-mm-dd}{Future changes}{Future person}
+}
+
+\begin{document}
+
+% Create the title page
+% Table of contents will be added automatically if "toc" class option
+% is used.
+\maketitle
+
+\include{content/intro.tex}
+
+% Include all the relevant bib files.
+% lsst is for DocuShare and DMTN entries.
+% refs_ads is for entries coming from ADS.
+\bibliography{lsst,refs,books,refs_ads}
+
+\end{document}

@@ -2,6 +2,12 @@
 Change Log
 ##########
 
+1.0.0 (unreleased)
+==================
+
+- New plugin framework to customize how Lander retrieves metadata from LaTeX documents, and their Git repositories and CI/build environments.
+  You can create a new plugin by creating a package that registers a subclass of ``lander.ext.parser.Parser`` with the ``lander.parser`` setuptools entry point.
+
 0.1.16 (2019-07-04)
 ===================
 
