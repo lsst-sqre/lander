@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Generator
 
 import pytest
+from typer.testing import CliRunner
 
 
 @pytest.fixture(scope="function")
@@ -18,3 +19,8 @@ def temp_cwd(tmp_path: Path) -> Generator[Path, None, None]:
     yield tmp_path
 
     os.chdir(current_dir)
+
+
+@pytest.fixture(scope="session")
+def runner() -> CliRunner:
+    return CliRunner()
