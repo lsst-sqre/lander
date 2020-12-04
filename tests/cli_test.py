@@ -2,28 +2,41 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING
+
+from bs4 import BeautifulSoup
 
 from lander.cli import app
 
 if TYPE_CHECKING:
-    from pathlib import Path
     from typer.testing import CliRunner
 
 
 def test_build(runner: CliRunner, temp_cwd: Path) -> None:
+    source_path = Path(__file__).parent.joinpath("data/article/article.tex")
+    pdf_path = Path(__file__).parent.joinpath("data/article/article.pdf")
     result = runner.invoke(
         app,
         [
             "--source",
-            "doc.tex",
+            str(source_path),
             "--pdf",
-            "doc.pdf",
+            str(pdf_path),
             "--parser",
-            "myparser",
+            "article",
             "--template",
-            "mytemplate",
+            "minimalist",
         ],
     )
     assert result.exit_code == 0
-    assert "Running lander build" in result.stdout
+    assert "Generated landing page" in result.stdout
+
+    html_output_path = Path("_build/index.html")
+    assert html_output_path.exists()
+
+    pdf_path = Path("_build/article.pdf")
+    assert pdf_path.exists()
+
+    soup = BeautifulSoup(html_output_path.read_text(), "html.parser")
+    assert soup.title.string == "Example Article Document"

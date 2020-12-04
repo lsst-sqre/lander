@@ -5,6 +5,7 @@ from typing import Optional
 
 import typer
 
+from lander.plugins import parsers, templates
 from lander.settings import BuildSettings
 
 __all__ = ["app"]
@@ -33,5 +34,16 @@ def build(
         parser=parser,
         template=template,
     )
-    print("Running lander build")
-    print(settings)
+
+    # Load plugins
+    Parser = parsers[settings.parser]
+    Template = templates[settings.template]
+
+    # Run the document parser
+    parser_plugin = Parser(settings.source_path)
+    template_plugin = Template(
+        metadata=parser_plugin.metadata, settings=settings
+    )
+    template_plugin.build_site()
+
+    print(f"Generated landing page in: {settings.output_dir}")
