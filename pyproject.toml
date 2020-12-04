@@ -30,7 +30,7 @@ exclude = '''
 include_trailing_comma = true
 multi_line_output = 3
 known_first_party = "lander"
-known_third_party = ["bleach", "git", "jinja2", "panflute", "pkg_resources", "pydantic", "pypandoc", "pytest", "setuptools", "typer", "yaml"]
+known_third_party = ["bleach", "bs4", "git", "jinja2", "panflute", "pkg_resources", "pydantic", "pypandoc", "pytest", "setuptools", "typer", "yaml"]
 skip = ["docs/conf.py"]
 
 [tool.coverage.run]
