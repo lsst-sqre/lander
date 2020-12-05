@@ -47,3 +47,15 @@ def build(
     template_plugin.build_site()
 
     print(f"Generated landing page in: {settings.output_dir}")
+
+
+@app.command("templates")
+def list_templates() -> None:
+    print("Available templates:\n")
+    print(templates.names)
+
+
+@app.command("parsers")
+def list_parsers() -> None:
+    print("Available parsers:\n")
+    print(parsers.names)

@@ -19,6 +19,7 @@ def test_build(runner: CliRunner, temp_cwd: Path) -> None:
     result = runner.invoke(
         app,
         [
+            "build",
             "--source",
             str(source_path),
             "--pdf",
@@ -40,3 +41,17 @@ def test_build(runner: CliRunner, temp_cwd: Path) -> None:
 
     soup = BeautifulSoup(html_output_path.read_text(), "html.parser")
     assert soup.title.string == "Example Article Document"
+
+
+def test_list_templates(runner: CliRunner) -> None:
+    result = runner.invoke(app, ["templates"])
+    assert result.exit_code == 0
+    assert "Available templates" in result.stdout
+    assert "minimalist" in result.stdout
+
+
+def test_list_parsers(runner: CliRunner) -> None:
+    result = runner.invoke(app, ["parsers"])
+    assert result.exit_code == 0
+    assert "Available parsers" in result.stdout
+    assert "article" in result.stdout
