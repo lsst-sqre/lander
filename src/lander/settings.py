@@ -4,7 +4,9 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import yaml
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
+
+from lander.plugins import parsers, templates
 
 __all__ = ["BuildSettings"]
 
@@ -109,3 +111,21 @@ class BuildSettings(BaseModel):
                 return settings_path
 
         return None
+
+    @validator("parser")
+    def validate_parser_plugin(cls, v: str) -> str:
+        if v not in parsers:
+            raise ValueError(
+                f"'{v}' is not a known parser plugin. Available parser "
+                f"plugins are: {', '.join(parsers.names)}."
+            )
+        return v
+
+    @validator("template")
+    def validate_template_plugin(cls, v: str) -> str:
+        if v not in templates:
+            raise ValueError(
+                f"'{v}' is not a known template plugin. Available templates "
+                f"are: {', '.join(templates.names)}."
+            )
+        return v

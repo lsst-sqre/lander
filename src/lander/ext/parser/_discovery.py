@@ -42,8 +42,12 @@ class ParsingPlugins:
     @property
     def names(self) -> List[str]:
         """The names of available parsing plugins."""
-        return list(self.plugins.keys())
+        return sorted(list(self.plugins.keys()))
 
     def __getitem__(self, key: str) -> Type[Parser]:
         """Get the plugin for the given name."""
         return self.plugins[key]
+
+    def __contains__(self, key: str) -> bool:
+        """Determine if the plugins is available, by name."""
+        return key in self.plugins
