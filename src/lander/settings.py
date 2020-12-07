@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import yaml
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, FilePath, validator
 
 from lander.plugins import parsers, templates
 
@@ -13,10 +13,10 @@ __all__ = ["BuildSettings"]
 
 class BuildSettings(BaseModel):
 
-    source_path: Path
+    source_path: FilePath
     """Path to the source file for metadata discovery by the parsing plugin."""
 
-    pdf_path: Path
+    pdf_path: FilePath
     """Path to the PDF file to display on the landing page."""
 
     parser: str
@@ -28,7 +28,7 @@ class BuildSettings(BaseModel):
     output_dir: Path = Field(default_factory=lambda: Path("_build"))
     """Path to the output directory for the built site."""
 
-    attachments: List[Path] = Field(default_factory=list)
+    attachments: List[FilePath] = Field(default_factory=list)
     """List of paths to attachments to include in the landing page for
     download.
     """

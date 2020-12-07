@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import shutil
 from pathlib import Path
 
 import pytest
@@ -11,29 +12,41 @@ from pydantic import ValidationError
 from lander.settings import BuildSettings
 
 
-def test_load_from_cwd(temp_cwd: Path) -> None:
+def test_load_from_cwd(temp_article_dir: Path) -> None:
     """Test where a lander.yaml file is detected in the current working
     directory to the source file.
     """
     settings_data = {
         "output_dir": "_build",
-        "source_path": "doc.tex",
-        "pdf_path": "doc.pdf",
+        "source_path": "article.tex",
+        "pdf_path": "article.pdf",
     }
-    settings_path = temp_cwd / "lander.yaml"
+    settings_path = Path("lander.yaml")
     settings_path.write_text(yaml.dump(settings_data))
 
     settings = BuildSettings.load(parser="article", template="minimalist")
     assert settings.output_dir == Path("_build")
-    assert settings.source_path == Path("doc.tex")
-    assert settings.pdf_path == Path("doc.pdf")
+    assert settings.source_path == Path("article.tex")
+    assert settings.pdf_path == Path("article.pdf")
     assert settings.parser == "article"
     assert settings.template == "minimalist"
 
 
 def test_load_from_source_directory(temp_cwd: Path) -> None:
     """Test where a lander.yaml file is detected next to the source file."""
-    source_path = Path("mysubdir") / "source.tex"
+    root_path = temp_cwd.joinpath("mysubdir")
+    root_path.mkdir(parents=True, exist_ok=True)
+    article_source_dir = Path(__file__).parent / "data" / "article"
+    for source_path in article_source_dir.iterdir():
+        relative_path = source_path.relative_to(article_source_dir)
+        dest_path = root_path.joinpath(relative_path)
+        if source_path.is_dir():
+            shutil.copytree(source_path, dest_path)
+        else:
+            shutil.copy(source_path, dest_path)
+
+    source_path = root_path / "article.tex"
+    pdf_path = root_path / "article.pdf"
     settings_data = {
         "output_dir": "_build",
         "parser": "article",
@@ -43,49 +56,47 @@ def test_load_from_source_directory(temp_cwd: Path) -> None:
     settings_path = source_path.parent / "lander.yaml"
     settings_path.write_text(yaml.dump(settings_data))
 
-    settings = BuildSettings.load(
-        pdf_path=source_path.parent / "document.pdf", source_path=source_path,
-    )
+    settings = BuildSettings.load(pdf_path=pdf_path, source_path=source_path,)
     assert settings.output_dir == Path("_build")
-    assert settings.source_path == Path("mysubdir/source.tex")
-    assert settings.pdf_path == Path("mysubdir/document.pdf")
+    assert settings.source_path == source_path
+    assert settings.pdf_path == pdf_path
     assert settings.parser == "article"
     assert settings.template == "minimalist"
 
 
-def test_load_from_cli_only(temp_cwd: Path) -> None:
+def test_load_from_cli_only(temp_article_dir: Path) -> None:
     """Test where configurations are only set from load classmethod parameters.
     """
     settings = BuildSettings.load(
-        pdf_path=Path("document.pdf"),
-        source_path=Path("document.tex"),
+        pdf_path=Path("article.pdf"),
+        source_path=Path("article.tex"),
         parser="article",
         template="minimalist",
     )
     assert settings.output_dir == Path("_build")  # a default
-    assert settings.source_path == Path("document.tex")
-    assert settings.pdf_path == Path("document.pdf")
+    assert settings.source_path == Path("article.tex")
+    assert settings.pdf_path == Path("article.pdf")
     assert settings.parser == "article"
     assert settings.template == "minimalist"
 
 
-def test_parser_plugin_validation() -> None:
+def test_parser_plugin_validation(temp_article_dir: Path) -> None:
     """Test validation of the parser plugin name."""
     with pytest.raises(ValidationError):
         BuildSettings(
-            pdf_path=Path("document.pdf"),
-            source_path=Path("document.tex"),
+            pdf_path=Path("article.pdf"),
+            source_path=Path("article.tex"),
             parser="does-not-exist",
             template="minimalist",
         )
 
 
-def test_template_plugin_validation() -> None:
+def test_template_plugin_validation(temp_article_dir: Path) -> None:
     """Test validation of the template plugin name."""
     with pytest.raises(ValidationError):
         BuildSettings(
-            pdf_path=Path("document.pdf"),
-            source_path=Path("document.tex"),
+            pdf_path=Path("article.pdf"),
+            source_path=Path("article.tex"),
             parser="article",
             template="does-not-exist",
         )
