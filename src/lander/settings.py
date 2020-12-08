@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional
 import yaml
 from pydantic import BaseModel, Field, FilePath, validator
 
-from lander.plugins import parsers, templates
+from lander.plugins import parsers, themes
 
 __all__ = ["BuildSettings"]
 
@@ -22,8 +22,8 @@ class BuildSettings(BaseModel):
     parser: str
     """Name of the parsing plugin."""
 
-    template: str
-    """Name of the template plugin."""
+    theme: str
+    """Name of the theme plugin."""
 
     output_dir: Path = Field(default_factory=lambda: Path("_build"))
     """Path to the output directory for the built site."""
@@ -50,7 +50,7 @@ class BuildSettings(BaseModel):
         source_path: Optional[Path] = None,
         pdf_path: Optional[Path] = None,
         parser: Optional[str] = None,
-        template: Optional[str] = None,
+        theme: Optional[str] = None,
     ) -> BuildSettings:
         """Create build settings by optionally loadings settings from a
         YAML configuration file and overriding settings from the command line.
@@ -69,8 +69,8 @@ class BuildSettings(BaseModel):
             command-line).
         parser
             Name of the parsing plugin (from the command-line).
-        template
-            Name of the template plugin (from the command-line).
+        theme
+            Name of the theme plugin (from the command-line).
 
         Returns
         -------
@@ -94,8 +94,8 @@ class BuildSettings(BaseModel):
             settings_data["pdf_path"] = pdf_path
         if parser:
             settings_data["parser"] = parser
-        if template:
-            settings_data["template"] = template
+        if theme:
+            settings_data["theme"] = theme
 
         return cls.parse_obj(settings_data)
 
@@ -121,11 +121,11 @@ class BuildSettings(BaseModel):
             )
         return v
 
-    @validator("template")
-    def validate_template_plugin(cls, v: str) -> str:
-        if v not in templates:
+    @validator("theme")
+    def validate_theme_plugin(cls, v: str) -> str:
+        if v not in themes:
             raise ValueError(
-                f"'{v}' is not a known template plugin. Available templates "
-                f"are: {', '.join(templates.names)}."
+                f"'{v}' is not a known theme plugin. Available themes "
+                f"are: {', '.join(themes.names)}."
             )
         return v

@@ -1,4 +1,4 @@
-"""Test the minimalist template plugin."""
+"""Test the minimalist theme plugin."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 
 from lander.ext.parser import DocumentMetadata
-from lander.ext.template import TemplatePluginDirectory
+from lander.ext.theme import ThemePluginDirectory
 from lander.settings import BuildSettings
 
 
@@ -23,18 +23,18 @@ def test_minimalist_article(temp_cwd: Path) -> None:
         pdf_path=data_root / "article.pdf",
         output_dir=output_dir,
         parser="article",
-        template="minimalist",
+        theme="minimalist",
     )
 
     # Load from the plugin system, though directly importing the
-    # MinimalistTemplate is also valid for this test.
-    templates = TemplatePluginDirectory.load_plugins()
-    Template = templates["minimalist"]
-    template = Template(metadata=metadata, settings=settings)
-    assert template.metadata == metadata
-    assert template.settings == settings
+    # MinimalistTheme is also valid for this test.
+    themes = ThemePluginDirectory.load_plugins()
+    Theme = themes["minimalist"]
+    theme = Theme(metadata=metadata, settings=settings)
+    assert theme.metadata == metadata
+    assert theme.settings == settings
 
-    template.build_site()
+    theme.build_site()
 
     assert output_dir.is_dir()
 

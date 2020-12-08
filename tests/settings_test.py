@@ -24,12 +24,12 @@ def test_load_from_cwd(temp_article_dir: Path) -> None:
     settings_path = Path("lander.yaml")
     settings_path.write_text(yaml.dump(settings_data))
 
-    settings = BuildSettings.load(parser="article", template="minimalist")
+    settings = BuildSettings.load(parser="article", theme="minimalist")
     assert settings.output_dir == Path("_build")
     assert settings.source_path == Path("article.tex")
     assert settings.pdf_path == Path("article.pdf")
     assert settings.parser == "article"
-    assert settings.template == "minimalist"
+    assert settings.theme == "minimalist"
 
 
 def test_load_from_source_directory(temp_cwd: Path) -> None:
@@ -50,7 +50,7 @@ def test_load_from_source_directory(temp_cwd: Path) -> None:
     settings_data = {
         "output_dir": "_build",
         "parser": "article",
-        "template": "minimalist",
+        "theme": "minimalist",
     }
     source_path.parent.mkdir(parents=True, exist_ok=True)
     settings_path = source_path.parent / "lander.yaml"
@@ -61,7 +61,7 @@ def test_load_from_source_directory(temp_cwd: Path) -> None:
     assert settings.source_path == source_path
     assert settings.pdf_path == pdf_path
     assert settings.parser == "article"
-    assert settings.template == "minimalist"
+    assert settings.theme == "minimalist"
 
 
 def test_load_from_cli_only(temp_article_dir: Path) -> None:
@@ -71,13 +71,13 @@ def test_load_from_cli_only(temp_article_dir: Path) -> None:
         pdf_path=Path("article.pdf"),
         source_path=Path("article.tex"),
         parser="article",
-        template="minimalist",
+        theme="minimalist",
     )
     assert settings.output_dir == Path("_build")  # a default
     assert settings.source_path == Path("article.tex")
     assert settings.pdf_path == Path("article.pdf")
     assert settings.parser == "article"
-    assert settings.template == "minimalist"
+    assert settings.theme == "minimalist"
 
 
 def test_parser_plugin_validation(temp_article_dir: Path) -> None:
@@ -87,16 +87,16 @@ def test_parser_plugin_validation(temp_article_dir: Path) -> None:
             pdf_path=Path("article.pdf"),
             source_path=Path("article.tex"),
             parser="does-not-exist",
-            template="minimalist",
+            theme="minimalist",
         )
 
 
-def test_template_plugin_validation(temp_article_dir: Path) -> None:
-    """Test validation of the template plugin name."""
+def test_theme_plugin_validation(temp_article_dir: Path) -> None:
+    """Test validation of the theme plugin name."""
     with pytest.raises(ValidationError):
         BuildSettings(
             pdf_path=Path("article.pdf"),
             source_path=Path("article.tex"),
             parser="article",
-            template="does-not-exist",
+            theme="does-not-exist",
         )

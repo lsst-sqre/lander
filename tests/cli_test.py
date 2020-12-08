@@ -26,7 +26,7 @@ def test_build(runner: CliRunner, temp_cwd: Path) -> None:
             str(pdf_path),
             "--parser",
             "article",
-            "--template",
+            "--theme",
             "minimalist",
         ],
     )
@@ -43,10 +43,10 @@ def test_build(runner: CliRunner, temp_cwd: Path) -> None:
     assert soup.title.string == "Example Article Document"
 
 
-def test_list_templates(runner: CliRunner) -> None:
-    result = runner.invoke(app, ["templates"])
+def test_list_themes(runner: CliRunner) -> None:
+    result = runner.invoke(app, ["themes"])
     assert result.exit_code == 0
-    assert "Available templates" in result.stdout
+    assert "Available themes" in result.stdout
     assert "minimalist" in result.stdout
 
 

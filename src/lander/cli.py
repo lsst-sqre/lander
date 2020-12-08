@@ -5,7 +5,7 @@ from typing import Optional
 
 import typer
 
-from lander.plugins import parsers, templates
+from lander.plugins import parsers, themes
 from lander.settings import BuildSettings
 
 __all__ = ["app"]
@@ -25,34 +25,32 @@ def build(
         None, help="Path to the PDF file to display on the landing page."
     ),
     parser: Optional[str] = typer.Option(None, help="Metadata parsing plugin"),
-    template: Optional[str] = typer.Option(None, help="Template plugin."),
+    theme: Optional[str] = typer.Option(None, help="Theme plugin."),
 ) -> None:
     settings = BuildSettings.load(
         output_dir=output,
         source_path=source,
         pdf_path=pdf,
         parser=parser,
-        template=template,
+        theme=theme,
     )
 
     # Load plugins
     Parser = parsers[settings.parser]
-    Template = templates[settings.template]
+    Theme = themes[settings.theme]
 
     # Run the document parser
     parser_plugin = Parser(settings.source_path)
-    template_plugin = Template(
-        metadata=parser_plugin.metadata, settings=settings
-    )
-    template_plugin.build_site()
+    theme_plugin = Theme(metadata=parser_plugin.metadata, settings=settings)
+    theme_plugin.build_site()
 
     print(f"Generated landing page in: {settings.output_dir}")
 
 
-@app.command("templates")
-def list_templates() -> None:
-    print("Available templates:\n")
-    print(templates.names)
+@app.command("themes")
+def list_themes() -> None:
+    print("Available themes:\n")
+    print(themes.names)
 
 
 @app.command("parsers")

@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Iterator, Optional
 
 import jinja2
 
-from lander.ext.template.jinjafilters import (
+from lander.ext.theme.jinjafilters import (
     filter_paragraphify,
     filter_simple_date,
 )
@@ -17,11 +17,11 @@ if TYPE_CHECKING:
     from lander.settings import BuildSettings
 
 
-__all__ = ["TemplatePlugin"]
+__all__ = ["ThemePlugin"]
 
 
-class TemplatePlugin(metaclass=ABCMeta):
-    """Base class for landing page template plugins.
+class ThemePlugin(metaclass=ABCMeta):
+    """Base class for landing page theme plugins.
 
     Parameters
     ----------
@@ -55,15 +55,15 @@ class TemplatePlugin(metaclass=ABCMeta):
         output_dir : `pathlib.Path`, optional
             Directory where the landing page site is built. If the output
             directory is not set, the output directory is determined from
-            the `TemplatePlugin.settings`.
+            the `ThemePlugin.settings`.
         """
         if output_dir is None:
             output_dir = self.settings.output_dir
         assert isinstance(output_dir, Path)
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        # Copying and rendering content from the template
-        for path in self._template_dir_contents(self.template_dir):
+        # Copying and rendering content from the theme's site directory
+        for path in self._site_dir_contents(self.site_dir):
             if path.suffix == ".jinja":
                 self._render_path(path, output_dir)
             else:
@@ -76,7 +76,7 @@ class TemplatePlugin(metaclass=ABCMeta):
         # TODO write metadata file
         # TODO write metadata.jsonld file
 
-    def _template_dir_contents(self, directory: Path) -> Iterator[Path]:
+    def _site_dir_contents(self, directory: Path) -> Iterator[Path]:
         """Iterate over the contents of a directory, including contents of
         subdirectories.
 
@@ -92,36 +92,36 @@ class TemplatePlugin(metaclass=ABCMeta):
         """
         for path in directory.iterdir():
             if path.is_dir():
-                yield from self._template_dir_contents(path)
+                yield from self._site_dir_contents(path)
             else:
                 yield path
 
-    def _copy_path(self, template_path: Path, output_dir: Path) -> None:
-        """Copy a path in the templates directory into the same relative
+    def _copy_path(self, site_path: Path, output_dir: Path) -> None:
+        """Copy a path in the theme's site directory into the same relative
         path in the output directory.
         """
-        relative_path = template_path.relative_to(self.template_dir)
+        relative_path = site_path.relative_to(self.site_dir)
         output_path = output_dir.joinpath(relative_path)
         if not output_path.parent.exists():
             output_path.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy(template_path, output_path)
+        shutil.copy(site_path, output_path)
 
-    def _render_path(self, template_path: Path, output_dir: Path) -> None:
+    def _render_path(self, site_path: Path, output_dir: Path) -> None:
         """Render a Jinja2 template and write it to the same relative path
         in the output directory.
 
         Notes
         -----
-        The output path will be the same as the ``template_path``, but without
+        The output path will be the same as the ``site_path``, but without
         the original ``.jinja`` extension.
         """
-        relative_path = template_path.relative_to(self.template_dir)
+        relative_path = site_path.relative_to(self.site_dir)
         # Remove the .jinja extension while also locating the rendered output
         # in the build directory.
         output_path = (
             output_dir.joinpath(relative_path)
             .with_suffix("")
-            .with_suffix("".join(template_path.suffixes[:-1]))
+            .with_suffix("".join(site_path.suffixes[:-1]))
         )
         if not output_path.parent.exists():
             output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -144,7 +144,7 @@ class TemplatePlugin(metaclass=ABCMeta):
         """Create a Jinja environment, with the template loader and filters
         set.
         """
-        loader = jinja2.FileSystemLoader(str(self.template_dir))
+        loader = jinja2.FileSystemLoader(str(self.site_dir))
         env = jinja2.Environment(
             loader=loader, autoescape=jinja2.select_autoescape(["html"]),
         )
@@ -154,6 +154,13 @@ class TemplatePlugin(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def template_dir(self) -> Path:
-        """Template directory."""
+    def site_dir(self) -> Path:
+        """Site directory.
+
+        This directory, which is part of the theme's package, contains the
+        files and subdirectories that define the built site.
+
+        Files that have a ``.jinja`` extension are treated as Jinja templates
+        and their contents are rendered.
+        """
         raise NotImplementedError
