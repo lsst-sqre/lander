@@ -153,6 +153,9 @@ class DocumentMetadata(BaseModel):
     ci_url: Optional[HttpUrl] = None
     """The URL of the continuous integration build for the document."""
 
+    canonical_url: Optional[HttpUrl] = None
+    """The canonical URL where this document is published."""
+
     @validator("title", "version", "keywords", "copyright", each_item=True)
     def clean_whitespace(cls, v: str) -> str:
         return collapse_whitespace(v)
