@@ -1,0 +1,18 @@
+{% extends "htmlpage.jinja" %}
+
+{%- block html_head_canonicalurl %} {# Override htmlpage.jinja #}
+{%- if metadata.canonical_url %}
+{# Use the document metadata if available #}
+<link rel="canonical" href="{{ metadata.canonical_url }}" />
+{%- else %}
+{{ super() }}
+{%- endif %}
+{%- endblock html_head_canonicalurl %}
+
+{%- block html_head_description %} {# Override htmlpage.jinja #}
+{%- if metadata.abstract %}
+<meta name="description" content="{{ metadata.abstract.plain }}" />
+{%- else %}
+{{ super() }}
+{%- endif %}
+{%- endblock html_head_description %}

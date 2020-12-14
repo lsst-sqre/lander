@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import shutil
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
@@ -7,6 +8,7 @@ from typing import TYPE_CHECKING, Iterator, Optional
 
 import jinja2
 
+from lander.ext.theme._jinjaloader import ThemeTemplateLoader
 from lander.ext.theme.jinjafilters import (
     filter_paragraphify,
     filter_simple_date,
@@ -32,9 +34,19 @@ class ThemePlugin(metaclass=ABCMeta):
     def __init__(
         self, *, metadata: DocumentMetadata, settings: BuildSettings
     ) -> None:
+        self._logger = logging.getLogger(__name__)
+        self._base_theme: Optional[ThemePlugin] = None
         self._metadata = metadata
         self._settings = settings
-        self.jinja_env = self.create_jinja_env()
+
+        self._template_loader = self._init_template_loader()
+        self._jinja_env = self.create_jinja_env()
+
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        """Name of this theme."""
+        raise NotImplementedError
 
     @property
     def metadata(self) -> DocumentMetadata:
@@ -45,6 +57,42 @@ class ThemePlugin(metaclass=ABCMeta):
     def settings(self) -> BuildSettings:
         """The build settings."""
         return self._settings
+
+    @property
+    def template_loader(self) -> ThemeTemplateLoader:
+        """The Jinja template loader."""
+        return self._template_loader
+
+    @property
+    def logger(self) -> logging.Logger:
+        """Logger for use the theme plugin."""
+        return self._logger
+
+    @property
+    def jinja_env(self) -> jinja2.Environment:
+        """The Jinja environment."""
+        return self._jinja_env
+
+    @property
+    def base_theme_name(self) -> Optional[str]:
+        """Name of the base theme, or `None` if this theme does not inherit
+        from another theme.
+        """
+        return None
+
+    @property
+    def base_theme(self) -> Optional[ThemePlugin]:
+        """The base theme."""
+        if self.base_theme_name is not None:
+            if self._base_theme is None:
+                from lander.plugins import themes
+
+                self._base_theme = themes[self.base_theme_name](
+                    metadata=self.metadata, settings=self.settings
+                )
+            return self._base_theme
+        else:
+            return None
 
     def build_site(self, output_dir: Optional[Path] = None) -> None:
         """Build the landing page site, including rendering templates and
@@ -102,6 +150,7 @@ class ThemePlugin(metaclass=ABCMeta):
         """
         relative_path = site_path.relative_to(self.site_dir)
         output_path = output_dir.joinpath(relative_path)
+        self.logger.debug("Copying %s to %s", relative_path, output_path)
         if not output_path.parent.exists():
             output_path.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(site_path, output_path)
@@ -125,28 +174,29 @@ class ThemePlugin(metaclass=ABCMeta):
         )
         if not output_path.parent.exists():
             output_path.parent.mkdir(parents=True, exist_ok=True)
-        content = self.render_template(str(relative_path))
-        output_path.write_text(content)
 
-    def render_template(self, template_name: str) -> str:
-        """Render a Jinja2 template given its path in the template directory.
-        """
-        # TODO add attachment information as well (include a dataclass with
-        # information about file types for icons?)
+        template_name = f"${self.name}/{relative_path!s}"
+        self.logger.debug("Rendering templated file: %s", relative_path)
         jinja_template = self.jinja_env.get_template(template_name)
-        return jinja_template.render(
+        content = jinja_template.render(
             metadata=self.metadata,
             settings=self.settings.template_vars,
             pdf_path=self.settings.pdf_path.name,
         )
 
+        output_path.write_text(content)
+
+    def _init_template_loader(self) -> ThemeTemplateLoader:
+        """Initialize the custom Jinja template loader."""
+        return ThemeTemplateLoader(self)
+
     def create_jinja_env(self) -> jinja2.Environment:
         """Create a Jinja environment, with the template loader and filters
         set.
         """
-        loader = jinja2.FileSystemLoader(str(self.site_dir))
         env = jinja2.Environment(
-            loader=loader, autoescape=jinja2.select_autoescape(["html"]),
+            loader=self.template_loader,
+            autoescape=jinja2.select_autoescape(["html"]),
         )
         env.filters["simple_date"] = filter_simple_date
         env.filters["paragraphify"] = filter_paragraphify
@@ -162,5 +212,16 @@ class ThemePlugin(metaclass=ABCMeta):
 
         Files that have a ``.jinja`` extension are treated as Jinja templates
         and their contents are rendered.
+        """
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def templates_dir(self) -> Path:
+        """Templates directory.
+
+        This directory, which is part of the theme's package, contains Jinja
+        templates that are included by either Jinja-templates files, or
+        other templates.
         """
         raise NotImplementedError

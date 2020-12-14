@@ -4,20 +4,15 @@ from pathlib import Path
 
 from lander.ext.theme import ThemePlugin
 
-__all__ = ["MinimalistTheme"]
+__all__ = ["BaseTheme"]
 
 
-class MinimalistTheme(ThemePlugin):
-    """A minimalist-style landing page theme to demonstrate Lander."""
+class BaseTheme(ThemePlugin):
+    """The base landing page theme that other themes are built on."""
 
     @property
     def name(self) -> str:
         """Name of this theme."""
-        return "minimalist"
-
-    @property
-    def base_theme_name(self) -> str:
-        """Name of the theme this theme inherits from."""
         return "base"
 
     @property
