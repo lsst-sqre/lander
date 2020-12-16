@@ -4,7 +4,7 @@ import logging
 import shutil
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterator, Optional
+from typing import TYPE_CHECKING, Any, Dict, Iterator, Optional
 
 import jinja2
 
@@ -164,25 +164,25 @@ class ThemePlugin(metaclass=ABCMeta):
         The output path will be the same as the ``site_path``, but without
         the original ``.jinja`` extension.
         """
+        # Relative path of template
         relative_path = site_path.relative_to(self.site_dir)
+        # Relative path of the output (remove the .jinja extension)
+        relative_output_path = relative_path.with_suffix("").with_suffix(
+            "".join(site_path.suffixes[:-1])
+        )
         # Remove the .jinja extension while also locating the rendered output
         # in the build directory.
-        output_path = (
-            output_dir.joinpath(relative_path)
-            .with_suffix("")
-            .with_suffix("".join(site_path.suffixes[:-1]))
-        )
+        output_path = output_dir.joinpath(relative_output_path)
         if not output_path.parent.exists():
             output_path.parent.mkdir(parents=True, exist_ok=True)
 
         template_name = f"${self.name}/{relative_path!s}"
-        self.logger.debug("Rendering templated file: %s", relative_path)
+        self.logger.debug("Rendering templated file: %s", relative_output_path)
         jinja_template = self.jinja_env.get_template(template_name)
-        content = jinja_template.render(
-            metadata=self.metadata,
-            settings=self.settings.template_vars,
-            pdf_path=self.settings.pdf_path.name,
+        context = self.create_jinja_context(
+            path=relative_output_path, template_name=template_name
         )
+        content = jinja_template.render(**context)
 
         output_path.write_text(content)
 
@@ -201,6 +201,34 @@ class ThemePlugin(metaclass=ABCMeta):
         env.filters["simple_date"] = filter_simple_date
         env.filters["paragraphify"] = filter_paragraphify
         return env
+
+    def create_jinja_context(
+        self, *, path: Path, template_name: str
+    ) -> Dict[str, Any]:
+        """Create the context for rendering a Jinja template.
+
+        This method can be implemented by themes to customize the Jinja
+        context.
+
+        Parameters
+        ----------
+        path : `pathlib.Path`
+            The relative path of the templated context in the site.
+        template_name: `str`
+            Name of the Jinja template.
+
+        Returns
+        -------
+        context : `dict`
+            Dictionary used as the Jinja template rendering context. Keys
+            are variable names in templates.
+        """
+        context: Dict[str, Any] = {
+            "metadata": self.metadata,
+            "settings": self.settings.template_vars,
+            "pdf_path": self.settings.pdf_path.name,
+        }
+        return context
 
     @property
     @abstractmethod
