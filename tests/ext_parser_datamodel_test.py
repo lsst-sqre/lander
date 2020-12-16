@@ -8,6 +8,7 @@ from pydantic import BaseModel, ValidationError
 from lander.ext.parser._datamodel import (
     FormattedString,
     Orcid,
+    Ror,
     collapse_whitespace,
 )
 
@@ -79,3 +80,28 @@ def test_orcid_fail(sample: str) -> None:
 
     with pytest.raises(ValidationError):
         Model(orcid=sample)
+
+
+def test_ror() -> None:
+    class Model(BaseModel):
+        ror: Ror
+
+    sample = "https://ror.org/02y72wh86"
+    m = Model(ror=sample)
+    assert m.ror == sample
+
+
+@pytest.mark.parametrize(
+    "sample",
+    [
+        "02y72wh86",  # not a URL
+        "https://ror.org/02y72wh87",  # checksum should fail
+        "https://roar.org/02y72wh86",  # wrong domain
+    ],
+)
+def test_ror_fail(sample: str) -> None:
+    class Model(BaseModel):
+        ror: Ror
+
+    with pytest.raises(ValidationError):
+        Model(ror=sample)

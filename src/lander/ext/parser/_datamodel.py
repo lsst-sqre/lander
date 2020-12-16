@@ -4,6 +4,7 @@ import datetime
 import re
 from typing import TYPE_CHECKING, Any, Generator, List, Optional
 
+import base32_lib as base32
 import bleach
 from pydantic import BaseConfig, BaseModel, EmailStr, Field, HttpUrl, validator
 from pydantic.errors import UrlError
@@ -36,6 +37,12 @@ Examples:
 For more information, see
 https://support.orcid.org/hc/en-us/articles/360006897674
 """
+
+ROR_PATTERN = re.compile(
+    r"https://ror.org"
+    r"\/(?P<identifier>0[0-9abcdefghjkmpqrstuvwxyzabcdefghjkmpqrstuvwxyz]{8})",
+    flags=re.IGNORECASE,
+)
 
 
 def collapse_whitespace(text: str) -> str:
@@ -169,6 +176,59 @@ class Orcid(HttpUrl):
         return result == 10
 
 
+class RorError(UrlError):
+    code = "ror"
+    msg_template = "invalid ROR"
+
+
+class Ror(HttpUrl):
+    """A ROR (Research Organization Registry) type for Pydantic validation.
+    """
+
+    allowed_schemes = {"https"}
+
+    @classmethod
+    def __get_validators__(cls) -> "CallableGenerator":
+        yield cls.validate
+
+    @classmethod
+    def validate(
+        cls, value: Any, field: ModelField, config: BaseConfig
+    ) -> Ror:
+        if value.__class__ == cls:
+            return value
+
+        m = ROR_PATTERN.search(value)
+        if not m:
+            print("pattern did not match")
+            raise RorError()
+
+        identifier = m["identifier"]
+        try:
+            base32.decode(identifier, checksum=True)
+        except ValueError:
+            raise RorError()
+
+        return HttpUrl.validate(value, field, config)
+
+
+class Organization(BaseModel):
+    """Data about an organization (often used as an affiliation).
+    """
+
+    name: str
+    """The display name of the institution."""
+
+    ror: Optional[Ror] = None
+    """The ROR identifier of the institution."""
+
+    address: Optional[str] = None
+    """The address of the institution."""
+
+    url: Optional[HttpUrl] = None
+    """The homepage of the institution."""
+
+
 class Person(BaseModel):
     """Data about a person."""
 
@@ -178,13 +238,15 @@ class Person(BaseModel):
     orcid: Optional[Orcid] = None
     """The ORCiD of the person."""
 
-    affiliations: Optional[List[str]] = Field(default_factory=lambda: [])
-    """Names of the person's affiliations."""
+    affiliations: Optional[List[Organization]] = Field(
+        default_factory=lambda: []
+    )
+    """The person's affiliations."""
 
     email: Optional[EmailStr] = None
     """Email associated with the person."""
 
-    @validator("name", "affiliations", each_item=True)
+    @validator("name")
     def clean_whitespace(cls, v: str) -> str:
         return collapse_whitespace(v)
 
