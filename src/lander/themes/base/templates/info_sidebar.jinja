@@ -1,0 +1,35 @@
+{%- block info_header %}
+<header class="lander-info-header">
+  {% if metadata.identifier %}
+  <span class="lander-info-header__identifier">
+    {{ metadata.identifier }}
+  </span>
+  {% endif %}
+  <h1 class="lander-h1 lander-info-header__title">{{ metadata.title }}</h1>
+</header>
+{%- endblock info_header %}
+
+{% if metadata.authors %}
+<section class="lander-info-authors">
+  <ul class='lander-comma-list'>
+  {% for author in metadata.authors %}
+    <li>
+    {% if author.orcid %}
+      <a href="{{ author.orcid|safe }}">{{ author.name }}</a>
+    {% else %}
+    {{ author.name }}
+    {% endif %}
+    </li>
+  {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{%- block info_abstract %}
+{% if metadata.abstract.html %}
+<section class="lander-info-abstract">
+  <h2 class="lander-h2 lander-info-abstract__header">Abstract</h2>
+  {{ config.abstract.html|safe }}
+</section>
+{% endif %}
+{%- endblock info_abstract %}

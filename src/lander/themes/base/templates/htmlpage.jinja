@@ -25,7 +25,21 @@
 </head>
 
 <body>
-{% block body %}{% endblock body %}
+{% block html_body %}
+<div class="lander-page-wrapper">
+
+{% block html_page_header %}
+{% endblock html_page_header %}
+
+<main>
+{% block html_page_main %}
+{% endblock html_page_main %}
+</main>
+
+{% block html_page_footer %}
+{% endblock html_page_footer %}
+</div>
+{% endblock html_body %}
 </body>
 
 </html>

@@ -16,3 +16,17 @@
 {{ super() }}
 {%- endif %}
 {%- endblock html_head_description %}
+
+{%- block html_page_main %} {# Override htmlpage.jinja #}
+<article class="lander-info-sidebar">
+{%- block info_sidebar %}
+{% include "info_sidebar.jinja" %}
+{%- endblock info_sidebar %}
+</article>
+
+<div class="lander-pdf-container">
+{%- block pdf_viewer %}
+{% include "pdfviewer.jinja" %}
+{%- endblock pdf_viewer %}
+</div>
+{%- endblock html_page_main %}
