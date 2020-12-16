@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import yaml
-from pydantic import BaseModel, Field, FilePath, validator
+from pydantic import BaseModel, Field, FilePath, HttpUrl, validator
 
 from lander.plugins import parsers, themes
 
@@ -24,6 +24,9 @@ class BuildSettings(BaseModel):
 
     theme: str
     """Name of the theme plugin."""
+
+    canonical_url: Optional[HttpUrl] = None
+    """The canonical URL where the landing page is hosted."""
 
     output_dir: Path = Field(default_factory=lambda: Path("_build"))
     """Path to the output directory for the built site."""
@@ -51,6 +54,7 @@ class BuildSettings(BaseModel):
         pdf_path: Optional[Path] = None,
         parser: Optional[str] = None,
         theme: Optional[str] = None,
+        canonical_url: Optional[str] = None,
     ) -> BuildSettings:
         """Create build settings by optionally loadings settings from a
         YAML configuration file and overriding settings from the command line.
@@ -71,6 +75,8 @@ class BuildSettings(BaseModel):
             Name of the parsing plugin (from the command-line).
         theme
             Name of the theme plugin (from the command-line).
+        canonical_url
+            The caonical URL where the landing page is hosted.
 
         Returns
         -------
@@ -96,6 +102,8 @@ class BuildSettings(BaseModel):
             settings_data["parser"] = parser
         if theme:
             settings_data["theme"] = theme
+        if canonical_url:
+            settings_data["canonical_url"] = canonical_url
 
         return cls.parse_obj(settings_data)
 

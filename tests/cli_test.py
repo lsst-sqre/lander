@@ -28,8 +28,12 @@ def test_build(runner: CliRunner, temp_cwd: Path) -> None:
             "article",
             "--theme",
             "minimalist",
+            "--url",
+            "https://example.com/my-paper/",
         ],
     )
+    print(result.stdout)
+
     assert result.exit_code == 0
     assert "Generated landing page" in result.stdout
 
@@ -41,6 +45,10 @@ def test_build(runner: CliRunner, temp_cwd: Path) -> None:
 
     soup = BeautifulSoup(html_output_path.read_text(), "html.parser")
     assert soup.title.string == "Example Article Document"
+    head = soup.head
+    print(head)
+    canonical_url = head.find("link", attrs={"rel": "canonical"})
+    assert canonical_url.attrs["href"] == "https://example.com/my-paper/"
 
 
 def test_list_themes(runner: CliRunner) -> None:

@@ -26,6 +26,9 @@ def build(
     ),
     parser: Optional[str] = typer.Option(None, help="Metadata parsing plugin"),
     theme: Optional[str] = typer.Option(None, help="Theme plugin."),
+    canonical_url: Optional[str] = typer.Option(
+        None, "--url", help="Canonical URL where the landing page is hosted."
+    ),
 ) -> None:
     settings = BuildSettings.load(
         output_dir=output,
@@ -33,6 +36,7 @@ def build(
         pdf_path=pdf,
         parser=parser,
         theme=theme,
+        canonical_url=canonical_url,
     )
 
     # Load plugins

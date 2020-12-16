@@ -5,6 +5,7 @@ import shutil
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Iterator, Optional
+from urllib.parse import urljoin
 
 import jinja2
 
@@ -178,6 +179,7 @@ class ThemePlugin(metaclass=ABCMeta):
 
         template_name = f"${self.name}/{relative_path!s}"
         self.logger.debug("Rendering templated file: %s", relative_output_path)
+        print(f"Rendering path {relative_output_path}")
         jinja_template = self.jinja_env.get_template(template_name)
         context = self.create_jinja_context(
             path=relative_output_path, template_name=template_name
@@ -228,6 +230,13 @@ class ThemePlugin(metaclass=ABCMeta):
             "settings": self.settings.template_vars,
             "pdf_path": self.settings.pdf_path.name,
         }
+        if self.settings.canonical_url:
+            context["canonical_url"] = urljoin(
+                self.settings.canonical_url, str(path)
+            )
+            # Strip "index.html" from the canonical URL
+            if context["canonical_url"].endswith("/index.html"):
+                context["canonical_url"] = context["canonical_url"][:-10]
         return context
 
     @property
