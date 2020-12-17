@@ -309,3 +309,12 @@ class DocumentMetadata(BaseModel):
                     f"License ID '{v}' is not a valid SPDX license identifier."
                 )
         return v
+
+    def get_license_name(self) -> Optional[str]:
+        """Get the name of the license."""
+        if self.license_identifier is not None:
+            licenses = Licenses.load()
+            license = licenses[self.license_identifier]
+            return license.name
+        else:
+            return None
