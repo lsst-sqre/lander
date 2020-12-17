@@ -9,7 +9,7 @@ import pytest
 import yaml
 from pydantic import ValidationError
 
-from lander.settings import BuildSettings
+from lander.settings import BuildSettings, DownloadableFile
 
 
 def test_load_from_cwd(temp_article_dir: Path) -> None:
@@ -19,7 +19,7 @@ def test_load_from_cwd(temp_article_dir: Path) -> None:
     settings_data = {
         "output_dir": "_build",
         "source_path": "article.tex",
-        "pdf_path": "article.pdf",
+        "pdf": "article.pdf",
     }
     settings_path = Path("lander.yaml")
     settings_path.write_text(yaml.dump(settings_data))
@@ -27,7 +27,7 @@ def test_load_from_cwd(temp_article_dir: Path) -> None:
     settings = BuildSettings.load(parser="article", theme="minimalist")
     assert settings.output_dir == Path("_build")
     assert settings.source_path == Path("article.tex")
-    assert settings.pdf_path == Path("article.pdf")
+    assert settings.pdf.file_path == Path("article.pdf")
     assert settings.parser == "article"
     assert settings.theme == "minimalist"
 
@@ -56,10 +56,10 @@ def test_load_from_source_directory(temp_cwd: Path) -> None:
     settings_path = source_path.parent / "lander.yaml"
     settings_path.write_text(yaml.dump(settings_data))
 
-    settings = BuildSettings.load(pdf_path=pdf_path, source_path=source_path,)
+    settings = BuildSettings.load(pdf=pdf_path, source_path=source_path,)
     assert settings.output_dir == Path("_build")
     assert settings.source_path == source_path
-    assert settings.pdf_path == pdf_path
+    assert settings.pdf.file_path == pdf_path
     assert settings.parser == "article"
     assert settings.theme == "minimalist"
 
@@ -68,14 +68,14 @@ def test_load_from_cli_only(temp_article_dir: Path) -> None:
     """Test where configurations are only set from load classmethod parameters.
     """
     settings = BuildSettings.load(
-        pdf_path=Path("article.pdf"),
+        pdf=Path("article.pdf"),
         source_path=Path("article.tex"),
         parser="article",
         theme="minimalist",
     )
     assert settings.output_dir == Path("_build")  # a default
     assert settings.source_path == Path("article.tex")
-    assert settings.pdf_path == Path("article.pdf")
+    assert settings.pdf.file_path == Path("article.pdf")
     assert settings.parser == "article"
     assert settings.theme == "minimalist"
 
@@ -84,7 +84,7 @@ def test_parser_plugin_validation(temp_article_dir: Path) -> None:
     """Test validation of the parser plugin name."""
     with pytest.raises(ValidationError):
         BuildSettings(
-            pdf_path=Path("article.pdf"),
+            pdf=DownloadableFile.load(Path("article.pdf")),
             source_path=Path("article.tex"),
             parser="does-not-exist",
             theme="minimalist",
@@ -95,7 +95,7 @@ def test_theme_plugin_validation(temp_article_dir: Path) -> None:
     """Test validation of the theme plugin name."""
     with pytest.raises(ValidationError):
         BuildSettings(
-            pdf_path=Path("article.pdf"),
+            pdf=DownloadableFile.load(Path("article.pdf")),
             source_path=Path("article.tex"),
             parser="article",
             theme="does-not-exist",

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import mimetypes
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -11,13 +12,60 @@ from lander.plugins import parsers, themes
 __all__ = ["BuildSettings"]
 
 
+class DownloadableFile(BaseModel):
+    """Model for a file that's downloadable through the landing page, either
+    the main PDF or an attachment.
+    """
+
+    file_path: FilePath
+    """Path to the file on the filesystem (not the generated site)."""
+
+    name: str
+    """Name of the file."""
+
+    mimetype: str
+    """The mimetype of the file."""
+
+    extension: str
+    """The file's extension."""
+
+    size: int
+    """The file's size in bytes."""
+
+    @classmethod
+    def load(cls, path: Path) -> DownloadableFile:
+        file_type, file_encoding = mimetypes.guess_type(
+            str(path), strict=False
+        )
+
+        return cls(
+            file_path=path,
+            name=path.name,
+            mimetype=file_type,
+            extension=path.suffix,
+            size=path.stat().st_size,
+        )
+
+    @property
+    def human_size(self) -> str:
+        """Humanized size label."""
+        if self.size < 1000:
+            return f"{self.size} B"
+        elif self.size < 1000000:
+            return f"{self.size / 1000:.0f} kB"
+        elif self.size < 1000000000:
+            return f"{self.size / 1000000.0:#.1f} MB"
+        else:
+            return f"{self.size / 1000000000.0:#.1f} GB"
+
+
 class BuildSettings(BaseModel):
 
     source_path: FilePath
     """Path to the source file for metadata discovery by the parsing plugin."""
 
-    pdf_path: FilePath
-    """Path to the PDF file to display on the landing page."""
+    pdf: DownloadableFile
+    """The PDF file to display on the landing page."""
 
     parser: str
     """Name of the parsing plugin."""
@@ -31,8 +79,8 @@ class BuildSettings(BaseModel):
     output_dir: Path = Field(default_factory=lambda: Path("_build"))
     """Path to the output directory for the built site."""
 
-    attachments: List[FilePath] = Field(default_factory=list)
-    """List of paths to attachments to include in the landing page for
+    attachments: List[DownloadableFile] = Field(default_factory=list)
+    """List of file attachments to include on the landing page for
     download.
     """
 
@@ -51,10 +99,11 @@ class BuildSettings(BaseModel):
         *,
         output_dir: Optional[Path] = None,
         source_path: Optional[Path] = None,
-        pdf_path: Optional[Path] = None,
+        pdf: Optional[Path] = None,
         parser: Optional[str] = None,
         theme: Optional[str] = None,
         canonical_url: Optional[str] = None,
+        attachments: Optional[List[Path]] = None,
     ) -> BuildSettings:
         """Create build settings by optionally loadings settings from a
         YAML configuration file and overriding settings from the command line.
@@ -68,7 +117,7 @@ class BuildSettings(BaseModel):
             Path to the root source file for metadata extraction by the
             parsing plugin (from the command-line). Typically this is the root
             LaTeX file.
-        pdf_path
+        pdf
             Path to the PDF to display on the landing page (from the
             command-line).
         parser
@@ -77,6 +126,9 @@ class BuildSettings(BaseModel):
             Name of the theme plugin (from the command-line).
         canonical_url
             The caonical URL where the landing page is hosted.
+        attachments
+            List of paths to attachments (files) to be included for download
+            on the landing page.
 
         Returns
         -------
@@ -91,19 +143,34 @@ class BuildSettings(BaseModel):
         else:
             settings_data = {}
 
+        # Modify the data to convert paths to DownloadableFile tile
+        if "pdf" in settings_data:
+            settings_data["pdf"] = DownloadableFile.load(
+                Path(settings_data["pdf"])
+            )
+        if "attachments" in settings_data:
+            settings_data["attachments"] = [
+                DownloadableFile.load(Path(p))
+                for p in settings_data["attachments"]
+            ]
+
         # Adding in command-line overrides
         if output_dir:
             settings_data["output_dir"] = output_dir
         if source_path:
             settings_data["source_path"] = source_path
-        if pdf_path:
-            settings_data["pdf_path"] = pdf_path
+        if pdf:
+            settings_data["pdf"] = DownloadableFile.load(pdf)
         if parser:
             settings_data["parser"] = parser
         if theme:
             settings_data["theme"] = theme
         if canonical_url:
             settings_data["canonical_url"] = canonical_url
+        if attachments:
+            settings_data["attachments"] = [
+                DownloadableFile.load(p) for p in attachments
+            ]
 
         return cls.parse_obj(settings_data)
 

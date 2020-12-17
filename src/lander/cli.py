@@ -33,7 +33,7 @@ def build(
     settings = BuildSettings.load(
         output_dir=output,
         source_path=source,
-        pdf_path=pdf,
+        pdf=pdf,
         parser=parser,
         theme=theme,
         canonical_url=canonical_url,

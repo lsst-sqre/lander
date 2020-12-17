@@ -119,8 +119,15 @@ class ThemePlugin(metaclass=ABCMeta):
                 self._copy_path(path, output_dir)
 
         # Copy the PDF
-        output_pdf_path = output_dir.joinpath(self.settings.pdf_path.name)
-        shutil.copy(self.settings.pdf_path, output_pdf_path)
+        output_pdf_path = output_dir.joinpath(self.settings.pdf.name)
+        shutil.copy(self.settings.pdf.file_path, output_pdf_path)
+
+        # Copy attachments
+        for attachment in self.settings.attachments:
+            output_attachment_path = output_dir.joinpath(
+                self.settings.pdf.name
+            )
+            shutil.copy(attachment.file_path, output_attachment_path)
 
         # TODO write metadata file
         # TODO write metadata.jsonld file
@@ -179,7 +186,6 @@ class ThemePlugin(metaclass=ABCMeta):
 
         template_name = f"${self.name}/{relative_path!s}"
         self.logger.debug("Rendering templated file: %s", relative_output_path)
-        print(f"Rendering path {relative_output_path}")
         jinja_template = self.jinja_env.get_template(template_name)
         context = self.create_jinja_context(
             path=relative_output_path, template_name=template_name
@@ -228,7 +234,8 @@ class ThemePlugin(metaclass=ABCMeta):
         context: Dict[str, Any] = {
             "metadata": self.metadata,
             "settings": self.settings.template_vars,
-            "pdf_path": self.settings.pdf_path.name,
+            "pdf": self.settings.pdf,
+            "attachments": self.settings.attachments,
         }
         if self.settings.canonical_url:
             context["canonical_url"] = urljoin(

@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 
 from lander.ext.parser import DocumentMetadata
 from lander.ext.theme import ThemePluginDirectory
-from lander.settings import BuildSettings
+from lander.settings import BuildSettings, DownloadableFile
 
 if TYPE_CHECKING:
     from _pytest.logging import LogCaptureFixture
@@ -27,7 +27,7 @@ def test_minimalist_article(caplog: LogCaptureFixture, temp_cwd: Path) -> None:
     # Mock build settings as well
     settings = BuildSettings(
         source_path=data_root / "article.tex",
-        pdf_path=data_root / "article.pdf",
+        pdf=DownloadableFile.load(data_root / "article.pdf"),
         output_dir=output_dir,
         parser="article",
         theme="minimalist",
