@@ -33,3 +33,17 @@
 </section>
 {% endif %}
 {%- endblock info_abstract %}
+
+{%- block info_downloads %}
+<section class="lander-info-downloads">
+  <h2 class="lander-h2 lander-info-downloads__header">Download</h2>
+  {%- block info_downloads_filelist %}
+  <ul class='lander-info-filelist'>
+    <li><a href="{{ pdf.name|safe }}" download>{{ pdf.name }}</li>
+    {% for item in attachments %}
+    <li><a href="{{ item.name|safe }}" download>{{ item.name }}</li>
+    {% endfor %}
+  </ul>
+  {%- endblock info_downloads_filelist %}
+</section>
+{%- endblock info_downloads %}

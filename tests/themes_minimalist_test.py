@@ -57,3 +57,8 @@ def test_minimalist_article(caplog: LogCaptureFixture, temp_cwd: Path) -> None:
     assert soup.title.string == "Example Article Document"
     h1 = soup.find("h1")
     assert h1.string == "Example Article Document"
+
+    download_link = soup.find(
+        "a", attrs={"download": True, "href": "article.pdf"}
+    )
+    assert download_link is not None
