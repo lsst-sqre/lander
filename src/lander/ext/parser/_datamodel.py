@@ -266,8 +266,8 @@ class DocumentMetadata(BaseModel):
     authors: List[Person] = Field(default_factory=lambda: [])
     """Authors of the document."""
 
-    date_modified: Optional[datetime.datetime] = None
-    """Time when the document was last modified."""
+    date_modified: Optional[datetime.date] = None
+    """Date when the document was last modified."""
 
     version: Optional[str] = None
     """Version of this document."""
