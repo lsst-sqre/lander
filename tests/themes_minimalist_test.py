@@ -62,3 +62,4 @@ def test_minimalist_article(caplog: LogCaptureFixture, temp_cwd: Path) -> None:
         "a", attrs={"download": True, "href": "article.pdf"}
     )
     assert download_link is not None
+    assert download_link.text == "article.pdf"
