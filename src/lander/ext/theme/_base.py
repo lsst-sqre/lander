@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import shutil
 from abc import ABCMeta, abstractmethod
-from pathlib import Path
+from pathlib import Path, PurePath, PurePosixPath
 from typing import TYPE_CHECKING, Any, Dict, Iterator, Optional
 from urllib.parse import urljoin
 
@@ -111,12 +111,12 @@ class ThemePlugin(metaclass=ABCMeta):
         assert isinstance(output_dir, Path)
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        # Copying and rendering content from the theme's site directory
-        for path in self._site_dir_contents(self.site_dir):
-            if path.suffix == ".jinja":
-                self._render_path(path, output_dir)
+        site_inventory = self._build_site_inventory()
+        for relative_path, file_path in site_inventory.items():
+            if file_path.suffix == ".jinja":
+                self._render_path(file_path, relative_path, output_dir)
             else:
-                self._copy_path(path, output_dir)
+                self._copy_path(file_path, relative_path, output_dir)
 
         # Copy the PDF
         output_pdf_path = output_dir.joinpath(self.settings.pdf.name)
@@ -131,6 +131,39 @@ class ThemePlugin(metaclass=ABCMeta):
 
         # TODO write metadata file
         # TODO write metadata.jsonld file
+
+    def _build_site_inventory(
+        self, inventory: Optional[Dict[PurePath, Path]] = None
+    ) -> Dict[PurePath, Path]:
+        """Create an inventory of files in the site.
+
+        This method gathers file paths in this theme's "site" directory, as
+        well as any files in the site directories of base themes. Files in
+        a theme override its base theme.
+
+        Returns
+        -------
+        inventory : `dict`
+            Dictionary where the key is the relative path of the file in the
+            site. This is a `PurePath`. The value is the filesystem path of
+            that file.
+        """
+        # Map relative site path to filesystem path of the asset.
+        if inventory is None:
+            inventory = {}
+        assert inventory is not None
+
+        # First add paths from the base theme(s)
+        if self.base_theme:
+            self.base_theme._build_site_inventory(inventory)
+
+        # Add paths from this theme's site directory that add to or override
+        # the assets from the base theme
+        for path in self._site_dir_contents(self.site_dir):
+            path_key = PurePath(path.relative_to(self.site_dir))
+            inventory[path_key] = path
+
+        return inventory
 
     def _site_dir_contents(self, directory: Path) -> Iterator[Path]:
         """Iterate over the contents of a directory, including contents of
@@ -152,18 +185,21 @@ class ThemePlugin(metaclass=ABCMeta):
             else:
                 yield path
 
-    def _copy_path(self, site_path: Path, output_dir: Path) -> None:
+    def _copy_path(
+        self, site_path: Path, relative_path: PurePath, output_dir: Path
+    ) -> None:
         """Copy a path in the theme's site directory into the same relative
         path in the output directory.
         """
-        relative_path = site_path.relative_to(self.site_dir)
         output_path = output_dir.joinpath(relative_path)
         self.logger.debug("Copying %s to %s", relative_path, output_path)
         if not output_path.parent.exists():
             output_path.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(site_path, output_path)
 
-    def _render_path(self, site_path: Path, output_dir: Path) -> None:
+    def _render_path(
+        self, site_path: Path, relative_path: PurePath, output_dir: Path
+    ) -> None:
         """Render a Jinja2 template and write it to the same relative path
         in the output directory.
 
@@ -172,8 +208,6 @@ class ThemePlugin(metaclass=ABCMeta):
         The output path will be the same as the ``site_path``, but without
         the original ``.jinja`` extension.
         """
-        # Relative path of template
-        relative_path = site_path.relative_to(self.site_dir)
         # Relative path of the output (remove the .jinja extension)
         relative_output_path = relative_path.with_suffix("").with_suffix(
             "".join(site_path.suffixes[:-1])
@@ -188,7 +222,8 @@ class ThemePlugin(metaclass=ABCMeta):
         self.logger.debug("Rendering templated file: %s", relative_output_path)
         jinja_template = self.jinja_env.get_template(template_name)
         context = self.create_jinja_context(
-            path=relative_output_path, template_name=template_name
+            path=PurePosixPath(relative_output_path),
+            template_name=template_name,
         )
         content = jinja_template.render(**context)
 
@@ -211,7 +246,7 @@ class ThemePlugin(metaclass=ABCMeta):
         return env
 
     def create_jinja_context(
-        self, *, path: Path, template_name: str
+        self, *, path: PurePosixPath, template_name: str
     ) -> Dict[str, Any]:
         """Create the context for rendering a Jinja template.
 
@@ -220,8 +255,9 @@ class ThemePlugin(metaclass=ABCMeta):
 
         Parameters
         ----------
-        path : `pathlib.Path`
-            The relative path of the templated context in the site.
+        path : `pathlib.PurePosixPath`
+            The relative path of the templated context in the site. This path
+            is used to set the ``canonical_url`` template variable.
         template_name: `str`
             Name of the Jinja template.
 
