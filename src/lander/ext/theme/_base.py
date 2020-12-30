@@ -129,7 +129,7 @@ class ThemePlugin(metaclass=ABCMeta):
             )
             shutil.copy(attachment.file_path, output_attachment_path)
 
-        # TODO write metadata file
+        self._write_metadata(output_dir)
         self.run_post_build(output_dir)
 
     def run_post_build(self, output_dir: Path) -> None:
@@ -317,3 +317,8 @@ class ThemePlugin(metaclass=ABCMeta):
         other templates.
         """
         raise NotImplementedError
+
+    def _write_metadata(self, output_dir: Path) -> None:
+        metadata_json = self.metadata.json()
+        metadata_path = output_dir.joinpath("metadata.json")
+        metadata_path.write_text(metadata_json)
