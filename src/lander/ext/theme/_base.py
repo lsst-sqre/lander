@@ -130,7 +130,19 @@ class ThemePlugin(metaclass=ABCMeta):
             shutil.copy(attachment.file_path, output_attachment_path)
 
         # TODO write metadata file
-        # TODO write metadata.jsonld file
+        self.run_post_build(output_dir)
+
+    def run_post_build(self, output_dir: Path) -> None:
+        """Hook that is executed at the end of the site site build.
+
+        Themes can implement this method to perform tasks on a completed site.
+
+        Parameters
+        ----------
+        output_dir : `pathlib.Path`
+            File system directory where the site is built.
+        """
+        pass
 
     def _build_site_inventory(
         self, inventory: Optional[Dict[PurePath, Path]] = None
