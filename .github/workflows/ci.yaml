@@ -37,7 +37,7 @@ jobs:
           pip install tox
 
       - name: Build assets
-        run: gulp assets --env=deploy
+        run: gulp assets
 
       - name: Run tests
         run: tox -e py,lint,typing
@@ -75,7 +75,7 @@ jobs:
           pip install --upgrade setuptools wheel twine
 
       - name: Build assets
-        run: gulp assets --env=deploy
+        run: gulp assets
 
       - name: Build and publish
         env:

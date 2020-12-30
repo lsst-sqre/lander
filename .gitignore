@@ -1,3 +1,7 @@
+# Built assets
+src/lander/themes/base/site/app.bundle.js
+src/lander/themes/base/site/app.bundle.js.LICENSE.txt
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

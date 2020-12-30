@@ -52,6 +52,9 @@ def test_minimalist_article(caplog: LogCaptureFixture, temp_cwd: Path) -> None:
     assert index_html_path.exists()
     pdf_path = output_dir / "article.pdf"
     assert pdf_path.exists()
+    # Check that the JS bundle from the base theme is included
+    js_path = output_dir / "app.bundle.js"
+    assert js_path.exists()
 
     soup = BeautifulSoup(index_html_path.read_text(), "html.parser")
     assert soup.title.string == "Example Article Document"
