@@ -13,7 +13,7 @@ module.exports = {
 
   output: {
     path: path.join(__dirname, 'site'),
-    filename: '[name].bundle.js',
+    filename: 'lander.bundle.js',
   },
 
   optimization: {
