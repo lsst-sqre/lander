@@ -9,7 +9,3 @@ prune tests*
 exclude gulpfile.js
 exclude package-lock.json
 exclude package.json
-exclude webpack.config.js
-prune js*
-prune scss*
-prune integration-tests*

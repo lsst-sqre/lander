@@ -1,0 +1,32 @@
+{% extends "htmlpage.jinja" %}
+
+{%- block html_head_canonicalurl %} {# Override htmlpage.jinja #}
+{%- if metadata.canonical_url %}
+{# Use the document metadata if available #}
+<link rel="canonical" href="{{ metadata.canonical_url }}" />
+{%- else %}
+{{ super() }}
+{%- endif %}
+{%- endblock html_head_canonicalurl %}
+
+{%- block html_head_description %} {# Override htmlpage.jinja #}
+{%- if metadata.abstract %}
+<meta name="description" content="{{ metadata.abstract.plain }}" />
+{%- else %}
+{{ super() }}
+{%- endif %}
+{%- endblock html_head_description %}
+
+{%- block html_page_main %} {# Override htmlpage.jinja #}
+<article class="lander-info-sidebar">
+{%- block info_sidebar %}
+{% include "info_sidebar.jinja" %}
+{%- endblock info_sidebar %}
+</article>
+
+<div class="lander-pdf-container">
+{%- block pdf_viewer %}
+{% include "pdfviewer.jinja" %}
+{%- endblock pdf_viewer %}
+</div>
+{%- endblock html_page_main %}

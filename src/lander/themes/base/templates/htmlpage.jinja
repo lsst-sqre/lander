@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+  {%- block html_head_title %}
+  <title>{{ metadata.title }}</title>
+  {%- endblock html_head_title %}
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {%- block html_head_canonicalurl %}
+  {%- if canonical_url %}
+  <link rel="canonical" href="{{ canonical_url }}" />
+  {%- endif %}
+  {%- endblock html_head_canonicalurl %}
+  {%- block html_head_description %}
+  {%- if description %}
+  <meta name="description" content="{{ description }}" />
+  {%- endif %}
+  {%- endblock html_head_description %}
+
+  {%- block html_head_appendix %}
+  {%- endblock html_head_appendix %}
+</head>
+
+<body>
+{% block html_body %}
+<div class="lander-page-wrapper">
+
+{% block html_page_header %}
+{% endblock html_page_header %}
+
+<main>
+{% block html_page_main %}
+{% endblock html_page_main %}
+</main>
+
+{% block html_page_footer %}
+{% endblock html_page_footer %}
+</div>
+{% endblock html_body %}
+
+{% block html_bottom_javascript %}
+<script src="lander.bundle.js"></script>
+{% endblock html_bottom_javascript %}
+</body>
+
+</html>

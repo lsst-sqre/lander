@@ -2,17 +2,47 @@ from __future__ import annotations
 
 import datetime
 import re
-from typing import List, Optional
+from typing import TYPE_CHECKING, Any, Generator, List, Optional
 
+import base32_lib as base32
 import bleach
-from pydantic import BaseModel, EmailStr, Field, HttpUrl, validator
+from pydantic import BaseConfig, BaseModel, EmailStr, Field, HttpUrl, validator
+from pydantic.errors import UrlError
+from pydantic.fields import ModelField
 
 from lander.ext.parser.pandoc import convert_text
 from lander.spdx import Licenses
 
-__all__ = ["FormattedString", "Person", "DocumentMetadata"]
+if TYPE_CHECKING:
+    from pydantic.typing import AnyCallable
+
+    CallableGenerator = Generator[AnyCallable, None, None]
+
+
+__all__ = ["FormattedString", "Person", "Orcid", "DocumentMetadata"]
 
 WHITESPACE_PATTERN = re.compile(r"\s+")
+
+ORCID_PATTERN = re.compile(
+    r"(?P<identifier>[0-9X]{4}-[0-9X]{4}-[0-9X]{4}-[0-9X]{4})"
+)
+"""Regular expression for matching the ORCiD identifier
+
+Examples:
+
+- 0000-0002-1825-0097
+- 0000-0001-5109-3700
+- 0000-0002-1694-233X
+
+For more information, see
+https://support.orcid.org/hc/en-us/articles/360006897674
+"""
+
+ROR_PATTERN = re.compile(
+    r"https://ror.org"
+    r"\/(?P<identifier>0[0-9abcdefghjkmpqrstuvwxyzabcdefghjkmpqrstuvwxyz]{8})",
+    flags=re.IGNORECASE,
+)
 
 
 def collapse_whitespace(text: str) -> str:
@@ -91,22 +121,132 @@ class FormattedString(BaseModel):
         return collapse_whitespace(v)
 
 
+class OrcidError(UrlError):
+    code = "orcid"
+    msg_template = "invalid ORCiD"
+
+
+class Orcid(HttpUrl):
+    """An ORCiD type for Pydantic validation.
+
+    The validator forces an ORCiD identifier to always be a URL for
+    orcid.org, per https://support.orcid.org/hc/en-us/articles/360006897674.
+    This validator implments the ISO 7064 11,2 checksum algorithm.
+    """
+
+    allowed_schemes = {"https"}
+
+    @classmethod
+    def __get_validators__(cls) -> "CallableGenerator":
+        yield cls.validate
+
+    @classmethod
+    def validate(
+        cls, value: Any, field: ModelField, config: BaseConfig
+    ) -> Orcid:
+        if value.__class__ == cls:
+            return value
+
+        m = ORCID_PATTERN.search(value)
+        if not m:
+            raise OrcidError()
+
+        identifier = m["identifier"]
+        if not cls.verify_checksum(identifier):
+            raise OrcidError()
+
+        return HttpUrl.validate(
+            f"https://orcid.org/{identifier}", field, config
+        )
+
+    @staticmethod
+    def verify_checksum(identifier: str) -> bool:
+        """Verify the checksum of an ORCiD identifier string (path component
+        of the URL) given teh ISO 7064 11,2 algorithm.
+        """
+        total: int = 0
+        for digit in identifier:
+            if digit == "X":
+                digit = "10"
+            if not digit.isdigit():
+                continue
+            total = (total + int(digit)) * 2
+        remainder = total % 11
+        result = (12 - remainder) % 11
+        return result == 10
+
+
+class RorError(UrlError):
+    code = "ror"
+    msg_template = "invalid ROR"
+
+
+class Ror(HttpUrl):
+    """A ROR (Research Organization Registry) type for Pydantic validation.
+    """
+
+    allowed_schemes = {"https"}
+
+    @classmethod
+    def __get_validators__(cls) -> "CallableGenerator":
+        yield cls.validate
+
+    @classmethod
+    def validate(
+        cls, value: Any, field: ModelField, config: BaseConfig
+    ) -> Ror:
+        if value.__class__ == cls:
+            return value
+
+        m = ROR_PATTERN.search(value)
+        if not m:
+            print("pattern did not match")
+            raise RorError()
+
+        identifier = m["identifier"]
+        try:
+            base32.decode(identifier, checksum=True)
+        except ValueError:
+            raise RorError()
+
+        return HttpUrl.validate(value, field, config)
+
+
+class Organization(BaseModel):
+    """Data about an organization (often used as an affiliation).
+    """
+
+    name: str
+    """The display name of the institution."""
+
+    ror: Optional[Ror] = None
+    """The ROR identifier of the institution."""
+
+    address: Optional[str] = None
+    """The address of the institution."""
+
+    url: Optional[HttpUrl] = None
+    """The homepage of the institution."""
+
+
 class Person(BaseModel):
     """Data about a person."""
 
     name: str
     """Display name of the person."""
 
-    orcid: Optional[str] = None
+    orcid: Optional[Orcid] = None
     """The ORCiD of the person."""
 
-    affiliations: Optional[List[str]] = Field(default_factory=lambda: [])
-    """Names of the person's affiliations."""
+    affiliations: Optional[List[Organization]] = Field(
+        default_factory=lambda: []
+    )
+    """The person's affiliations."""
 
     email: Optional[EmailStr] = None
     """Email associated with the person."""
 
-    @validator("name", "affiliations", each_item=True)
+    @validator("name")
     def clean_whitespace(cls, v: str) -> str:
         return collapse_whitespace(v)
 
@@ -126,8 +266,8 @@ class DocumentMetadata(BaseModel):
     authors: List[Person] = Field(default_factory=lambda: [])
     """Authors of the document."""
 
-    date_modified: Optional[datetime.datetime] = None
-    """Time when the document was last modified."""
+    date_modified: Optional[datetime.date] = None
+    """Date when the document was last modified."""
 
     version: Optional[str] = None
     """Version of this document."""
@@ -153,6 +293,9 @@ class DocumentMetadata(BaseModel):
     ci_url: Optional[HttpUrl] = None
     """The URL of the continuous integration build for the document."""
 
+    canonical_url: Optional[HttpUrl] = None
+    """The canonical URL where this document is published."""
+
     @validator("title", "version", "keywords", "copyright", each_item=True)
     def clean_whitespace(cls, v: str) -> str:
         return collapse_whitespace(v)
@@ -166,3 +309,12 @@ class DocumentMetadata(BaseModel):
                     f"License ID '{v}' is not a valid SPDX license identifier."
                 )
         return v
+
+    def get_license_name(self) -> Optional[str]:
+        """Get the name of the license."""
+        if self.license_identifier is not None:
+            licenses = Licenses.load()
+            license = licenses[self.license_identifier]
+            return license.name
+        else:
+            return None
