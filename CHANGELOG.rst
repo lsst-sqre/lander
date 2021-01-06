@@ -2,6 +2,14 @@
 Change Log
 ##########
 
+1.0.0 (2021-01-06)
+==================
+
+This is the first release of Lander!
+The version 1 release line is based on the 0.1 releases, and this line will continue to be maintained for existing users of Lander.
+
+A new version of Lander is under development, version 2.0, that will include a plugin interface for adding custom document parsers and website themes.
+
 0.1.16 (2019-07-04)
 ===================
 
