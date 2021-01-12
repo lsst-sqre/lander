@@ -15,5 +15,7 @@ def test_article() -> None:
     tex_path = Path(__file__).parent / "data" / "article" / "article.tex"
     parser = ArticleParser(tex_path)
 
+    assert parser.tex_macros == {r"\version": "1.0"}
+
     md = parser.metadata
     assert md.title == "Example Article Document"
