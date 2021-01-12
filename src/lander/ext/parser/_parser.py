@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 from lander.ext.parser._cidata import CiMetadata
 from lander.ext.parser._datamodel import DocumentMetadata
@@ -27,7 +27,10 @@ class Parser(metaclass=ABCMeta):
 
     def __init__(self, tex_path: Path) -> None:
         self._tex_path = tex_path
-        self._tex_source = self.normalize_source(read_tex_file(self.tex_path))
+
+        _tex_source = read_tex_file(self.tex_path)
+        self._tex_macros = get_macros(_tex_source)
+        self._tex_source = self.normalize_source(_tex_source)
 
         try:
             self._git_repository: Optional[
@@ -49,6 +52,19 @@ class Parser(metaclass=ABCMeta):
     def tex_source(self) -> str:
         """TeX source, which has been normalized."""
         return self._tex_source
+
+    @property
+    def tex_macros(self) -> Dict[str, str]:
+        """TeX macros detected by
+        `lander.ext.parser.texutils.extract.get_macros`.
+
+        Keys are command names (including the slash) and values are the values
+        of those macros.
+
+        This property is useful because the normalized source in `tex_source`
+        typically has macro definitions clobbered.
+        """
+        return self._tex_macros
 
     @property
     def ci_metadata(self) -> CiMetadata:
