@@ -19,7 +19,13 @@ if TYPE_CHECKING:
     CallableGenerator = Generator[AnyCallable, None, None]
 
 
-__all__ = ["FormattedString", "Person", "Orcid", "DocumentMetadata"]
+__all__ = [
+    "FormattedString",
+    "Person",
+    "Contributor",
+    "Orcid",
+    "DocumentMetadata",
+]
 
 WHITESPACE_PATTERN = re.compile(r"\s+")
 
@@ -251,6 +257,17 @@ class Person(BaseModel):
         return collapse_whitespace(v)
 
 
+class Contributor(Person):
+    """Data about a contributor.
+
+    A ``Contributor`` is the same as a ``Person``, with the addition of the
+    `role` attribute.
+    """
+
+    role: Optional[str] = None
+    """Description of the contributor's role."""
+
+
 class DocumentMetadata(BaseModel):
     """A container for LaTeX document metadata."""
 
@@ -263,7 +280,7 @@ class DocumentMetadata(BaseModel):
     abstract: Optional[FormattedString] = None
     """Document abstract or summary."""
 
-    authors: List[Person] = Field(default_factory=lambda: [])
+    authors: List[Contributor] = Field(default_factory=lambda: [])
     """Authors of the document."""
 
     date_modified: Optional[datetime.date] = None
