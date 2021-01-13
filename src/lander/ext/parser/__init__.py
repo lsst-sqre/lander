@@ -3,6 +3,7 @@
 __all__ = [
     "DocumentMetadata",
     "Parser",
+    "Contributor",
     "Person",
     "FormattedString",
     "ParsingPlugins",
@@ -15,6 +16,7 @@ __all__ = [
 
 from lander.ext.parser._cidata import CiMetadata, CiPlatform, GitRefType
 from lander.ext.parser._datamodel import (
+    Contributor,
     DocumentMetadata,
     FormattedString,
     Person,
