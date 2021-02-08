@@ -25,9 +25,9 @@ def test_load_from_cwd(temp_article_dir: Path) -> None:
     settings_path.write_text(yaml.dump(settings_data))
 
     settings = BuildSettings.load(parser="article", theme="minimalist")
-    assert settings.output_dir == Path("_build")
-    assert settings.source_path == Path("article.tex")
-    assert settings.pdf.file_path == Path("article.pdf")
+    assert settings.output_dir.resolve() == Path("_build").resolve()
+    assert settings.source_path.resolve() == Path("article.tex").resolve()
+    assert settings.pdf.file_path.resolve() == Path("article.pdf").resolve()
     assert settings.parser == "article"
     assert settings.theme == "minimalist"
 

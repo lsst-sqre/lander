@@ -140,19 +140,25 @@ class BuildSettings(BaseModel):
             settings_data: Dict[str, Any] = yaml.safe_load(
                 settings_path.read_text()
             )
+            project_dir = settings_path.parent
         else:
             settings_data = {}
+            project_dir = Path.cwd()
 
         # Modify the data to convert paths to DownloadableFile tile
         if "pdf" in settings_data:
             settings_data["pdf"] = DownloadableFile.load(
-                Path(settings_data["pdf"])
+                project_dir.joinpath(settings_data["pdf"])
             )
         if "attachments" in settings_data:
             settings_data["attachments"] = [
-                DownloadableFile.load(Path(p))
+                DownloadableFile.load(project_dir.joinpath(p))
                 for p in settings_data["attachments"]
             ]
+        if "source_path" in settings_data:
+            settings_data["source_path"] = project_dir.joinpath(
+                settings_data["source_path"]
+            )
 
         # Adding in command-line overrides
         if output_dir:
