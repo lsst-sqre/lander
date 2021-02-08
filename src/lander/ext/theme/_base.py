@@ -30,6 +30,9 @@ class ThemePlugin(metaclass=ABCMeta):
     ----------
     metadata : `lander.ext.parser.DocumentMetadata`
         The document's metadata, typically created by the parsing plugin.
+    settings : `lander.settings.BuildSettings`
+        The build settings for this site, which includes command-line and YAML
+        configuration overrides of metadata.
     """
 
     def __init__(

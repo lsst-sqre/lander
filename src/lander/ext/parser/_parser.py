@@ -11,6 +11,7 @@ from lander.ext.parser.texutils.normalize import read_tex_file, replace_macros
 
 if TYPE_CHECKING:
     from pathlib import Path
+    from lander.settings import BuildSettings
 
 
 __all__ = ["Parser"]
@@ -21,12 +22,13 @@ class Parser(metaclass=ABCMeta):
 
     Parameters
     ----------
-    tex_path
-        Path to the root tex document.
+    settings : `lander.settings.BuildSettings`
+        The build settings for this site, which includes command-line and YAML
+        configuration overrides of metadata.
     """
 
-    def __init__(self, tex_path: Path) -> None:
-        self._tex_path = tex_path
+    def __init__(self, *, settings: BuildSettings) -> None:
+        self._settings = settings
 
         _tex_source = read_tex_file(self.tex_path)
         self._tex_macros = get_macros(_tex_source)
@@ -35,18 +37,23 @@ class Parser(metaclass=ABCMeta):
         try:
             self._git_repository: Optional[
                 GitRepository
-            ] = GitRepository.create(self._tex_path.parent)
+            ] = GitRepository.create(self.tex_path.parent)
         except Exception:
             self._git_repository = None
 
         self._ci_metadata = CiMetadata.create()
 
-        self._metadata = self.extract_metadata(self.tex_source)
+        self._metadata = self.extract_metadata()
+
+    @property
+    def settings(self) -> BuildSettings:
+        """The build settings."""
+        return self._settings
 
     @property
     def tex_path(self) -> Path:
         """"Path to the root TeX source file."""
-        return self._tex_path
+        return self.settings.source_path
 
     @property
     def tex_source(self) -> str:
@@ -107,13 +114,8 @@ class Parser(metaclass=ABCMeta):
         return replace_macros(tex_source, macros)
 
     @abstractmethod
-    def extract_metadata(self, tex_source: str) -> DocumentMetadata:
+    def extract_metadata(self) -> DocumentMetadata:
         """Hook for implementing metadata extraction.
-
-        Parameters
-        ----------
-        tex_source
-            TeX source content.
 
         Returns
         -------

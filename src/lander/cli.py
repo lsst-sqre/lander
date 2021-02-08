@@ -44,7 +44,7 @@ def build(
     Theme = themes[settings.theme]
 
     # Run the document parser
-    parser_plugin = Parser(settings.source_path)
+    parser_plugin = Parser(settings=settings)
     theme_plugin = Theme(metadata=parser_plugin.metadata, settings=settings)
     theme_plugin.build_site()
 
