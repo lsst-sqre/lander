@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import Any, Dict
 
 from lander.ext.parser import DocumentMetadata, Parser
 from lander.ext.parser.texutils.extract import (
@@ -14,27 +14,29 @@ __all__ = ["ArticleParser"]
 class ArticleParser(Parser):
     """A parser for LaTeX article class documents."""
 
-    def extract_metadata(self, tex_source: str) -> DocumentMetadata:
+    def extract_metadata(self) -> DocumentMetadata:
         """Extract meta from an article document (parser hook).
-
-        Parameters
-        ----------
-        tex_source
-            TeX source content.
 
         Returns
         -------
         metadata
             The metadata parsed from the document source.
         """
+        metadata: Dict[str, Any] = {}
         try:
-            date_modified: Optional[str] = self._parse_date(tex_source)
+            metadata["date_modified"] = self._parse_date(self.tex_source)
         except RuntimeError:
-            date_modified = None
+            pass
+        metadata["title"] = self._parse_title(self.tex_source)
 
-        return DocumentMetadata(
-            title=self._parse_title(tex_source), date_modified=date_modified
-        )
+        # Apply canonical URL setting, if available
+        if self.settings.canonical_url:
+            metadata["canonical_url"] = self.settings.canonical_url
+
+        # Override metadata from YAML or CLI as available
+        metadata.update(self.settings.metadata)
+
+        return DocumentMetadata(**metadata)
 
     def _parse_title(self, tex_source: str) -> str:
         command = LaTeXCommand(
