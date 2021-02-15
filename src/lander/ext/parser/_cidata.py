@@ -20,6 +20,9 @@ class GitRefType(str, Enum):
     branch = "branch"
     """The git ref corresponds to a branch."""
 
+    def __str__(self) -> str:
+        return self.value
+
 
 class CiPlatform(str, Enum):
     """The name of the CI platform."""
@@ -32,6 +35,9 @@ class CiPlatform(str, Enum):
 
     travis = "travis"
     """The build is performed on Travis CI."""
+
+    def __str__(self) -> str:
+        return self.value
 
 
 @dataclass
