@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from jinja2 import Template
+
 from lander.ext.parser import CiMetadata
 
 if TYPE_CHECKING:
@@ -105,3 +107,26 @@ def test_travis_tag(monkeypatch: MonkeyPatch) -> None:
     assert ci_metadata.github_repository == (
         "https://github.com/lsst-sqre/lander"
     )
+
+
+def test_enum_jinja_templating(monkeypatch: MonkeyPatch) -> None:
+    """Demonstrate how the Enum-based types can be used in Jinja templates
+    """
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_REF", "refs/tags/1.0.0")
+
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_REF", "refs/heads/tickets/DM-26564")
+    monkeypatch.setenv("GITHUB_RUN_ID", "1234")
+    monkeypatch.setenv("GITHUB_REPOSITORY", "lsst-sqre/lander")
+    monkeypatch.setenv(
+        "GITHUB_SHA", "cecaac52e1dbbc7709a93f715c3c68b845a3f976"
+    )
+
+    ci_metadata = CiMetadata.create()
+
+    t1 = Template("{{ ci.platform }}")
+    assert t1.render(ci=ci_metadata) == "github_actions"
+
+    t1 = Template("{{ ci.git_ref_type }}")
+    assert t1.render(ci=ci_metadata) == "branch"
