@@ -23,7 +23,7 @@ jobs:
       - uses: actions/setup-node@v1
         name: Use Node.js
         with:
-          node-version: 13.3.0 # known to be compatible with current build
+          node-version: 14
 
       - name: NPM install
         run: |
@@ -61,7 +61,7 @@ jobs:
       - uses: actions/setup-node@v1
         name: Use Node.js
         with:
-          node-version: 13.3.0 # known to be compatible with current build
+          node-version: 14
 
       - name: NPM install
         run: |
