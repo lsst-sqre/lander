@@ -2,6 +2,11 @@
 Change Log
 ##########
 
+1.0.1 (2021-05-11)
+==================
+
+- Pin click<8 since Click 8.0.0 currently triggers the ``--version`` mode, regardless of whether it was set on the command-line or not.
+
 1.0.0 (2021-01-06)
 ==================
 
