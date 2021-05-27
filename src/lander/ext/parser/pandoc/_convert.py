@@ -38,6 +38,7 @@ def ensure_pandoc(func: F) -> Callable[..., Any]:
                     pypandoc.get_pandoc_version(),
                 )
             except Exception:
+                logger.exception("Failed to download pandoc.")
                 raise RuntimeError(
                     "Could not install Pandoc. Please pre-install pandoc on "
                     "your system and try again. See "
