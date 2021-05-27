@@ -5,6 +5,7 @@ from typing import Optional
 
 import typer
 
+from lander.ext.parser.pandoc import print_pandoc_version
 from lander.plugins import parsers, themes
 from lander.settings import BuildSettings
 
@@ -30,6 +31,8 @@ def build(
         None, "--url", help="Canonical URL where the landing page is hosted."
     ),
 ) -> None:
+    print_pandoc_version()
+
     settings = BuildSettings.load(
         output_dir=output,
         source_path=source,

@@ -26,8 +26,24 @@ def ensure_pandoc(func: F) -> Callable[..., Any]:
             result = func(*args, **kwargs)
         except OSError:
             # Install pandoc and retry
-            message = "Pandoc is required but not found."
-            logger.warning(message)
+            logger.warning(
+                "Pandoc is required but not found. Lander is going to try to "
+                "install it for you right now."
+            )
+
+            try:
+                pypandoc.download_pandoc()
+                logger.info(
+                    "Pandoc version %s installation complete",
+                    pypandoc.get_pandoc_version(),
+                )
+            except Exception:
+                logger.exception("Failed to download pandoc.")
+                raise RuntimeError(
+                    "Could not install Pandoc. Please pre-install pandoc on "
+                    "your system and try again. See "
+                    "https://pandoc.org/installing.html."
+                )
 
             result = func(*args, **kwargs)
 
