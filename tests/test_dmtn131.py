@@ -49,3 +49,36 @@ def test_dmtn131_manual(tmp_path: Path) -> None:
     assert result.exit_code == 0
 
     assert (build_dir / "index.html").exists()
+
+
+def test_dmtn131_auto(tmp_path: Path) -> None:
+    """Integration test with DMTN-131, located in tests/data/dmtn-131, with
+    introspected metadata
+    """
+    root = os.path.join(os.path.dirname(__file__), "data", "dmtn-131")
+    pdf_path = os.path.join(root, "DMTN-131.pdf")
+    tex_path = os.path.join(root, "DMTN-131.tex")
+    assert os.path.exists(pdf_path)
+
+    build_dir = tmp_path / "build2"
+    build_dir.mkdir()
+    assert build_dir.exists()
+
+    runner = CliRunner()
+    result = runner.invoke(
+        main,
+        [
+            "--build-dir",
+            str(build_dir),
+            "--pdf",
+            pdf_path,
+            "--lsstdoc",
+            tex_path,
+            "--ltd-product",
+            "dmtn-131",
+            "--no-upload",
+        ],
+    )
+    assert result.exit_code == 0
+
+    assert (build_dir / "index.html").exists()

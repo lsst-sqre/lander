@@ -30,7 +30,7 @@ exclude = '''
 include_trailing_comma = true
 multi_line_output = 3
 known_first_party = "lander"
-known_third_party = ["click", "jinja2", "lsstprojectmeta", "ltdconveyor", "pkg_resources", "pydantic", "requests", "setuptools", "structlog"]
+known_third_party = ["click", "jinja2", "lsstprojectmeta", "ltdconveyor", "markupsafe", "pkg_resources", "pydantic", "requests", "setuptools", "structlog"]
 skip = ["docs/conf.py"]
 
 [tool.coverage.run]

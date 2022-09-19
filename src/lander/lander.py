@@ -7,9 +7,9 @@ import shutil
 from typing import TYPE_CHECKING
 
 import structlog
-from lsstprojectmeta.jsonld import encode_jsonld
 
 from . import ltdclient
+from .lsstprojectmeta.jsonld import encode_jsonld
 from .renderer import create_jinja_env, render_homepage
 
 if TYPE_CHECKING:
