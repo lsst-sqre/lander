@@ -9,7 +9,6 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 
 import requests
-from lsstprojectmeta.tex.lsstdoc import LsstLatexDoc
 from pydantic import (
     BaseModel,
     Field,
@@ -19,6 +18,8 @@ from pydantic import (
     validator,
 )
 from structlog import get_logger
+
+from .lsstprojectmeta.tex.lsstdoc import LsstLatexDoc
 
 # Detects a GitHub repo slug from a GitHub URL
 GITHUB_SLUG_PATTERN = re.compile(

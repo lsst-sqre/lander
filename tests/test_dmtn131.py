@@ -74,6 +74,9 @@ def test_dmtn131_auto(tmp_path: Path) -> None:
             pdf_path,
             "--lsstdoc",
             tex_path,
+            "--ltd-product",
+            "dmtn-131",
+            "--no-upload",
         ],
     )
     assert result.exit_code == 0

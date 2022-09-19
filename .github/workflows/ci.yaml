@@ -46,7 +46,7 @@ jobs:
         run: gulp assets --env=deploy
 
       - name: Run tests
-        run: tox -e py,lint,typing
+        run: tox -e py,lint # ,typing
 
       - name: What pandoc
         run: which pandoc | true

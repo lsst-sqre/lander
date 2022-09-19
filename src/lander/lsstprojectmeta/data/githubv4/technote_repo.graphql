@@ -1,0 +1,37 @@
+query ($orgName: String!, $repoName: String!) {
+  rateLimit {
+    remaining
+    cost
+  }
+  repository(owner: $orgName, name: $repoName) {
+    shortDescriptionHTML
+    defaultBranchRef {
+      target {
+        ... on Commit {
+          committedDate
+          tree {
+            entries {
+              name
+            }
+          }
+        }
+      }
+    }
+    primaryLanguage {
+      name
+    }
+    licenseInfo {
+      spdxId
+    }
+    repositoryTopics(first: 10) {
+      edges {
+        node {
+          topic {
+            name
+          }
+          url
+        }
+      }
+    }
+  }
+}

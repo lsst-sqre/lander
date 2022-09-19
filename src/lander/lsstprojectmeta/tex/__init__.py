@@ -1,0 +1,1 @@
+"""TeX metadata extraction tools."""
