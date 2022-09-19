@@ -46,7 +46,9 @@ jobs:
         run: gulp assets --env=deploy
 
       - name: Install pandoc
-        run: sudo apt-get install pandoc
+        run: |
+          sudo apt-get install pandoc
+          pandoc --version
 
       - name: Run tests
         run: tox -e py,lint # ,typing
