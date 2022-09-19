@@ -45,9 +45,12 @@ jobs:
       - name: Build assets
         run: gulp assets --env=deploy
 
-      - name: Install pandoc
+      - name: Download Pandoc
         run: |
-          sudo apt-get install pandoc
+          url="https://github.com/jgm/pandoc/releases/tag/2.19.2"
+          downloadUrl="https://github.com$(curl -L $url | grep -o '/jgm/pandoc/releases/download/.*-amd64\.deb')"
+          wget --no-verbose "$downloadUrl"
+          sudo dpkg -i "${downloadUrl##*/}"
           pandoc --version
 
       - name: Run tests
