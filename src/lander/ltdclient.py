@@ -46,8 +46,7 @@ def upload(config: "Configuration") -> None:
 
 
 def get_product(config: "Configuration") -> Dict[str, Any]:
-    """Get the /product/<product> resource from LTD Keeper.
-    """
+    """Get the /product/<product> resource from LTD Keeper."""
     product_url = config.ltd_url + "/products/{p}".format(p=config.ltd_product)
     r = requests.get(product_url)
     if r.status_code != 200:
