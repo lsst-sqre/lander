@@ -11,7 +11,7 @@ from panflute import Para, Plain, toJSONFilter
 __all__ = ["main", "deparagraph"]
 
 if TYPE_CHECKING:
-    from panflute import Element, Doc
+    from panflute import Doc, Element
 
 
 def deparagraph(element: Element, doc: Doc) -> Element:

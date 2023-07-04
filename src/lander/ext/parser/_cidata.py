@@ -92,9 +92,9 @@ class CiMetadata:
         repo = os.getenv("GITHUB_REPOSITORY")
 
         if run_id and repo:
-            ci_build_url: Optional[str] = (
-                f"https://github.com/{repo}/actions/runs/{run_id}"
-            )
+            ci_build_url: Optional[
+                str
+            ] = f"https://github.com/{repo}/actions/runs/{run_id}"
         else:
             ci_build_url = None
 

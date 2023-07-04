@@ -188,8 +188,7 @@ class RorError(UrlError):
 
 
 class Ror(HttpUrl):
-    """A ROR (Research Organization Registry) type for Pydantic validation.
-    """
+    """A ROR (Research Organization Registry) type for Pydantic validation."""
 
     allowed_schemes = {"https"}
 
@@ -219,8 +218,7 @@ class Ror(HttpUrl):
 
 
 class Organization(BaseModel):
-    """Data about an organization (often used as an affiliation).
-    """
+    """Data about an organization (often used as an affiliation)."""
 
     name: str
     """The display name of the institution."""

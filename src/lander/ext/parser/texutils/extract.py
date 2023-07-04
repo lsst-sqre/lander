@@ -117,7 +117,6 @@ def get_newcommand_macros(tex_source: str) -> Dict[str, str]:
 
 @dataclass
 class LaTeXCommandElement:
-
     bracket: Optional[str] = None
     """The element's bracket style, either ``[`` or ``{``."""
 
@@ -134,7 +133,6 @@ class LaTeXCommandElement:
 
 @dataclass
 class ParsedElement:
-
     name: Optional[str]
     """Optional name of the element (`None` if the element is not named)."""
 

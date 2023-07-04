@@ -60,7 +60,6 @@ class DownloadableFile(BaseModel):
 
 
 class BuildSettings(BaseModel):
-
     source_path: FilePath
     """Path to the source file for metadata discovery by the parsing plugin."""
 

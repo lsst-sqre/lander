@@ -112,7 +112,10 @@ class GitRepository:
         # Don't use head_commit.iter_parents because then it skips the
         # commit of a file that's added but never modified.
         for commit in head_commit.iter_items(
-            repo, head_commit, [repo_rel_path], skip=0,
+            repo,
+            head_commit,
+            [repo_rel_path],
+            skip=0,
         ):
             return GitFile(
                 path=filepath.resolve(),

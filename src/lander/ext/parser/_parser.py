@@ -11,6 +11,7 @@ from lander.ext.parser.texutils.normalize import read_tex_file, replace_macros
 
 if TYPE_CHECKING:
     from pathlib import Path
+
     from lander.settings import BuildSettings
 
 
@@ -52,7 +53,7 @@ class Parser(metaclass=ABCMeta):
 
     @property
     def tex_path(self) -> Path:
-        """"Path to the root TeX source file."""
+        """ "Path to the root TeX source file."""
         return self.settings.source_path
 
     @property
