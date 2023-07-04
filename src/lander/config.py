@@ -172,7 +172,6 @@ class EncodedString(BaseModel):
 
 
 class GitRefType(str, Enum):
-
     tag = "tag"
     branch = "branch"
 
