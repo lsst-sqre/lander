@@ -6,6 +6,7 @@ Change Log
 ==================
 
 - Pin ``pydantic<2.0.0``.
+- Drop support for Python 3.7.
 
 1.0.1 (2021-05-11)
 ==================
