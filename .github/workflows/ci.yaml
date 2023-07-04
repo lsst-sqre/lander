@@ -11,7 +11,7 @@ jobs:
         python-version: ["3.8", "3.9", "3.10", "3.11"]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0 # full history for setuptools_scm
 
@@ -23,18 +23,14 @@ jobs:
           pandoc --version
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Read .nvmrc
-        id: node_version
-        run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
-
       - name: Set up node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
+          node-version-file: .nvmrc
 
       - name: NPM install
         run: |
@@ -51,13 +47,13 @@ jobs:
         run: gulp assets
 
       - name: Run tests
-        run: tox -e py,lint,typing
+        run: tox run -e py,lint,typing
 
   demo:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0 # full history for setuptools_scm
 
@@ -69,18 +65,14 @@ jobs:
           pandoc --version
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
-          python-version: 3.9
-
-      - name: Read .nvmrc
-        id: node_version
-        run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
+          python-version: "3.11"
 
       - name: Set up node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
+          node-version-file: .nvmrc
 
       - name: NPM install
         run: |
@@ -97,7 +89,7 @@ jobs:
         run: gulp assets
 
       - name: Build demo pages
-        run: tox -e demo
+        run: tox run -e demo
 
       - name: Upload demo artifact
         uses: actions/upload-artifact@v2
@@ -112,7 +104,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0 # full history for setuptools_scm
 
@@ -123,38 +115,21 @@ jobs:
           sudo dpkg -i "${downloadUrl##*/}"
           pandoc --version
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
-
-      - name: Read .nvmrc
-        id: node_version
-        run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
-
       - name: Set up node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
+          node-version-file: .nvmrc
 
       - name: NPM install
         run: |
           npm install -g gulp-cli
           npm install
 
-      - name: Python install
-        run: |
-          python -m pip install --upgrade pip
-          pip install .[dev]
-          pip install --upgrade setuptools wheel twine
-
       - name: Build assets
         run: gulp assets
 
       - name: Build and publish
-        env:
-          TWINE_USERNAME: "__token__"
-          TWINE_PASSWORD: ${{ secrets.PYPI_SQRE_ADMIN }}
-        run: |
-          python setup.py sdist bdist_wheel
-          twine upload dist/*
+        uses: lsst-sqre/build-and-publish-to-pypi@v1
+        with:
+          pypi-token: ${{ secrets.PYPI_SQRE_ADMIN }}
+          python-version: "3.11"
