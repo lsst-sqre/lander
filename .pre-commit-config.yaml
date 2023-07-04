@@ -1,6 +1,6 @@
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.3.0
+  rev: v4.4.0
   hooks:
   - id: check-yaml
   - id: check-toml
@@ -8,37 +8,30 @@ repos:
   - id: trailing-whitespace
 
 - repo: https://github.com/Lucas-C/pre-commit-hooks-markup
-  rev: v1.0.0
+  rev: v1.0.1
   hooks:
   - id: rst-linter
     files: (README\.rst)|(CHANGELOG\.rst)
 
 - repo: https://github.com/PyCQA/isort
-  rev: 5.10.1
+  rev: 5.12.0
   hooks:
   - id: isort
     args: [toml]
 
-- repo: https://github.com/timothycrosley/isort
-  rev: 5.10.1
-  hooks:
-  - id: isort
-    additional_dependencies:
-      - toml
-
 - repo: https://github.com/psf/black
-  rev: 22.6.0
+  rev: 23.3.0
   hooks:
   - id: black
 
 - repo: https://github.com/asottile/blacken-docs
-  rev: v1.12.1
+  rev: 1.14.0
   hooks:
   - id: blacken-docs
-    additional_dependencies: [black==22.6.0]
+    additional_dependencies: [black==23.3.0]
     args: [-l, "79", -t, py37]
 
-- repo: https://gitlab.com/pycqa/flake8
-  rev: 5.0.2
+- repo: https://github.com/pycqa/flake8
+  rev: 6.0.0
   hooks:
   - id: flake8
