@@ -62,7 +62,7 @@ def read_tex_file(root_filepath: Path, root_dir: Optional[Path] = None) -> str:
     2. `remove_trailing_whitespace`
     3. `process_inputs`
     """
-    if not root_filepath.is_file:
+    if not root_filepath.is_file():
         raise ValueError(
             f"root_filepath must be a file (got {root_filepath})."
         )
