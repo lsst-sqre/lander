@@ -8,6 +8,7 @@ from pathlib import Path, PurePath
 from typing import List, Optional, Sequence
 
 import git
+from git.repo import Repo
 
 __all__ = ["GitFile", "GitRepository"]
 
@@ -38,7 +39,7 @@ class GitRepository:
     date_modified: datetime.datetime
     """Date when the head commit was created."""
 
-    repo: git.Repo
+    repo: Repo
     """The GitPython repository representation."""
 
     files: List[GitFile]
@@ -49,7 +50,7 @@ class GitRepository:
         """Create a GitRepository from a Git repository located on the
         file system.
         """
-        repo = git.Repo(path=str(path), search_parent_directories=True)
+        repo = Repo(path=str(path), search_parent_directories=True)
         if repo.working_tree_dir is None:
             raise ValueError(f"{path} does not have a working tree.")
         repo_path = Path(repo.working_tree_dir)
@@ -65,7 +66,7 @@ class GitRepository:
         )
 
     @staticmethod
-    def _gather_files(repo: git.Repo) -> List[GitFile]:
+    def _gather_files(repo: Repo) -> List[GitFile]:
         """Gather metadata about all files in the Git tree."""
         files: List[GitFile] = []
 
@@ -84,7 +85,7 @@ class GitRepository:
         return files
 
     @staticmethod
-    def _import_file(*, filepath: Path, repo: git.Repo) -> GitFile:
+    def _import_file(*, filepath: Path, repo: Repo) -> GitFile:
         """Gather Git metadata about a file.
 
         Parameters
