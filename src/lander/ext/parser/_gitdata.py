@@ -50,6 +50,8 @@ class GitRepository:
         file system.
         """
         repo = git.Repo(path=str(path), search_parent_directories=True)
+        if repo.working_tree_dir is None:
+            raise ValueError(f"{path} does not have a working tree.")
         repo_path = Path(repo.working_tree_dir)
         head_commit = repo.head.commit
 
@@ -70,7 +72,7 @@ class GitRepository:
         head_commit = repo.head.commit
 
         for item in head_commit.tree.traverse():
-            if item.type == "blob":
+            if isinstance(item, git.objects.blob.Blob):
                 try:
                     git_file = GitRepository._import_file(
                         filepath=Path(item.abspath), repo=repo
@@ -105,6 +107,8 @@ class GitRepository:
         head_commit = repo.head.commit
 
         # Filepath relative to the repo path
+        if repo.working_tree_dir is None:
+            raise ValueError("Repository does not have a working tree.")
         repo_path = Path(repo.working_tree_dir)
         repo_rel_path = filepath.resolve().relative_to(repo_path.resolve())
 
