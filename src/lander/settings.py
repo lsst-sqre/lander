@@ -85,7 +85,7 @@ class BuildSettings(BaseModel):
     """Metadata that overrides any metadata discovered by the parsing plugin.
     """
 
-    template_vars: Dict[str, Any] = Field(default_factory=list)
+    template_vars: Dict[str, Any] = Field(default_factory=dict)
     """Additional variables that are available to the Jinja template
     environment.
     """
