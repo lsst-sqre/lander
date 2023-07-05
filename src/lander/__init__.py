@@ -3,10 +3,22 @@ LSST the Docs.
 
 https://github.com/lsst-sqre/lander
 """
-from pkg_resources import DistributionNotFound, get_distribution
+
+__all__ = ["__version__"]
+
+import sys
+
+if sys.version_info < (3, 8):
+    from importlib_metadata import PackageNotFoundError, version
+else:
+    from importlib.metadata import PackageNotFoundError, version
+
+
+__version__: str
+"""The application version string of (PEP 440 / SemVer compatible)."""
 
 try:
-    __version__ = get_distribution("lander").version
-except DistributionNotFound:
+    __version__ = version(__name__)
+except PackageNotFoundError:
     # package is not installed
-    pass
+    __version__ = "0.0.0"
