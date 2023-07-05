@@ -23,14 +23,18 @@ def test_minimalist_article(caplog: LogCaptureFixture, temp_cwd: Path) -> None:
     data_root = Path(__file__).parent / "data" / "article"
     output_dir = Path("_build")
     # Mock up metadata to isolate the test case
-    metadata = DocumentMetadata(title="Example Article Document")
+    metadata = DocumentMetadata.parse_obj(
+        dict(title="Example Article Document")
+    )
     # Mock build settings as well
-    settings = BuildSettings(
-        source_path=data_root / "article.tex",
-        pdf=DownloadableFile.load(data_root / "article.pdf"),
-        output_dir=output_dir,
-        parser="article",
-        theme="minimalist",
+    settings = BuildSettings.parse_obj(
+        dict(
+            source_path=data_root / "article.tex",
+            pdf=DownloadableFile.load(data_root / "article.pdf"),
+            output_dir=output_dir,
+            parser="article",
+            theme="minimalist",
+        )
     )
 
     # Load from the plugin system, though directly importing the
