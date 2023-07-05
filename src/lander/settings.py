@@ -34,14 +34,12 @@ class DownloadableFile(BaseModel):
 
     @classmethod
     def load(cls, path: Path) -> DownloadableFile:
-        file_type, file_encoding = mimetypes.guess_type(
-            str(path), strict=False
-        )
+        file_type, _ = mimetypes.guess_type(str(path), strict=False)
 
         return cls(
             file_path=path,
             name=path.name,
-            mimetype=file_type,
+            mimetype=file_type or "application/octet-stream",
             extension=path.suffix,
             size=path.stat().st_size,
         )
