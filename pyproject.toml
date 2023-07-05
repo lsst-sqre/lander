@@ -1,37 +1,83 @@
+[project]
+# https://packaging.python.org/en/latest/specifications/declaring-project-metadata/
+name = "lander"
+description = "HTML landing page generator for PDF/LaTeX documents"
+license = {file = "LICENSE"}
+readme= "README.rst"
+keywords = [
+    "rubin",
+    "lsst",
+]
+# https://pypi.org/classifiers/
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Operating System :: POSIX",
+    "Typing :: Typed",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "importlib_metadata; python_version < \"3.8\"",
+    "python-dateutil>=2.6.0",
+    "Jinja2>=2.10.1",
+    "pydantic < 2",
+    "email-validator", # for pydantic
+    "bleach",
+    "pypandoc",
+    "panflute>=2",  # https://github.com/sergiocorreia/panflute#supported-pandoc-versions
+    "GitPython",
+    "typer",
+    "base32-lib",
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = [
+    # Testing
+    "pytest",
+    "pytest-asyncio",
+    "coverage[toml]",
+    "beautifulsoup4",
+    "types-bleach",
+    "types-setuptools",
+    "types-PyYAML",
+    "coverage[toml]",
+    "mypy",
+    # Documentation
+    "documenteer[guide]",
+]
+
+[project.urls]
+Homepage = "https://github.com/lsst-sqre/lander"
+Source = "https://github.com/lsst-sqre/lander"
+
+[project.entry-points.'lander.parsers']
+article = "lander.parsers.article:ArticleParser"
+
+[project.entry-points.'lander.themes']
+base = "lander.themes.base:BaseTheme"
+minimalist = "lander.themes.minimalist:MinimalistTheme"
+
+[project.scripts]
+lander = "lander.cli:app"
+lander-deparagraph = "lander.ext.parser.pandoc.filters.deparagraph:main"
+
 [build-system]
 requires = [
-    "setuptools>=42",
+    "setuptools>=61",
     "wheel",
-    "setuptools_scm[toml]>=3.4"
+    "setuptools_scm[toml]>=6.2"
 ]
-build-backend = 'setuptools.build_meta'
+build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
-
-[tool.black]
-line-length = 79
-target-version = ['py37']
-exclude = '''
-/(
-    \.eggs
-  | \.git
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | _build
-  | build
-  | dist
-)/
-'''
-# Use single-quoted strings so TOML treats the string like a Python r-string
-# Multi-line strings are implicitly treated by black as regular expressions
-
-[tool.isort]
-include_trailing_comma = true
-multi_line_output = 3
-known_first_party = "lander"
-known_third_party = ["base32_lib", "bleach", "bs4", "git", "jinja2", "panflute", "pkg_resources", "pydantic", "pypandoc", "pytest", "setuptools", "typer", "yaml"]
-skip = ["docs/conf.py"]
 
 [tool.coverage.run]
 parallel = true
@@ -53,4 +99,49 @@ exclude_lines = [
     "if 0:",
     "if __name__ == .__main__.:",
     "if TYPE_CHECKING:"
+]
+
+[tool.black]
+line-length = 79
+target-version = ["py38"]
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | build
+  | dist
+)/
+'''
+# Use single-quoted strings so TOML treats the string like a Python r-string
+#  Multi-line strings are implicitly treated by black as regular expressions
+
+[tool.isort]
+profile = "black"
+line_length = 79
+known_first_party = ["lander", "tests"]
+skip = ["docs/conf.py"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "strict"
+python_files = [
+    "tests/*.py",
+    "tests/*/*.py"
+]
+
+[tool.mypy]
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+ignore_missing_imports = true
+local_partial_types = true
+no_implicit_reexport = true
+strict_equality = true
+warn_redundant_casts = true
+warn_unreachable = true
+warn_unused_ignores = true
+plugins = [
+    "pydantic.mypy"
 ]

@@ -13,6 +13,7 @@ import re
 from typing import TYPE_CHECKING
 
 import jinja2
+from markupsafe import Markup
 
 if TYPE_CHECKING:
     from lander.config import Configuration
@@ -57,4 +58,4 @@ def filter_paragraphify(value: str) -> str:
     value = re.sub(r"\r\n|\r|\n", "\n", value)  # Normalize newlines
     paras = re.split("\n{2,}", value)
     paras = ["<p>{0}</p>".format(p) for p in paras if len(p) > 0]
-    return jinja2.Markup("\n\n".join(paras))
+    return Markup("\n\n".join(paras))

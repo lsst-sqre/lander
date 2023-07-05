@@ -25,6 +25,11 @@ class CodemetaPerson(BaseModel):
 
     at__type: str = Field("Person", alias="@type")
 
+    class Config:
+        """Configuration for Pydantic."""
+
+        allow_population_by_field_name = True
+
 
 class CodemetaData(BaseModel):
     """A Codemeta/JSON-LD version of document metadata.
@@ -74,6 +79,11 @@ class CodemetaData(BaseModel):
 
     license_id: Optional[str] = None
 
+    class Config:
+        """Configuration for Pydantic."""
+
+        allow_population_by_field_name = True
+
     @classmethod
     def from_document_metadata(
         cls,
@@ -90,19 +100,24 @@ class CodemetaData(BaseModel):
         else:
             full_text = None
 
-        instance = cls(
-            at__id=url,
-            reportNumber=metadata.identifier,
-            name=metadata.title,
-            description=metadata.abstract,
-            author=[CodemetaPerson(name=a.name) for a in metadata.authors],
-            dateModified=metadata.date_modified,
-            articleBody=full_text,
-            url=url,
-            codeRepository=metadata.repository_url,
-            contIntegration=metadata.ci_url,
+        instance = cls.parse_obj(
+            {
+                "@id": url,
+                "@type": ["Report", "SoftwareSourceCode"],
+                "reportNumber": metadata.identifier,
+                "name": metadata.title,
+                "description": metadata.abstract,
+                "author": [
+                    {"name": a.name, "@type": "Person"}
+                    for a in metadata.authors
+                ],
+                "dateModified": metadata.date_modified,
+                "articleBody": full_text,
+                "url": url,
+                "codeRepository": metadata.repository_url,
+                "contIntegration": metadata.ci_url,
+            }
         )
-        instance.at__id = url
         return instance
 
     def jsonld(self) -> str:

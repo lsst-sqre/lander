@@ -56,7 +56,10 @@ def test_load_from_source_directory(temp_cwd: Path) -> None:
     settings_path = source_path.parent / "lander.yaml"
     settings_path.write_text(yaml.dump(settings_data))
 
-    settings = BuildSettings.load(pdf=pdf_path, source_path=source_path,)
+    settings = BuildSettings.load(
+        pdf=pdf_path,
+        source_path=source_path,
+    )
     assert settings.output_dir == Path("_build")
     assert settings.source_path == source_path
     assert settings.pdf.file_path == pdf_path
@@ -65,7 +68,8 @@ def test_load_from_source_directory(temp_cwd: Path) -> None:
 
 
 def test_load_from_cli_only(temp_article_dir: Path) -> None:
-    """Test where configurations are only set from load classmethod parameters.
+    """Test where configurations are only set from load classmethod
+    parameters.
     """
     settings = BuildSettings.load(
         pdf=Path("article.pdf"),

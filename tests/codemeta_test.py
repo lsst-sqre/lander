@@ -4,18 +4,17 @@ from __future__ import annotations
 
 import json
 
-from lander.codemeta import CodemetaData, CodemetaPerson
+from lander.codemeta import CodemetaData
 
 
 def test_json_export() -> None:
-    cmdata = CodemetaData(
-        at__id="https://example.com/1234/",
-        name="Test document",
-        author=[CodemetaPerson(name="Jonathan Sick")],
+    cmdata = CodemetaData.parse_obj(
+        {
+            "@id": "https://example.com/1234/",
+            "name": "Test document",
+            "author": [{"name": "Jonathan Sick", "@type": "Person"}],
+        }
     )
-    # It seems this needs to be set manually; the alias prevents it from
-    # being set during the constructor
-    cmdata.at__id = "https://example.com/1234/"
     json_str = cmdata.jsonld()
 
     unencoded = json.loads(json_str)

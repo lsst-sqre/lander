@@ -34,14 +34,12 @@ class DownloadableFile(BaseModel):
 
     @classmethod
     def load(cls, path: Path) -> DownloadableFile:
-        file_type, file_encoding = mimetypes.guess_type(
-            str(path), strict=False
-        )
+        file_type, _ = mimetypes.guess_type(str(path), strict=False)
 
         return cls(
             file_path=path,
             name=path.name,
-            mimetype=file_type,
+            mimetype=file_type or "application/octet-stream",
             extension=path.suffix,
             size=path.stat().st_size,
         )
@@ -60,7 +58,6 @@ class DownloadableFile(BaseModel):
 
 
 class BuildSettings(BaseModel):
-
     source_path: FilePath
     """Path to the source file for metadata discovery by the parsing plugin."""
 
@@ -88,7 +85,7 @@ class BuildSettings(BaseModel):
     """Metadata that overrides any metadata discovered by the parsing plugin.
     """
 
-    template_vars: Dict[str, Any] = Field(default_factory=list)
+    template_vars: Dict[str, Any] = Field(default_factory=dict)
     """Additional variables that are available to the Jinja template
     environment.
     """
