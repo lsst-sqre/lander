@@ -1,6 +1,27 @@
 name: CI
 
-"on": [push, pull_request]
+env:
+  # Default Python version used for all jobs other than test, which uses a
+  # matrix of supported versions. Quote the version to avoid interpretation as
+  # a floating point number.
+  PYTHON_VERSION: "3.12"
+
+"on":
+  merge_group: {}
+  pull_request: {}
+  push:
+    branches-ignore:
+      # These should always correspond to pull requests, so ignore them for
+      # the push trigger and let them be triggered by the pull_request
+      # trigger, avoiding running the workflow twice.  This is a minor
+      # optimization so there's no need to ensure this is comprehensive.
+      - "dependabot/**"
+      - "gh-readonly-queue/**"
+      - "renovate/**"
+      - "tickets/**"
+      - "u/**"
+    tags:
+      - "*"
 
 jobs:
   test:
@@ -8,10 +29,10 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.10", "3.11", "3.12"]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # full history for setuptools_scm
 
@@ -37,23 +58,21 @@ jobs:
           npm install -g gulp-cli
           npm install
 
-      - name: Python install
-        run: |
-          python -m pip install --upgrade pip
-          pip install .[dev]
-          pip install tox
-
       - name: Build assets
         run: gulp assets
 
-      - name: Run tests
-        run: tox run -e py,lint,typing
+      - name: Run tox
+        uses: lsst-sqre/run-tox@v1
+        with:
+          python-version: ${{ matrix.python }}
+          tox-envs: "lint,py,typing"
+          tox-plugins: tox-uv
 
   demo:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # full history for setuptools_scm
 
@@ -65,12 +84,12 @@ jobs:
           pandoc --version
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Set up node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
 
@@ -79,44 +98,36 @@ jobs:
           npm install -g gulp-cli
           npm install
 
-      - name: Python install
-        run: |
-          python -m pip install --upgrade pip
-          pip install .[dev]
-          pip install tox
-
       - name: Build assets
         run: gulp assets
 
       - name: Build demo pages
-        run: tox run -e demo
+        uses: lsst-sqre/run-tox@v1
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          tox-envs: "demo"
+          tox-plugins: tox-uv
 
       - name: Upload demo artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: article-demo
           path: _build/article-demo
 
-  pypi:
+  test-packaging:
 
+    name: Test packaging
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [test]
-    if: startsWith(github.ref, 'refs/tags/')
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # full history for setuptools_scm
 
-      - name: Install Pandoc
-        run: |
-          downloadUrl="https://github.com/jgm/pandoc/releases/download/2.19.2/pandoc-2.19.2-1-amd64.deb"
-          wget --no-verbose "$downloadUrl"
-          sudo dpkg -i "${downloadUrl##*/}"
-          pandoc --version
-
       - name: Set up node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
 
@@ -129,7 +140,47 @@ jobs:
         run: gulp assets
 
       - name: Build and publish
-        uses: lsst-sqre/build-and-publish-to-pypi@v1
+        uses: lsst-sqre/build-and-publish-to-pypi@v2
         with:
-          pypi-token: ${{ secrets.PYPI_SQRE_ADMIN }}
-          python-version: "3.11"
+          python-version: ${{ env.PYTHON_VERSION }}
+          upload: false
+
+  pypi:
+
+    # This job requires set up:
+    # 1. Set up a trusted publisher for PyPI
+    # 2. Set up a "pypi" environment in the repository
+    # See https://github.com/lsst-sqre/build-and-publish-to-pypi
+    name: Upload release to PyPI
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [test-packaging]
+    environment:
+      name: pypi
+      url: https://pypi.org/p/example
+    permissions:
+      id-token: write
+    if: github.event_name == 'release' && github.event.action == 'published'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history for setuptools_scm
+
+      - name: Set up node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: NPM install
+        run: |
+          npm install -g gulp-cli
+          npm install
+
+      - name: Build assets
+        run: gulp assets
+
+      - name: Build and publish
+        uses: lsst-sqre/build-and-publish-to-pypi@v2
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
