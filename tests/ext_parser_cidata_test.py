@@ -110,7 +110,7 @@ def test_travis_tag(monkeypatch: MonkeyPatch) -> None:
 
 
 def test_enum_jinja_templating(monkeypatch: MonkeyPatch) -> None:
-    """Demonstrate how the Enum-based types can be used in Jinja templates"""
+    """Demonstrate how the Enum-based types can be used in Jinja templates."""
     monkeypatch.setenv("GITHUB_ACTIONS", "true")
     monkeypatch.setenv("GITHUB_REF", "refs/tags/1.0.0")
 

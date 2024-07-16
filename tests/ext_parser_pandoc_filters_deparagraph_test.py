@@ -11,7 +11,7 @@ import pytest
 
 
 @pytest.mark.parametrize(
-    "sample,expected",
+    ("sample", "expected"),
     [
         # Should strip <p> tag from single paragraph.
         ("Hello world!", "Hello world!\n"),

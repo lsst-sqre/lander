@@ -38,7 +38,7 @@ def test_formattedstring_from_latex_paragraph() -> None:
 
 
 @pytest.mark.parametrize(
-    "text,expected",
+    ("text", "expected"),
     [
         (" Jonathan   Sick ", "Jonathan Sick"),
         ("Jonathan\nSick", "Jonathan Sick"),
@@ -49,7 +49,7 @@ def test_collapse_whitespace(text: str, expected: str) -> None:
 
 
 @pytest.mark.parametrize(
-    "identifier,sample",
+    ("identifier", "sample"),
     [
         ("0000-0002-1825-0097", "0000-0002-1825-0097"),
         ("0000-0001-5109-3700", "hello 0000-0001-5109-3700 world"),

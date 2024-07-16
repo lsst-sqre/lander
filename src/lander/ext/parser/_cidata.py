@@ -6,7 +6,6 @@ import os
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
 
 __all__ = ["GitRefType", "CiMetadata", "GitRefType"]
 
@@ -47,26 +46,26 @@ class CiMetadata:
     platform: CiPlatform = CiPlatform.null
     """The CI platform."""
 
-    git_ref: Optional[str] = None
+    git_ref: str | None = None
     """Git reference: branch or tag name."""
 
-    git_ref_type: Optional[GitRefType] = None
+    git_ref_type: GitRefType | None = None
     """Type of git reference: branch or tag."""
 
-    git_sha: Optional[str] = None
+    git_sha: str | None = None
     """The SHA1 of the Git commit."""
 
-    build_id: Optional[str] = None
+    build_id: str | None = None
     """CI build number."""
 
-    build_url: Optional[str] = None
+    build_url: str | None = None
     """CI dashboard URL for this build."""
 
-    github_slug: Optional[str] = None
+    github_slug: str | None = None
     """Slug of the GitHub repository (``org/repo``)."""
 
     @property
-    def github_repository(self) -> Optional[str]:
+    def github_repository(self) -> str | None:
         """URL of the GitHub repository homepage."""
         if self.github_slug:
             return f"https://github.com/{self.github_slug}"
@@ -92,9 +91,9 @@ class CiMetadata:
         repo = os.getenv("GITHUB_REPOSITORY")
 
         if run_id and repo:
-            ci_build_url: Optional[
-                str
-            ] = f"https://github.com/{repo}/actions/runs/{run_id}"
+            ci_build_url: str | None = (
+                f"https://github.com/{repo}/actions/runs/{run_id}"
+            )
         else:
             ci_build_url = None
 
@@ -104,13 +103,13 @@ class CiMetadata:
             )
             if m:
                 if m.group("kind") == "heads":
-                    git_ref_type: Optional[GitRefType] = GitRefType.branch
+                    git_ref_type: GitRefType | None = GitRefType.branch
                 elif m.group("kind") == "tags":
                     git_ref_type = GitRefType.tag
                 else:
                     git_ref_type = None
 
-                git_ref: Optional[str] = m.group("ref")
+                git_ref: str | None = m.group("ref")
             else:
                 git_ref_type = None
                 git_ref = None
@@ -129,8 +128,8 @@ class CiMetadata:
     def for_travis(cls) -> CiMetadata:
         """Gather CI metadata from a Travis environment."""
         if os.getenv("TRAVIS_TAG"):
-            git_ref: Optional[str] = os.getenv("TRAVIS_TAG")
-            git_ref_type: Optional[GitRefType] = GitRefType.tag
+            git_ref: str | None = os.getenv("TRAVIS_TAG")
+            git_ref_type: GitRefType | None = GitRefType.tag
         elif os.getenv("TRAVIS_BRANCH"):
             git_ref = os.getenv("TRAVIS_BRANCH")
             git_ref_type = GitRefType.branch

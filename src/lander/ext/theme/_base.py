@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import contextlib
 import logging
 import shutil
 from abc import ABCMeta, abstractmethod
+from collections.abc import Iterator
 from pathlib import Path, PurePath, PurePosixPath
-from typing import TYPE_CHECKING, Any, Dict, Iterator, Optional
+from typing import TYPE_CHECKING, Any
 from urllib.parse import urljoin
 
 import jinja2
@@ -39,7 +41,7 @@ class ThemePlugin(metaclass=ABCMeta):
         self, *, metadata: DocumentMetadata, settings: BuildSettings
     ) -> None:
         self._logger = logging.getLogger(__name__)
-        self._base_theme: Optional[ThemePlugin] = None
+        self._base_theme: ThemePlugin | None = None
         self._metadata = metadata
         self._settings = settings
 
@@ -78,14 +80,14 @@ class ThemePlugin(metaclass=ABCMeta):
         return self._jinja_env
 
     @property
-    def base_theme_name(self) -> Optional[str]:
+    def base_theme_name(self) -> str | None:
         """Name of the base theme, or `None` if this theme does not inherit
         from another theme.
         """
         return None
 
     @property
-    def base_theme(self) -> Optional[ThemePlugin]:
+    def base_theme(self) -> ThemePlugin | None:
         """The base theme."""
         if self.base_theme_name is not None:
             if self._base_theme is None:
@@ -98,7 +100,7 @@ class ThemePlugin(metaclass=ABCMeta):
         else:
             return None
 
-    def build_site(self, output_dir: Optional[Path] = None) -> None:
+    def build_site(self, output_dir: Path | None = None) -> None:
         """Build the landing page site, including rendering templates and
         copying assets into the output directory.
 
@@ -111,7 +113,6 @@ class ThemePlugin(metaclass=ABCMeta):
         """
         if output_dir is None:
             output_dir = self.settings.output_dir
-        assert isinstance(output_dir, Path)
         output_dir.mkdir(parents=True, exist_ok=True)
 
         site_inventory = self._build_site_inventory()
@@ -133,10 +134,12 @@ class ThemePlugin(metaclass=ABCMeta):
             shutil.copy(attachment.file_path, output_attachment_path)
 
         self._write_metadata(output_dir)
-        self.run_post_build(output_dir)
+        with contextlib.suppress(NotImplementedError):
+            self.run_post_build(output_dir)
 
+    @abstractmethod
     def run_post_build(self, output_dir: Path) -> None:
-        """Hook that is executed at the end of the site site build.
+        """Run post-build tasks.
 
         Themes can implement this method to perform tasks on a completed site.
 
@@ -145,11 +148,11 @@ class ThemePlugin(metaclass=ABCMeta):
         output_dir : `pathlib.Path`
             File system directory where the site is built.
         """
-        pass
+        raise NotImplementedError
 
     def _build_site_inventory(
-        self, inventory: Optional[Dict[PurePath, Path]] = None
-    ) -> Dict[PurePath, Path]:
+        self, inventory: dict[PurePath, Path] | None = None
+    ) -> dict[PurePath, Path]:
         """Create an inventory of files in the site.
 
         This method gathers file paths in this theme's "site" directory, as
@@ -166,11 +169,10 @@ class ThemePlugin(metaclass=ABCMeta):
         # Map relative site path to filesystem path of the asset.
         if inventory is None:
             inventory = {}
-        assert inventory is not None
 
         # First add paths from the base theme(s)
         if self.base_theme:
-            self.base_theme._build_site_inventory(inventory)
+            self.base_theme._build_site_inventory(inventory)  # noqa: SLF001
 
         # Add paths from this theme's site directory that add to or override
         # the assets from the base theme
@@ -262,7 +264,7 @@ class ThemePlugin(metaclass=ABCMeta):
 
     def create_jinja_context(
         self, *, path: PurePosixPath, template_name: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Create the context for rendering a Jinja template.
 
         This method can be implemented by themes to customize the Jinja
@@ -282,7 +284,7 @@ class ThemePlugin(metaclass=ABCMeta):
             Dictionary used as the Jinja template rendering context. Keys
             are variable names in templates.
         """
-        context: Dict[str, Any] = {
+        context: dict[str, Any] = {
             "metadata": self.metadata,
             "settings": self.settings.template_vars,
             "pdf": self.settings.pdf,

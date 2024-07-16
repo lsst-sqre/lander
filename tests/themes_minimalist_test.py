@@ -24,24 +24,24 @@ def test_minimalist_article(caplog: LogCaptureFixture, temp_cwd: Path) -> None:
     output_dir = Path("_build")
     # Mock up metadata to isolate the test case
     metadata = DocumentMetadata.parse_obj(
-        dict(title="Example Article Document")
+        {"title": "Example Article Document"}
     )
     # Mock build settings as well
     settings = BuildSettings.parse_obj(
-        dict(
-            source_path=data_root / "article.tex",
-            pdf=DownloadableFile.load(data_root / "article.pdf"),
-            output_dir=output_dir,
-            parser="article",
-            theme="minimalist",
-        )
+        {
+            "source_path": data_root / "article.tex",
+            "pdf": DownloadableFile.load(data_root / "article.pdf"),
+            "output_dir": output_dir,
+            "parser": "article",
+            "theme": "minimalist",
+        }
     )
 
     # Load from the plugin system, though directly importing the
     # MinimalistTheme is also valid for this test.
     themes = ThemePluginDirectory.load_plugins()
-    Theme = themes["minimalist"]
-    theme = Theme(metadata=metadata, settings=settings)
+    theme_plugin = themes["minimalist"]
+    theme = theme_plugin(metadata=metadata, settings=settings)
 
     assert theme.base_theme_name == "base"
     assert isinstance(theme.base_theme, themes["base"])

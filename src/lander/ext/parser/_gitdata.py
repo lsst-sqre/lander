@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import datetime
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path, PurePath
-from typing import List, Optional, Sequence
 
 import git
 from git.repo import Repo
@@ -42,7 +42,7 @@ class GitRepository:
     repo: Repo
     """The GitPython repository representation."""
 
-    files: List[GitFile]
+    files: list[GitFile]
     """"Files in the Git repository."""
 
     @classmethod
@@ -66,9 +66,9 @@ class GitRepository:
         )
 
     @staticmethod
-    def _gather_files(repo: Repo) -> List[GitFile]:
+    def _gather_files(repo: Repo) -> list[GitFile]:
         """Gather metadata about all files in the Git tree."""
-        files: List[GitFile] = []
+        files: list[GitFile] = []
 
         head_commit = repo.head.commit
 
@@ -79,7 +79,7 @@ class GitRepository:
                         filepath=Path(item.abspath), repo=repo
                     )
                     files.append(git_file)
-                except IOError:
+                except OSError:
                     continue
 
         return files
@@ -129,10 +129,10 @@ class GitRepository:
             )
 
         # Only get here if git could not find the file path in the history
-        raise IOError("File {} not found".format(filepath))
+        raise OSError(f"File {filepath} not found")
 
     def compute_date_modified(
-        self, extensions: Optional[Sequence[str]] = None
+        self, extensions: Sequence[str] | None = None
     ) -> datetime.datetime:
         """Get the most recent modification date, optional considering only
         files with one of an accepted sequence of extensions.

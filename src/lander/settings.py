@@ -1,8 +1,10 @@
+"""Lander settings models."""
+
 from __future__ import annotations
 
 import mimetypes
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import yaml
 from pydantic import BaseModel, Field, FilePath, HttpUrl, validator
@@ -58,6 +60,8 @@ class DownloadableFile(BaseModel):
 
 
 class BuildSettings(BaseModel):
+    """Model for build settings in a lander.yaml configuration file."""
+
     source_path: FilePath
     """Path to the source file for metadata discovery by the parsing plugin."""
 
@@ -70,22 +74,22 @@ class BuildSettings(BaseModel):
     theme: str
     """Name of the theme plugin."""
 
-    canonical_url: Optional[HttpUrl] = None
+    canonical_url: HttpUrl | None = None
     """The canonical URL where the landing page is hosted."""
 
     output_dir: Path = Field(default_factory=lambda: Path("_build"))
     """Path to the output directory for the built site."""
 
-    attachments: List[DownloadableFile] = Field(default_factory=list)
+    attachments: list[DownloadableFile] = Field(default_factory=list)
     """List of file attachments to include on the landing page for
     download.
     """
 
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
     """Metadata that overrides any metadata discovered by the parsing plugin.
     """
 
-    template_vars: Dict[str, Any] = Field(default_factory=dict)
+    template_vars: dict[str, Any] = Field(default_factory=dict)
     """Additional variables that are available to the Jinja template
     environment.
     """
@@ -94,13 +98,13 @@ class BuildSettings(BaseModel):
     def load(
         cls,
         *,
-        output_dir: Optional[Path] = None,
-        source_path: Optional[Path] = None,
-        pdf: Optional[Path] = None,
-        parser: Optional[str] = None,
-        theme: Optional[str] = None,
-        canonical_url: Optional[str] = None,
-        attachments: Optional[List[Path]] = None,
+        output_dir: Path | None = None,
+        source_path: Path | None = None,
+        pdf: Path | None = None,
+        parser: str | None = None,
+        theme: str | None = None,
+        canonical_url: str | None = None,
+        attachments: list[Path] | None = None,
     ) -> BuildSettings:
         """Create build settings by optionally loadings settings from a
         YAML configuration file and overriding settings from the command line.
@@ -134,7 +138,7 @@ class BuildSettings(BaseModel):
         """
         settings_path = BuildSettings._get_settings_path(source_path)
         if settings_path:
-            settings_data: Dict[str, Any] = yaml.safe_load(
+            settings_data: dict[str, Any] = yaml.safe_load(
                 settings_path.read_text()
             )
             project_dir = settings_path.parent
@@ -178,7 +182,7 @@ class BuildSettings(BaseModel):
         return cls.parse_obj(settings_data)
 
     @staticmethod
-    def _get_settings_path(source_path: Optional[Path]) -> Optional[Path]:
+    def _get_settings_path(source_path: Path | None) -> Path | None:
         settings_path = Path.cwd().joinpath("lander.yaml")
         if settings_path.exists():
             return settings_path
@@ -191,6 +195,7 @@ class BuildSettings(BaseModel):
         return None
 
     @validator("parser")
+    @classmethod
     def validate_parser_plugin(cls, v: str) -> str:
         if v not in parsers:
             raise ValueError(
@@ -200,6 +205,7 @@ class BuildSettings(BaseModel):
         return v
 
     @validator("theme")
+    @classmethod
     def validate_theme_plugin(cls, v: str) -> str:
         if v not in themes:
             raise ValueError(

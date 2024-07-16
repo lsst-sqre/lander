@@ -25,5 +25,5 @@ def filter_paragraphify(value: str) -> str:
     """
     value = re.sub(r"\r\n|\r|\n", "\n", value)  # Normalize newlines
     paras = re.split("\n{2,}", value)
-    paras = ["<p>{0}</p>".format(p) for p in paras if len(p) > 0]
+    paras = [f"<p>{p}</p>" for p in paras if len(p) > 0]
     return Markup("\n\n".join(paras))

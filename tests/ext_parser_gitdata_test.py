@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime
+from datetime import UTC
 from pathlib import Path, PurePath
 
 from lander.ext.parser import GitFile, GitRepository
@@ -13,7 +14,7 @@ def test_gitfile_extension() -> None:
     gitfile = GitFile(
         path=Path(__file__),
         name=PurePath(__file__),
-        date_modified=datetime.datetime.now(),
+        date_modified=datetime.datetime.now(tz=UTC),
     )
     assert gitfile.extension == "py"  # this test file
 
@@ -22,5 +23,5 @@ def test_gitrepository() -> None:
     git_repository = GitRepository.create(Path(__file__).parent)
     assert len(git_repository.files) > 0
 
-    extensions = set([gitfile.extension for gitfile in git_repository.files])
+    extensions = {gitfile.extension for gitfile in git_repository.files}
     assert "py" in extensions

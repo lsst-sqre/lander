@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import functools
 import logging
-from typing import Any, Callable, List, Optional, TypeVar
+from collections.abc import Callable
+from typing import Any, TypeVar
 
 import pypandoc
 
@@ -37,13 +38,13 @@ def ensure_pandoc(func: F) -> Callable[..., Any]:
                     "Pandoc version %s installation complete",
                     pypandoc.get_pandoc_version(),
                 )
-            except Exception:
+            except Exception as e:
                 logger.exception("Failed to download pandoc.")
                 raise RuntimeError(
                     "Could not install Pandoc. Please pre-install pandoc on "
                     "your system and try again. See "
                     "https://pandoc.org/installing.html."
-                )
+                ) from e
 
             result = func(*args, **kwargs)
 
@@ -60,7 +61,7 @@ def convert_text(
     output_fmt: str,
     deparagraph: bool = False,
     mathjax: bool = False,
-    extra_args: Optional[List[str]] = None,
+    extra_args: list[str] | None = None,
 ) -> str:
     """Convert text from one markup format to another using pandoc.
 
@@ -117,10 +118,7 @@ def convert_text(
     """
     logger = logging.getLogger(__name__)
 
-    if extra_args is not None:
-        extra_args = list(extra_args)
-    else:
-        extra_args = []
+    extra_args = list(extra_args) if extra_args is not None else []
 
     if mathjax:
         extra_args.append("--mathjax")
@@ -140,7 +138,6 @@ def convert_text(
         extra_args,
     )
 
-    output = pypandoc.convert_text(
+    return pypandoc.convert_text(
         content, output_fmt, format=source_fmt, extra_args=extra_args
     )
-    return output

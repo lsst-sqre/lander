@@ -4,14 +4,14 @@ from __future__ import annotations
 
 import os
 import shutil
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator
 
 import pytest
 from typer.testing import CliRunner
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def temp_cwd(tmp_path: Path) -> Generator[Path, None, None]:
     """Run the test from a temporary directory."""
     current_dir = Path.cwd()
@@ -22,7 +22,7 @@ def temp_cwd(tmp_path: Path) -> Generator[Path, None, None]:
     os.chdir(current_dir)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def temp_article_dir(temp_cwd: Path) -> Path:
     """Run the test from a temporary directory containing the
     "tests/data/article" dataset.

@@ -18,7 +18,8 @@ from lander.ext.parser.texutils.normalize import (
 
 def test_remove_comments_abstract() -> None:
     sample = (
-        r"\setDocAbstract{%" + "\n"
+        r"\setDocAbstract{%"
+        "\n"
         " The LSST Data Management System (DMS) is a set of services\n"
         " employing a variety of software components running on\n"
         " computational and networking infrastructure that combine to\n"
@@ -30,7 +31,8 @@ def test_remove_comments_abstract() -> None:
         "}"
     )
     expected = (
-        r"\setDocAbstract{" + "\n"
+        r"\setDocAbstract{"
+        "\n"
         " The LSST Data Management System (DMS) is a set of services\n"
         " employing a variety of software components running on\n"
         " computational and networking infrastructure that combine to\n"
@@ -81,16 +83,22 @@ def test_read_tex_file() -> None:
 
 def test_replace_macros() -> None:
     sample = (
-        r"\def \product {Data Management}" + "\n"
-        r"\title    [Test Plan]  { \product\ Test Plan}" + "\n"
-        r"\setDocAbstract {" + "\n"
+        r"\def \product {Data Management}"
+        "\n"
+        r"\title    [Test Plan]  { \product\ Test Plan}"
+        "\n"
+        r"\setDocAbstract {"
+        "\n"
         r"This is the  Test Plan for \product.}"
     )
 
     expected = (
-        r"\def Data Management {Data Management}" + "\n"
-        r"\title    [Test Plan]  { Data Management Test Plan}" + "\n"
-        r"\setDocAbstract {" + "\n"
+        r"\def Data Management {Data Management}"
+        "\n"
+        r"\title    [Test Plan]  { Data Management Test Plan}"
+        "\n"
+        r"\setDocAbstract {"
+        "\n"
         r"This is the  Test Plan for Data Management.}"
     )
 
@@ -102,7 +110,7 @@ def test_replace_macros() -> None:
 
 
 @pytest.mark.parametrize(
-    "sample,expected",
+    ("sample", "expected"),
     [
         (r"\input{file.tex}", "file.tex"),
         (r"\input{dirname/file.tex}", "dirname/file.tex"),
