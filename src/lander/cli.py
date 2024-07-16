@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Optional
 
 import typer
 
@@ -15,30 +15,38 @@ __all__ = ["app"]
 
 app = typer.Typer()
 
+# typer doesn't work with modern union syntax for optional types,
+# hence the use of UP007 to suppress the error for now.
+
 
 @app.command()
 def build(
     output: Annotated[
-        Path | None, typer.Option(help="Directory for the built site")
+        Optional[Path],  # noqa: UP007
+        typer.Option(help="Directory for the built site"),
     ] = None,
     source: Annotated[
-        Path | None,
+        Optional[Path],  # noqa: UP007
         typer.Option(
             help="Source file for metadata (usually the root tex file)."
         ),
     ] = None,
     pdf: Annotated[
-        Path | None,
+        Optional[Path],  # noqa: UP007
         typer.Option(
             help="Path to the PDF file to display on the landing page."
         ),
     ] = None,
     parser: Annotated[
-        str | None, typer.Option(help="Metadata parsing plugin")
+        Optional[str],  # noqa: UP007
+        typer.Option(help="Metadata parsing plugin"),
     ] = None,
-    theme: Annotated[str | None, typer.Option(help="Theme plugin.")] = None,
+    theme: Annotated[
+        Optional[str],  # noqa: UP007
+        typer.Option(help="Theme plugin."),
+    ] = None,
     canonical_url: Annotated[
-        str | None,
+        Optional[str],  # noqa: UP007
         typer.Option(
             "--url", help="Canonical URL where the landing page is hosted."
         ),
