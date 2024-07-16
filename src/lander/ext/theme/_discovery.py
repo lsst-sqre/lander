@@ -1,8 +1,7 @@
 from __future__ import annotations
 
+from importlib.metadata import entry_points
 from typing import TYPE_CHECKING
-
-import pkg_resources
 
 if TYPE_CHECKING:
     from lander.ext.theme import ThemePlugin
@@ -23,7 +22,7 @@ class ThemePluginDirectory:
         """
         discovered_plugins = {
             entry_point.name: entry_point.load()
-            for entry_point in pkg_resources.iter_entry_points("lander.themes")
+            for entry_point in entry_points(group="lander.themes")
         }
         return cls(discovered_plugins)
 

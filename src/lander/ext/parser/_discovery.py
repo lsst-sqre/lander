@@ -1,8 +1,7 @@
 from __future__ import annotations
 
+from importlib.metadata import entry_points
 from typing import TYPE_CHECKING
-
-import pkg_resources
 
 if TYPE_CHECKING:
     from lander.ext.parser import Parser
@@ -33,9 +32,7 @@ class ParsingPlugins:
         """
         discovered_plugins = {
             entry_point.name: entry_point.load()
-            for entry_point in pkg_resources.iter_entry_points(
-                "lander.parsers"
-            )
+            for entry_point in entry_points(group="lander.parsers")
         }
         return cls(discovered_plugins)
 
