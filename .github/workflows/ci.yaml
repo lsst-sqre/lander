@@ -157,7 +157,7 @@ jobs:
     needs: [test-packaging]
     environment:
       name: pypi
-      url: https://pypi.org/p/example
+      url: https://pypi.org/p/lander
     permissions:
       id-token: write
     if: github.event_name == 'release' && github.event.action == 'published'
