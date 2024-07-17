@@ -26,3 +26,6 @@ class BaseTheme(ThemePlugin):
         files in the site.
         """
         return Path(__file__).parent.joinpath("templates")
+
+    def run_post_build(self, output_dir: Path) -> None:
+        pass

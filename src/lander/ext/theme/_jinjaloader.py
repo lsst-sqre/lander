@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import logging
 import re
-from os.path import getmtime
-from typing import TYPE_CHECKING, Callable, Optional, Tuple
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from jinja2 import BaseLoader, TemplateNotFound
 
@@ -63,7 +63,7 @@ class ThemeTemplateLoader(BaseLoader):
         return self._theme
 
     @property
-    def inherited_loader(self) -> Optional[ThemeTemplateLoader]:
+    def inherited_loader(self) -> ThemeTemplateLoader | None:
         """The template loader from the theme's base theme (if the theme
         inherits from a base theme).
         """
@@ -74,8 +74,8 @@ class ThemeTemplateLoader(BaseLoader):
 
     def get_source(
         self, environment: Environment, template: str
-    ) -> Tuple[str, str, Callable]:
-        """Get the template source given its name
+    ) -> tuple[str, str, Callable]:
+        """Get the template source given its name.
 
         Implements the Jinja `jinja.BaseLoader` interface.
         """
@@ -94,7 +94,7 @@ class ThemeTemplateLoader(BaseLoader):
 
     def get_site_file_template(
         self, environment: Environment, theme_name: str, file_path: str
-    ) -> Tuple[str, str, Callable]:
+    ) -> tuple[str, str, Callable]:
         """Get the source for a templated site file."""
         if theme_name == self.theme.name:
             path = self.theme.site_dir.joinpath(file_path)
@@ -120,7 +120,7 @@ class ThemeTemplateLoader(BaseLoader):
 
     def get_theme_template(
         self, environment: Environment, template: str
-    ) -> Tuple[str, str, Callable]:
+    ) -> tuple[str, str, Callable]:
         """Get the source for a theme template, or a template in an inherited
         theme.
         """
@@ -134,14 +134,14 @@ class ThemeTemplateLoader(BaseLoader):
         else:
             raise TemplateNotFound(template)
 
-    def _return_source(self, path: Path) -> Tuple[str, str, Callable]:
+    def _return_source(self, path: Path) -> tuple[str, str, Callable]:
         """Return template source following the `Loader.get_source`
         return-type specification.
         """
         source = path.read_text()
-        modified_time = getmtime(path)
+        modified_time = path.stat().st_mtime
         return (
             source,
             str(path.resolve()),
-            lambda: modified_time == getmtime(path),
+            lambda: modified_time == path.stat().st_mtime,
         )

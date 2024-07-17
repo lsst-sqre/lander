@@ -10,4 +10,4 @@ from lander.ext.parser.pandoc._convert import ensure_pandoc
 @ensure_pandoc
 def print_pandoc_version() -> None:
     version = pypandoc.get_pandoc_version()
-    print(f"Using pandoc {version}")
+    print(f"Using pandoc {version}")  # noqa: T201

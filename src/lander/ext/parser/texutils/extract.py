@@ -1,11 +1,12 @@
-"""Content extraction form TeX source"""
+"""Content extraction from TeX source."""
 
 from __future__ import annotations
 
 import logging
 import re
+from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import Dict, Iterator, List, Optional, Union
+from typing import ClassVar
 
 __all__ = [
     "get_macros",
@@ -26,7 +27,7 @@ DEF_PATTERN = re.compile(
 )  # macro contents
 
 
-def get_macros(tex_source: str) -> Dict[str, str]:
+def get_macros(tex_source: str) -> dict[str, str]:
     r"""Get all macro definitions from TeX source, supporting multiple
     declaration patterns.
 
@@ -60,7 +61,7 @@ def get_macros(tex_source: str) -> Dict[str, str]:
     return macros
 
 
-def get_def_macros(tex_source: str) -> Dict[str, str]:
+def get_def_macros(tex_source: str) -> dict[str, str]:
     r"""Get all ``\def`` macro definition from TeX source.
 
     Parameters
@@ -84,7 +85,7 @@ def get_def_macros(tex_source: str) -> Dict[str, str]:
     return macros
 
 
-def get_newcommand_macros(tex_source: str) -> Dict[str, str]:
+def get_newcommand_macros(tex_source: str) -> dict[str, str]:
     r"""Get all ``\newcommand`` macro definition from TeX source.
 
     Parameters
@@ -117,23 +118,27 @@ def get_newcommand_macros(tex_source: str) -> Dict[str, str]:
 
 @dataclass
 class LaTeXCommandElement:
-    bracket: Optional[str] = None
+    """Definition of a LaTeX command element."""
+
+    bracket: str | None = None
     """The element's bracket style, either ``[`` or ``{``."""
 
     required: bool = False
     """Whether the element is considered optional in the command invocation.
     """
 
-    name: Optional[str] = None
+    name: str | None = None
     """Optional name of the element."""
 
-    index: Optional[int] = None
+    index: int | None = None
     """Index of the command element in the command."""
 
 
 @dataclass
 class ParsedElement:
-    name: Optional[str]
+    """Contents of a parsed LaTeX command element."""
+
+    name: str | None
     """Optional name of the element (`None` if the element is not named)."""
 
     index: int
@@ -165,14 +170,14 @@ class LaTeXCommand:
         - ``name`` (optional field): Name of the field.
     """
 
-    _brackets: Dict[str, str] = {"[": "]", "{": "}"}
+    _brackets: ClassVar[dict[str, str]] = {"[": "]", "{": "}"}
 
     def __init__(self, name: str, *elements: LaTeXCommandElement) -> None:
         super().__init__()
         self._logger = logging.getLogger(__name__)
         self.name = name
         # Should add validation to elements
-        self.elements: List[LaTeXCommandElement] = []
+        self.elements: list[LaTeXCommandElement] = []
         for i, element in enumerate(elements):
             element.index = i
             self.elements.append(element)
@@ -240,7 +245,8 @@ class LaTeXCommand:
         running_index = start_index
 
         for element in self.elements:
-            assert element.bracket is not None
+            if element.bracket is None:
+                raise RuntimeError("Element bracket is None")
             opening_bracket = element.bracket
             closing_bracket = self._brackets[opening_bracket]
 
@@ -251,7 +257,8 @@ class LaTeXCommand:
                 if c == element.bracket:
                     element_start = i
                     break
-                elif c == "\n":
+
+                if c == "\n":
                     # No starting bracket on the line.
                     if element.required is True:
                         # Try to parse a single single-word token after the
@@ -259,7 +266,8 @@ class LaTeXCommand:
                         content = self._parse_whitespace_argument(
                             source[running_index:], self.name
                         )
-                        assert element.index is not None
+                        if element.index is None:
+                            raise RuntimeError("Element index is None")
                         return ParsedCommand(
                             self.name,
                             [
@@ -281,7 +289,8 @@ class LaTeXCommand:
                 # Optional element not found. Continue to next element,
                 # not advancing the running_index of the parser.
                 continue
-            elif element_start is None and element.required is True:
+
+            if element_start is None and element.required is True:
                 message = (
                     f"Parsing command {self.name} at index {start_index:d}, "
                     f"did not detect element {element.index:d}"
@@ -291,7 +300,8 @@ class LaTeXCommand:
             # Find the closing bracket, keeping track of the number of times
             # the same type of bracket was opened and closed.
             balance = 1
-            assert element_start is not None
+            if element_start is None:
+                raise RuntimeError("Element start is None")
             for i, c in enumerate(
                 source[element_start + 1 :], start=element_start + 1
             ):
@@ -314,8 +324,10 @@ class LaTeXCommand:
 
             # Package the parsed element's content.
             element_content = source[element_start + 1 : element_end]
-            assert element.index is not None
-            assert element_end is not None
+            if element.index is None:
+                raise RuntimeError("Element index is None")
+            if element_end is None:
+                raise RuntimeError("Element end is None")
             parsed_element = ParsedElement(
                 index=element.index,
                 name=element.name,
@@ -326,10 +338,9 @@ class LaTeXCommand:
             running_index = element_end + 1
 
         command_source = source[start_index:running_index]
-        parsed_command = ParsedCommand(
+        return ParsedCommand(
             self.name, parsed_elements, start_index, command_source
         )
-        return parsed_command
 
     @staticmethod
     def _parse_whitespace_argument(source: str, name: str) -> str:
@@ -339,8 +350,8 @@ class LaTeXCommand:
         ``\input file``. The source should ideally contain `` file`` along
         with a newline character.
 
-        >>> source = 'Line 1\n' r'\input test.tex' '\nLine 2'
-        >>> LatexCommand._parse_whitespace_argument(source, 'input')
+        >>> source = "Line 1\n" r"\input test.tex" "\nLine 2"
+        >>> LatexCommand._parse_whitespace_argument(source, "input")
         'test.tex'
 
         Bracket delimited arguments (``\input{test.tex}``) are handled in
@@ -388,20 +399,20 @@ class ParsedCommand:
     def __init__(
         self,
         name: str,
-        parsed_elements: List[ParsedElement],
+        parsed_elements: list[ParsedElement],
         start_index: int,
         command_source: str,
     ) -> None:
         self.name: str = name
         self.start_index: int = start_index
-        self._parsed_elements: List[ParsedElement] = parsed_elements
+        self._parsed_elements: list[ParsedElement] = parsed_elements
         self.command_source: str = command_source
 
-    def __getitem__(self, key: Union[int, str]) -> str:
+    def __getitem__(self, key: int | str) -> str:
         element = self._get_element(key)
         return element.content
 
-    def __contains__(self, key: Union[int, str]) -> bool:
+    def __contains__(self, key: int | str) -> bool:
         try:
             self._get_element(key)
         except KeyError:
@@ -409,7 +420,7 @@ class ParsedCommand:
 
         return True
 
-    def _get_element(self, key: Union[int, str]) -> ParsedElement:
+    def _get_element(self, key: int | str) -> ParsedElement:
         element = None
 
         if isinstance(key, int):
@@ -426,6 +437,6 @@ class ParsedCommand:
                     break
 
         if element is None:
-            message = "Key {} not found".format(key)
+            message = f"Key {key} not found"
             raise KeyError(message)
         return element

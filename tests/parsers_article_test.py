@@ -21,9 +21,9 @@ def test_article() -> None:
     )
 
     plugins = ParsingPlugins.load_plugins()
-    ArticleParser = plugins["article"]
+    article_parser = plugins["article"]
 
-    parser = ArticleParser(settings=settings)
+    parser = article_parser(settings=settings)
 
     assert parser.tex_macros == {r"\version": "1.0"}
 

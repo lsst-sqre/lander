@@ -8,8 +8,8 @@ __all__ = [
 ]
 
 import datetime
-import os
 import re
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import jinja2
@@ -28,7 +28,7 @@ def create_jinja_env() -> jinja2.Environment:
         Jinja2 template rendering environment, configured to use templates in
         ``templates/``.
     """
-    template_dir = os.path.join(os.path.dirname(__file__), "templates")
+    template_dir = Path(__file__).parent / "templates"
     env = jinja2.Environment(
         loader=jinja2.FileSystemLoader(template_dir),
         autoescape=jinja2.select_autoescape(["html"]),
@@ -41,8 +41,7 @@ def create_jinja_env() -> jinja2.Environment:
 def render_homepage(config: "Configuration", env: jinja2.Environment) -> str:
     """Render the homepage.jinja template."""
     template = env.get_template("homepage.jinja")
-    rendered_page = template.render(config=config)
-    return rendered_page
+    return template.render(config=config)
 
 
 def filter_simple_date(value: datetime.datetime) -> str:
@@ -57,5 +56,5 @@ def filter_paragraphify(value: str) -> str:
     """
     value = re.sub(r"\r\n|\r|\n", "\n", value)  # Normalize newlines
     paras = re.split("\n{2,}", value)
-    paras = ["<p>{0}</p>".format(p) for p in paras if len(p) > 0]
+    paras = [f"<p>{p}</p>" for p in paras if len(p) > 0]
     return Markup("\n\n".join(paras))

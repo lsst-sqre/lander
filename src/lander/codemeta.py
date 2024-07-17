@@ -1,4 +1,4 @@
-"""This modules deals with generating metadata.jsonld files from parsed
+"""Support for generating metadata.jsonld files from parsed
 document metadata.
 
 This metadata format is considered legacy for compatibility with the orignal
@@ -8,9 +8,9 @@ versions of Lander (versions 0.x).
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING
 
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
 __all__ = ["CodemetaPerson", "CodemetaData"]
 
@@ -24,11 +24,7 @@ class CodemetaPerson(BaseModel):
     name: str
 
     at__type: str = Field("Person", alias="@type")
-
-    class Config:
-        """Configuration for Pydantic."""
-
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class CodemetaData(BaseModel):
@@ -40,7 +36,7 @@ class CodemetaData(BaseModel):
 
     at__id: str = Field("", alias="@id")
 
-    at__context: List[str] = Field(
+    at__context: list[str] = Field(
         alias="@context",
         default_factory=lambda: [
             "https://raw.githubusercontent.com/codemeta/codemeta/2.0-rc/"
@@ -49,40 +45,36 @@ class CodemetaData(BaseModel):
         ],
     )
 
-    at__type: List[str] = Field(
+    at__type: list[str] = Field(
         alias="@type", default_factory=lambda: ["Report", "SoftwareSourceCode"]
     )
 
     language: str = "TeX"
 
-    reportNumber: Optional[str] = None
+    report_number: str | None = Field(None, alias="reportNumber")
 
-    name: Optional[str] = None
+    name: str | None = None
 
-    description: Optional[str] = None
+    description: str | None = None
 
-    author: Optional[List[CodemetaPerson]] = Field(default_factory=lambda: [])
+    author: list[CodemetaPerson] | None = Field(default_factory=list)
 
-    dateModified: Optional[datetime.datetime] = None
+    date_modified: datetime.datetime | None = Field(None, alias="dateModified")
 
-    articleBody: Optional[str] = None
+    article_body: str | None = Field(None, alias="articleBody")
 
-    fileFormat: str = "text/plain"
+    file_format: str = Field("text/plain", alias="fileFormat")
 
-    url: Optional[HttpUrl] = None
+    url: HttpUrl | None = None
 
-    codeRepository: Optional[HttpUrl] = None
+    code_repository: HttpUrl | None = Field(None, alias="codeRepository")
 
-    contIntegration: Optional[HttpUrl] = None
+    cont_integration: HttpUrl | None = Field(None, alias="contIntegration")
 
-    readme: Optional[HttpUrl] = None
+    readme: HttpUrl | None = None
 
-    license_id: Optional[str] = None
-
-    class Config:
-        """Configuration for Pydantic."""
-
-        allow_population_by_field_name = True
+    license_id: str | None = None
+    model_config = ConfigDict(populate_by_name=True)
 
     @classmethod
     def from_document_metadata(
@@ -90,17 +82,17 @@ class CodemetaData(BaseModel):
         *,
         metadata: DocumentMetadata,
         url: str,
-        ci_url: Optional[str] = None,
+        ci_url: str | None = None,  # noqa: ARG003
     ) -> CodemetaData:
         """Create a CodemetaData from a `lander.ext.parser.DocumentMetadata`
         instance.
         """
         if metadata.full_text:
-            full_text: Optional[str] = metadata.full_text.plain
+            full_text: str | None = metadata.full_text.plain
         else:
             full_text = None
 
-        instance = cls.parse_obj(
+        return cls.parse_obj(
             {
                 "@id": url,
                 "@type": ["Report", "SoftwareSourceCode"],
@@ -118,7 +110,6 @@ class CodemetaData(BaseModel):
                 "contIntegration": metadata.ci_url,
             }
         )
-        return instance
 
     def jsonld(self) -> str:
         """Export to JSON-LD content."""

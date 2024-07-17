@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING
 
 from lander.ext.parser._cidata import CiMetadata
 from lander.ext.parser._datamodel import DocumentMetadata
@@ -36,9 +36,9 @@ class Parser(metaclass=ABCMeta):
         self._tex_source = self.normalize_source(_tex_source)
 
         try:
-            self._git_repository: Optional[
-                GitRepository
-            ] = GitRepository.create(self.tex_path.parent)
+            self._git_repository: GitRepository | None = GitRepository.create(
+                self.tex_path.parent
+            )
         except Exception:
             self._git_repository = None
 
@@ -53,7 +53,7 @@ class Parser(metaclass=ABCMeta):
 
     @property
     def tex_path(self) -> Path:
-        """ "Path to the root TeX source file."""
+        """Path to the root TeX source file."""
         return self.settings.source_path
 
     @property
@@ -62,7 +62,7 @@ class Parser(metaclass=ABCMeta):
         return self._tex_source
 
     @property
-    def tex_macros(self) -> Dict[str, str]:
+    def tex_macros(self) -> dict[str, str]:
         """TeX macros detected by
         `lander.ext.parser.texutils.extract.get_macros`.
 
@@ -76,18 +76,18 @@ class Parser(metaclass=ABCMeta):
 
     @property
     def ci_metadata(self) -> CiMetadata:
-        """Metadata from the CI environment
+        """Metadata from the CI environment.
 
-        This attribute is instantiate automatically and is available to the
+        This attribute is instantiated automatically and is available to the
         `extract_metadata` hook for use by parser implementations.
         """
         return self._ci_metadata
 
     @property
-    def git_repository(self) -> Optional[GitRepository]:
-        """Metadata from the local Git repository
+    def git_repository(self) -> GitRepository | None:
+        """Metadata from the local Git repository.
 
-        This attribute is instantiate automatically and is available to the
+        This attribute is instantiated automatically and is available to the
         `extract_metadata` hook for use by parser implementations.
         """
         return self._git_repository
@@ -116,7 +116,9 @@ class Parser(metaclass=ABCMeta):
 
     @abstractmethod
     def extract_metadata(self) -> DocumentMetadata:
-        """Hook for implementing metadata extraction.
+        """Extract metadata from the document.
+
+        This method should be implemented by parser subclasses.
 
         Returns
         -------

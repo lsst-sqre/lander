@@ -16,14 +16,16 @@ def test_get_def_macros() -> None:
     assert macros[r"\name"] == "content"
 
 
-def test_get_def_macros_LDM_503() -> None:
-    sample = (
-        r"\documentclass[DM,STP,toc]{lsstdoc}" + "\n"
-        "%set the WP number or product here for the requirements\n"
-        r"\def\product{Data Management}" + "\n"
-        r"\def\cycle{S17}" + "\n"
-    )
-    macros = get_def_macros(sample)
+multiline_sample = r"""
+\documentclass[DM,STP,toc]{lsstdoc}
+%set the WP number or product here for the requirements
+"\def\product{Data Management}
+"\def\cycle{S17}
+"""
+
+
+def test_get_def_macros_ldm_503() -> None:
+    macros = get_def_macros(multiline_sample)
 
     assert macros[r"\product"] == "Data Management"
     assert macros[r"\cycle"] == "S17"

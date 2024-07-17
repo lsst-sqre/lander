@@ -34,14 +34,14 @@ def deparagraph(element: Element, doc: Doc) -> Element:
     """
     if isinstance(element, Para):
         # Check if siblings exist; don't process the paragraph in that case.
-        if element.next is not None:
-            return element
-        elif element.prev is not None:
+        if element.next is not None or element.prev is not None:
             return element
 
         # Remove the Para wrapper from the lone paragraph.
         # `Plain` is a container that isn't rendered as a paragraph.
         return Plain(*element.content)
+
+    return element
 
 
 def main() -> None:
