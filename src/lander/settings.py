@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from pydantic import BaseModel, Field, FilePath, HttpUrl, validator
+from pydantic import BaseModel, Field, FilePath, HttpUrl, field_validator
 
 from lander.plugins import parsers, themes
 
@@ -194,7 +194,8 @@ class BuildSettings(BaseModel):
 
         return None
 
-    @validator("parser")
+    @field_validator("parser")
+    @classmethod
     @classmethod
     def validate_parser_plugin(cls, v: str) -> str:
         if v not in parsers:
@@ -204,7 +205,8 @@ class BuildSettings(BaseModel):
             )
         return v
 
-    @validator("theme")
+    @field_validator("theme")
+    @classmethod
     @classmethod
     def validate_theme_plugin(cls, v: str) -> str:
         if v not in themes:

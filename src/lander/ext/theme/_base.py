@@ -292,7 +292,7 @@ class ThemePlugin(metaclass=ABCMeta):
         }
         if self.settings.canonical_url:
             context["canonical_url"] = urljoin(
-                self.settings.canonical_url, str(path)
+                str(self.settings.canonical_url), str(path)
             )
             # Strip "index.html" from the canonical URL
             if context["canonical_url"].endswith("/index.html"):

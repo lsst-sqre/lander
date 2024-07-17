@@ -10,7 +10,7 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING
 
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
 __all__ = ["CodemetaPerson", "CodemetaData"]
 
@@ -24,11 +24,7 @@ class CodemetaPerson(BaseModel):
     name: str
 
     at__type: str = Field("Person", alias="@type")
-
-    class Config:
-        """Configuration for Pydantic."""
-
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class CodemetaData(BaseModel):
@@ -78,11 +74,7 @@ class CodemetaData(BaseModel):
     readme: HttpUrl | None = None
 
     license_id: str | None = None
-
-    class Config:
-        """Configuration for Pydantic."""
-
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
     @classmethod
     def from_document_metadata(

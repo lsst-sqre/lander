@@ -7,8 +7,8 @@ from pydantic import BaseModel, ValidationError
 
 from lander.ext.parser._datamodel import (
     FormattedString,
-    Orcid,
-    Ror,
+    OrcidUrl,
+    RorUrl,
     collapse_whitespace,
 )
 
@@ -61,11 +61,11 @@ def test_collapse_whitespace(text: str, expected: str) -> None:
 )
 def test_orcid(identifier: str, sample: str) -> None:
     class Model(BaseModel):
-        orcid: Orcid
+        orcid: OrcidUrl
 
     m = Model(orcid=sample)
 
-    assert m.orcid == f"https://orcid.org/{identifier}"
+    assert str(m.orcid) == f"https://orcid.org/{identifier}"
     assert m.orcid.path == f"/{identifier}"
     assert m.orcid.host == "orcid.org"
     assert m.orcid.scheme == "https"
@@ -76,7 +76,7 @@ def test_orcid_fail(sample: str) -> None:
     """Test mal-formed ORCiD (wrong checksum or wrong pattern)."""
 
     class Model(BaseModel):
-        orcid: Orcid
+        orcid: OrcidUrl
 
     with pytest.raises(ValidationError):
         Model(orcid=sample)
@@ -84,11 +84,11 @@ def test_orcid_fail(sample: str) -> None:
 
 def test_ror() -> None:
     class Model(BaseModel):
-        ror: Ror
+        ror: RorUrl
 
     sample = "https://ror.org/02y72wh86"
     m = Model(ror=sample)
-    assert m.ror == sample
+    assert str(m.ror) == sample
 
 
 @pytest.mark.parametrize(
@@ -101,7 +101,7 @@ def test_ror() -> None:
 )
 def test_ror_fail(sample: str) -> None:
     class Model(BaseModel):
-        ror: Ror
+        ror: RorUrl
 
     with pytest.raises(ValidationError):
         Model(ror=sample)

@@ -3,13 +3,12 @@ from __future__ import annotations
 import datetime
 import re
 from collections.abc import Generator
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Annotated
 
 import base32_lib as base32
 import bleach
-from pydantic import BaseConfig, BaseModel, EmailStr, Field, HttpUrl, validator
-from pydantic.errors import UrlError
-from pydantic.fields import ModelField
+from pydantic import BaseModel, EmailStr, Field, HttpUrl, field_validator
+from pydantic.functional_validators import AfterValidator, BeforeValidator
 
 from lander.ext.parser.pandoc import convert_text
 from lander.spdx import Licenses
@@ -24,7 +23,6 @@ __all__ = [
     "FormattedString",
     "Person",
     "Contributor",
-    "Orcid",
     "DocumentMetadata",
 ]
 
@@ -57,6 +55,90 @@ def collapse_whitespace(text: str) -> str:
     return WHITESPACE_PATTERN.sub(" ", text).strip()
 
 
+CollapsedWhitespaceStr = Annotated[str, AfterValidator(collapse_whitespace)]
+"""Custom Pydantic string type that collapses whitespace.
+
+Any whitespace character, or continuous group of whitespace characters, is
+replaced with a single space. Preceding and trailing whitespace is also
+removed.
+"""
+
+
+def validate_orcid_url(value: HttpUrl) -> HttpUrl:
+    """Check an ORCiD URL for validity.
+
+    Raises
+    ------
+    ValueError
+        Raised if the URL is not a valid ROR URL.
+    """
+    m = ORCID_PATTERN.search(str(value))
+    if not m:
+        raise ValueError(f"Expected ORCiD URL, received: {value}")
+
+    identifier = m["identifier"]
+    if not verify_orcid_checksum(identifier):
+        raise ValueError(f"ORCiD identifier checksum failed ({value})")
+
+    return HttpUrl(url=f"https://orcid.org/{identifier}")
+
+
+def verify_orcid_checksum(identifier: str) -> bool:
+    """Verify the checksum of an ORCiD identifier string (path component
+    of the URL) given the ISO 7064 11,2 algorithm.
+    """
+    total: int = 0
+    for digit in identifier:
+        numeric_digit = "10" if digit == "X" else digit
+        if not numeric_digit.isdigit():
+            continue
+        total = (total + int(numeric_digit)) * 2
+    remainder = total % 11
+    result = (12 - remainder) % 11
+    return result == 10
+
+
+def format_orcid_url(value: str) -> str:
+    """Format a bare ORCiD identifier as a URL."""
+    if value.startswith(("http://oricid", "https://orcid")):
+        return value
+    if verify_orcid_checksum(value):
+        return f"https://orcid.org/{value}"
+    raise ValueError(f"Not an ORCiD identifier checksum ({value})")
+
+
+def validate_ror_url(value: HttpUrl) -> HttpUrl:
+    """Check a ROR URL for validity.
+
+    Raises
+    ------
+    ValueError
+        Raised if the URL is not a valid ROR URL.
+    """
+    m = ROR_PATTERN.search(str(value))
+    if not m:
+        raise ValueError(f"Expected ROR URL, received: {value}")
+    identifier = m["identifier"]
+    try:
+        base32.decode(identifier, checksum=True)
+    except ValueError as e:
+        raise ValueError("ROR identifier checksum failed") from e
+
+    return value
+
+
+RorUrl = Annotated[
+    HttpUrl,
+    AfterValidator(validate_ror_url),
+]
+
+OrcidUrl = Annotated[
+    HttpUrl,
+    AfterValidator(validate_orcid_url),
+    BeforeValidator(format_orcid_url),
+]
+
+
 class FormattedString(BaseModel):
     """A string with plain and HTML encodings."""
 
@@ -66,7 +148,7 @@ class FormattedString(BaseModel):
     plain: str
     """Plain (unicode) version of the string."""
 
-    latex: str | None
+    latex: str | None = None
     """LaTeX version of the string, if available."""
 
     @classmethod
@@ -100,7 +182,7 @@ class FormattedString(BaseModel):
 
         return cls(html=html, plain=plain, latex=tex)
 
-    @validator("html")
+    @field_validator("html")
     @classmethod
     def santize_html(cls, v: str) -> str:
         """Ensure that the HTML is safe for injecting into templates."""
@@ -126,96 +208,10 @@ class FormattedString(BaseModel):
             ],
         )
 
-    @validator("*")
+    @field_validator("*")
     @classmethod
     def clean_whitespace(cls, v: str) -> str:
         return collapse_whitespace(v)
-
-
-class OrcidError(UrlError):
-    code = "orcid"
-    msg_template = "invalid ORCiD"
-
-
-class Orcid(HttpUrl):
-    """An ORCiD type for Pydantic validation.
-
-    The validator forces an ORCiD identifier to always be a URL for
-    orcid.org, per https://support.orcid.org/hc/en-us/articles/360006897674.
-    This validator implments the ISO 7064 11,2 checksum algorithm.
-    """
-
-    @classmethod
-    def __get_validators__(cls) -> CallableGenerator:
-        yield cls.validate
-
-    @classmethod
-    def validate(
-        cls, value: Any, field: ModelField, config: BaseConfig
-    ) -> Orcid:
-        if value.__class__ == cls:
-            return value
-
-        m = ORCID_PATTERN.search(value)
-        if not m:
-            raise OrcidError
-
-        identifier = m["identifier"]
-        if not cls.verify_checksum(identifier):
-            raise OrcidError
-
-        return HttpUrl.validate(
-            f"https://orcid.org/{identifier}", field, config
-        )
-
-    @staticmethod
-    def verify_checksum(identifier: str) -> bool:
-        """Verify the checksum of an ORCiD identifier string (path component
-        of the URL) given the ISO 7064 11,2 algorithm.
-        """
-        total: int = 0
-        for digit in identifier:
-            _digit = digit
-            if _digit == "X":
-                _digit = "10"
-            if not _digit.isdigit():
-                continue
-            total = (total + int(_digit)) * 2
-        remainder = total % 11
-        result = (12 - remainder) % 11
-        return result == 10
-
-
-class RorError(UrlError):
-    code = "ror"
-    msg_template = "invalid ROR"
-
-
-class Ror(HttpUrl):
-    """A ROR (Research Organization Registry) type for Pydantic validation."""
-
-    @classmethod
-    def __get_validators__(cls) -> CallableGenerator:
-        yield cls.validate
-
-    @classmethod
-    def validate(
-        cls, value: Any, field: ModelField, config: BaseConfig
-    ) -> Ror:
-        if value.__class__ == cls:
-            return value
-
-        m = ROR_PATTERN.search(value)
-        if not m:
-            raise RorError
-
-        identifier = m["identifier"]
-        try:
-            base32.decode(identifier, checksum=True)
-        except ValueError as e:
-            raise RorError from e
-
-        return HttpUrl.validate(value, field, config)
 
 
 class Organization(BaseModel):
@@ -224,7 +220,7 @@ class Organization(BaseModel):
     name: str
     """The display name of the institution."""
 
-    ror: Ror | None = None
+    ror: RorUrl | None = None
     """The ROR identifier of the institution."""
 
     address: str | None = None
@@ -237,10 +233,10 @@ class Organization(BaseModel):
 class Person(BaseModel):
     """Data about a person."""
 
-    name: str
+    name: CollapsedWhitespaceStr
     """Display name of the person."""
 
-    orcid: Orcid | None = None
+    orcid: OrcidUrl | None = None
     """The ORCiD of the person."""
 
     affiliations: list[Organization] | None = Field(default_factory=list)
@@ -248,11 +244,6 @@ class Person(BaseModel):
 
     email: EmailStr | None = None
     """Email associated with the person."""
-
-    @classmethod
-    @validator("name")
-    def clean_whitespace(cls, v: str) -> str:
-        return collapse_whitespace(v)
 
 
 class Contributor(Person):
@@ -269,7 +260,7 @@ class Contributor(Person):
 class DocumentMetadata(BaseModel):
     """A container for LaTeX document metadata."""
 
-    title: str
+    title: CollapsedWhitespaceStr
     """Document title."""
 
     identifier: str | None = None
@@ -284,19 +275,19 @@ class DocumentMetadata(BaseModel):
     date_modified: datetime.date | None = None
     """Date when the document was last modified."""
 
-    version: str | None = None
+    version: CollapsedWhitespaceStr | None = None
     """Version of this document."""
 
-    keywords: list[str] = Field(default_factory=list)
+    keywords: list[CollapsedWhitespaceStr] = Field(default_factory=list)
     """Keywords associated with the document."""
 
-    repository_url: HttpUrl | None
+    repository_url: HttpUrl | None = None
     """URL of the document's source code repository."""
 
-    copyright: str | None
+    copyright: CollapsedWhitespaceStr | None = None
     """Free-form copyright statement."""
 
-    license_identifier: str | None
+    license_identifier: str | None = None
     """The license of the document, as an SPDX identifier.
 
     See https://spdx.org/licenses/ for a list of licenses.
@@ -311,13 +302,8 @@ class DocumentMetadata(BaseModel):
     canonical_url: HttpUrl | None = None
     """The canonical URL where this document is published."""
 
+    @field_validator("license_identifier")
     @classmethod
-    @validator("title", "version", "keywords", "copyright", each_item=True)
-    def clean_whitespace(cls, v: str) -> str:
-        return collapse_whitespace(v)
-
-    @classmethod
-    @validator("license_identifier")
     def validate_spdx(cls, v: str | None) -> str | None:
         if v is not None:
             licenses = Licenses.load()

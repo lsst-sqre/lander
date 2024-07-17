@@ -17,4 +17,6 @@ def test_licenses() -> None:
     mit_license = licenses["MIT"]
     assert isinstance(mit_license, SpdxLicense)
     assert mit_license.name == "MIT License"
-    assert mit_license.see_also[0] == "https://opensource.org/licenses/MIT"
+    assert (
+        str(mit_license.see_also[0]) == "https://opensource.org/licenses/MIT"
+    )
