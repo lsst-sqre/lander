@@ -20,8 +20,8 @@ env:
       - "renovate/**"
       - "tickets/**"
       - "u/**"
-    tags:
-      - "*"
+  release:
+    types: [published]
 
 jobs:
   test:
