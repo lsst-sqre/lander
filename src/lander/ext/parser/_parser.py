@@ -15,13 +15,13 @@ if TYPE_CHECKING:
     from lander.settings import BuildSettings
 
 
-__all__ = ["Parser", "MetadataContainer"]
+__all__ = ["Parser", "DocumentMetadataT"]
 
 #: Type variable of the DocumentMetadata Pydantic object being stored in Parser
-MetadataContainer = TypeVar("MetadataContainer", bound=DocumentMetadata)
+DocumentMetadataT = TypeVar("DocumentMetadataT", bound=DocumentMetadata)
 
 
-class Parser(Generic[MetadataContainer], metaclass=ABCMeta):
+class Parser(Generic[DocumentMetadataT], metaclass=ABCMeta):
     """Base class for TeX document metadata parsing extensions.
 
     Parameters
@@ -96,7 +96,7 @@ class Parser(Generic[MetadataContainer], metaclass=ABCMeta):
         return self._git_repository
 
     @property
-    def metadata(self) -> MetadataContainer:
+    def metadata(self) -> DocumentMetadataT:
         """Metadata about the document."""
         return self._metadata
 
@@ -118,7 +118,7 @@ class Parser(Generic[MetadataContainer], metaclass=ABCMeta):
         return replace_macros(tex_source, macros)
 
     @abstractmethod
-    def extract_metadata(self) -> MetadataContainer:
+    def extract_metadata(self) -> DocumentMetadataT:
         """Extract metadata from the document.
 
         This method should be implemented by parser subclasses.
