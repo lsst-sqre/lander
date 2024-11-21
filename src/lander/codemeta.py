@@ -57,7 +57,7 @@ class CodemetaData(BaseModel):
 
     description: str | None = None
 
-    author: list[CodemetaPerson] | None = Field(default_factory=list)
+    author: list[CodemetaPerson] | None = Field([])
 
     date_modified: datetime.datetime | None = Field(None, alias="dateModified")
 

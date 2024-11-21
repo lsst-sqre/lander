@@ -105,7 +105,7 @@ Lander can upload pages directly to LSST the Docs for you with these configurati
 - ``--aws-secret`` or ``$LTD_AWS_SECRET``.
 
 Note: these are advanced configurations and are typically added to a CI configuration automatically or by a Documentation Engineer.
-Reach out to `#dm-docs <https://lsstc.slack.com/messages/C2B6DQBAL/>`_ on Slack for help.
+Reach out to `#square-docs-support <https://rubin-obs.slack.com/messages/C07QK9N14BY/>`_ on Slack for help.
 
 Development workflow
 ====================
