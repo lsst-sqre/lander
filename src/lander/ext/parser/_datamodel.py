@@ -239,7 +239,7 @@ class Person(BaseModel):
     orcid: OrcidUrl | None = None
     """The ORCiD of the person."""
 
-    affiliations: list[Organization] | None = Field(default_factory=list)
+    affiliations: list[Organization] | None = Field([])
     """The person's affiliations."""
 
     email: EmailStr | None = None
