@@ -180,7 +180,7 @@ def main(
     if github_sha:
         cli_configs["git_sha"] = github_sha
     if date:
-        cli_configs["date"] = date
+        cli_configs["build_datetime"] = date  # match config field name
 
     # Create the finalized Configuration that compiles information from
     # the CLI and also document metadata.
