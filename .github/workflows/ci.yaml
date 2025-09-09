@@ -1,6 +1,21 @@
 name: CI
 
-"on": [push, pull_request]
+"on":
+  merge_group: {}
+  pull_request: {}
+  push:
+    branches-ignore:
+      # These should always correspond to pull requests, so ignore them for
+      # the push trigger and let them be triggered by the pull_request
+      # trigger, avoiding running the workflow twice.  This is a minor
+      # optimization so there's no need to ensure this is comprehensive.
+      - "dependabot/**"
+      - "gh-readonly-queue/**"
+      - "renovate/**"
+      - "tickets/**"
+      - "u/**"
+  release:
+    types: [published]
 
 jobs:
   test:
@@ -11,16 +26,16 @@ jobs:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0 # full history for setuptools_scm
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v5
         name: Use Node.js
         with:
           node-version-file: ".nvmrc"
@@ -58,17 +73,53 @@ jobs:
       - name: What pandoc
         run: which pandoc | true
 
-  pypi:
+  test-packaging:
+    name: Test packaging
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [test]
-    if: startsWith(github.ref, 'refs/tags/')
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0 # full history for setuptools_scm
 
-      - uses: actions/setup-node@v3
+      - name: Set up node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: NPM install
+        run: |
+          npm install -g gulp-cli
+          npm install
+
+      - name: Build assets
+        run: gulp assets
+
+      - name: Build and publish
+        uses: lsst-sqre/build-and-publish-to-pypi@v3
+        with:
+          upload: false
+
+  pypi:
+    name: Upload release to PyPI
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [test-packaging]
+    environment:
+      name: pypi
+      url: https://pypi.org/p/lander
+    permissions:
+      id-token: write
+    if: github.event_name == 'release' && github.event.action == 'published'
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # full history for setuptools_scm
+
+      - uses: actions/setup-node@v5
         name: Use Node.js
         with:
           node-version-file: ".nvmrc"
@@ -82,7 +133,4 @@ jobs:
         run: gulp assets --env=deploy
 
       - name: Build and publish
-        uses: lsst-sqre/build-and-publish-to-pypi@v1
-        with:
-          pypi-token: ${{ secrets.PYPI_SQRE_ADMIN }}
-          python-version: "3.11"
+        uses: lsst-sqre/build-and-publish-to-pypi@v3

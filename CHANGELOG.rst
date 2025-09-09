@@ -2,6 +2,11 @@
 Change Log
 ##########
 
+1.0.9 (2025-09-09)
+==================
+
+- Update GitHub Actions workflows and use trusted publishers for PyPI uploads.
+
 1.0.8 (2025-09-09)
 ==================
 
