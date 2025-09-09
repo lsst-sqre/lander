@@ -118,7 +118,7 @@ def build_configuration(
     configs.update(cli_configs)
 
     # Build and validation configurations
-    return Configuration(**configs)
+    return Configuration.parse_obj(configs)
 
 
 def _get_lsstdoc_configuration(path: str) -> Dict[str, Any]:
@@ -347,8 +347,7 @@ class Configuration(BaseModel):
         ext = os.path.splitext(v)[-1]
         if ext.lower() != ".pdf":
             raise ValueError(
-                "--pdf-path must be a PDF. "
-                "The detected extension is {}".format(ext)
+                f"--pdf-path must be a PDF. The detected extension is {ext}"
             )
 
         return v
@@ -396,6 +395,31 @@ class Configuration(BaseModel):
             v.plain = v.html
 
         return v
+
+    @validator("build_datetime", pre=True)
+    def validate_build_datetime(cls, v: Any) -> datetime.datetime:
+        """Validate and convert build_datetime field."""
+        if isinstance(v, str):
+            # Try ISO datetime format first (YYYY-MM-DDTHH:MM:SS or variations)
+            try:
+                return datetime.datetime.fromisoformat(v)
+            except ValueError:
+                pass
+
+            # Fall back to ISO date format (YYYY-MM-DD)
+            try:
+                return datetime.datetime.strptime(v, "%Y-%m-%d")
+            except ValueError:
+                raise ValueError(
+                    f"Invalid date format: {v}. Expected ISO datetime format "
+                    "(YYYY-MM-DDTHH:MM:SS) or ISO date format (YYYY-MM-DD)."
+                )
+        elif isinstance(v, datetime.datetime):
+            return v
+        else:
+            raise ValueError(
+                f"build_datetime must be a string or datetime, got {type(v)}"
+            )
 
     @root_validator
     def validate_git_ref(cls, values: Dict[str, Any]) -> Dict[str, Any]:

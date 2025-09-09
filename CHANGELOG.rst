@@ -2,6 +2,13 @@
 Change Log
 ##########
 
+1.0.8 (2025-09-09)
+==================
+
+- Fix setting the date metadata from the command line ``--date`` argument.
+- Add Python 3.13 to the list of supported versions.
+- Add a setuptools to <81 dependency to provide ``pkg_resources`` for some environments.
+
 1.0.6 (2023-07-04)
 ==================
 

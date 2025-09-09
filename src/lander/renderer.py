@@ -10,7 +10,7 @@ __all__ = [
 import datetime
 import os
 import re
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 import jinja2
 import markupsafe
@@ -45,8 +45,10 @@ def render_homepage(config: "Configuration", env: jinja2.Environment) -> str:
     return rendered_page
 
 
-def filter_simple_date(value: datetime.datetime) -> str:
-    """Filter a `datetime.datetime` into a 'YYYY-MM-DD' string."""
+def filter_simple_date(value: Union[datetime.datetime, datetime.date]) -> str:
+    """Filter a `datetime.datetime` or `datetime.date` into a
+    'YYYY-MM-DD' string.
+    """
     return value.strftime("%Y-%m-%d")
 
 
