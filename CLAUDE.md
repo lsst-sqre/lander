@@ -4,19 +4,34 @@ This is an HTML landing page generator for LSST PDF documentation. It's a Python
 
 ## Commands
 
-Run tests:
-```bash
-make test
-```
-
-Run Python unit tests only:
-```bash
-make pytest
-```
-
 Build frontend assets:
+
 ```bash
 npm run build
+```
+
+Run tests:
+
+```bash
+tox run -e py
+```
+
+Run linting/formatting:
+
+```bash
+tox run -e lint
+```
+
+Run type checking:
+
+```bash
+tox run -e typing
+```
+
+Run end-to-end integration tests:
+
+```bash
+make test
 ```
 
 ## Project Structure
