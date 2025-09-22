@@ -10,7 +10,7 @@ help:
 test: pytest ldm151 dmtn070
 
 pytest:
-	pytest --flake8 --doctest-modules lander tests
+	tox
 
 ldm151:
 	# End-to-end smoke integration test with LDM-151

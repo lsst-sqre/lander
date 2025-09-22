@@ -100,3 +100,5 @@ _build
 _tests
 
 .mypy_cache
+
+.claude/settings.local.json

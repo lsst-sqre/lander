@@ -15,6 +15,9 @@ from typing import TYPE_CHECKING, Union
 import jinja2
 import markupsafe
 
+from lander import __version__
+from lander.metadata import HighwireMetadata, OpenGraphMetadata
+
 if TYPE_CHECKING:
     from lander.config import Configuration
 
@@ -39,9 +42,18 @@ def create_jinja_env() -> jinja2.Environment:
 
 
 def render_homepage(config: "Configuration", env: jinja2.Environment) -> str:
-    """Render the homepage.jinja template."""
+    """Render the homepage.jinja template with metadata."""
+    # Generate metadata
+    highwire = HighwireMetadata(config)
+    opengraph = OpenGraphMetadata(config)
+
     template = env.get_template("homepage.jinja")
-    rendered_page = template.render(config=config)
+    rendered_page = template.render(
+        config=config,
+        lander_version=__version__,
+        highwire_metadata=highwire.as_html(),
+        opengraph_metadata=opengraph.as_html(),
+    )
     return rendered_page
 
 

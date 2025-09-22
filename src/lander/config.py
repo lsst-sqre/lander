@@ -338,6 +338,23 @@ class Configuration(BaseModel):
 
         return data
 
+    @property
+    def canonical_url(self) -> Optional[str]:
+        """The canonical URL of the document.
+
+        This is the primary URL where the document can be accessed.
+        Prefers LSST the Docs URL, falls back to GitHub repository.
+        """
+        if self.ltd_product:
+            # Construct LSST the Docs URL from product slug
+            # Assumes we're building the main/default version
+            return f"https://{self.ltd_product}.lsst.io"  # noqa: E231
+        elif self.github_slug:
+            # Fall back to GitHub repository URL
+            return f"https://github.com/{self.github_slug}"  # noqa: E231
+        else:
+            return None
+
     @validator("pdf_path", always=True)
     def check_pdf_path(cls, v: str) -> str:
         """Validate the pdf_path field."""

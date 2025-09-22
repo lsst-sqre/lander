@@ -7,14 +7,16 @@
     {% endif %}
   </span>
   {% endif %}
-  <h1 class="lander-info-header__product-name">{{ config.title.html|safe }}</h1>
+  <h1 class="lander-info-header__product-name p-name">{{ config.title.html|safe }}</h1>
 
   <ul class="o-list-bare">
     <li>
       <span class="svg-icon svg-icon--left svg-baseline">
         <svg><use xlink:href="#octicon-calendar" /></svg>
       </span>
-      {{ config.build_datetime|simple_date }}
+      <time class="dt-published" datetime="{{ config.build_datetime.isoformat() }}">
+        {{ config.build_datetime|simple_date }}
+      </time>
     </li>
 
     <li>
@@ -37,7 +39,7 @@
         {% if config.ltd_product %}
         {# LSST the Docs version switcher button #}
         <li class="c-lander-btn-row__item">
-          <a class="c-btn c-btn--small c-btn--ghost c-btn--ghost-faint" href="https://{{ config.ltd_product }}.lsst.io/v">Change version</a>
+          <a class="c-btn c-btn--small c-btn--ghost c-btn--ghost-faint u-url" href="https://{{ config.ltd_product }}.lsst.io/v">Change version</a>
         </li>
         {% endif %}
 
@@ -57,14 +59,14 @@
 <section class="lander-info-authors">
   <ul class='comma-list'>
   {% for author_name in config.authors %}
-    <li>{{ author_name.html|safe }}</li>
+    <li class="p-author">{{ author_name.html|safe }}</li>
   {% endfor %}
   </ul>
 </section>
 {% endif %}
 
 {% if config.abstract %}
-<section class="lander-info-abstract">
+<section class="lander-info-abstract p-summary">
   <h2 class="lander-subsection-header">Abstract</h2>
   {{ config.abstract.html|safe }}
 </section>
@@ -103,7 +105,7 @@
   <ul class="o-list-bare">
     {% if config.github_slug %}
     <li class="o-list-bare__item">
-      <a class="hidden-link" href="https://github.com/{{ config.github_slug }}">
+      <a class="hidden-link" href="https://github.com/{{ config.github_slug }}" data-lander-source-url="https://github.com/{{ config.github_slug }}">
         <span class="svg-icon svg-icon--left svg-baseline">
           <svg><use xlink:href="#octicon-mark-github" /></svg>
         </span>
