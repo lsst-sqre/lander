@@ -2,6 +2,17 @@
 Change Log
 ##########
 
+1.1.0 (2025-09-22)
+==================
+
+- Generate meta tags and microdata consistent with the `Technote project <https://technote.lsst.io/user-guide/metadata.html>`__:
+
+  - Highwire Press metadata supported by Google Scholar
+  - OpenGraph metadata for additional social media support
+  - microformats2 metadata on HTML elements
+
+  These changes improve compatibility for Ook to ingest Lander landing pages.
+
 1.0.9 (2025-09-09)
 ==================
 
