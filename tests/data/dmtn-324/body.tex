@@ -1,0 +1,63 @@
+\section{Introduction}
+Initial analysis of on-sky data from the commissioning period of LSSTCam shows that the astrometric calibration is basically working. Nevertheless, it is apparent that improvement is achievable in a couple of areas: atmospheric turbulence is causing significant variation in observed positions that is not captured by the existing model; additionally, subtle variations in the detectors are causing subdominant but consistent distortions in the astrometry. (I may also include a description of building a new camera distortion model from the astrometry.) This document will describe our approach to correcting for these effects.
+
+\section{Modeling Atmospheric Turbulence with Gaussian Processes}
+To perform astrometric calibration on an ensemble of visits in the Rubin DRP pipeline, a two-part model is fit, which attempts to capture both the static distortions of the camera and telescope system and the variable per-visit distortion dependent on observing conditions (see DMTN-266 for a full description). In the basic version of the model currently implemented, both of these parts are two-dimensional polynomials.
+
+However, given the short exposure times used in LSST, a significant source of visit-to-visit variation comes from atmospheric turbulence, which is not easily modeled by a low-order polynomial. Figure~\ref{fig:measured turbulence} shows an example of the astrometric residuals remaining after the fiducial calibration has been performed.
+\begin{figure}
+\includegraphics[width=\columnwidth]{2025052000348_1_measured.png}
+\label{fig:measured turbulence}
+\caption{Astrometric residuals after performing the standard calibration. The right panel shows the E- and B-modes calculated from the correlation in the residuals.}
+\end{figure}
+The correlation in the residuals is dominated by the curl-free E-mode (shown in the right panel of the figure), which is characteristic of residuals caused by atmospheric turbulence. (A few visits do show strong B-modes and require more investigation.) Following Leget+ and Fortino+, there is strong evidence that atmospheric turbulence can be modeled well using Gaussian Processes.
+
+\textbf{Fill in description of GP procedure here.}
+
+Figure~\ref{fig:fit gp} shows the result of the Gaussian Process fit to the residuals shown in Figure~\ref{fig:measured turbulence}. \begin{figure}
+\includegraphics[width=\columnwidth]{2025052000348_0_gp.png}
+\label{fig:fit gp}
+\caption{Gaussian Process prediction for the residuals measured in Figure~\ref{fig:measured turbulence}}
+\end{figure}
+Figure~\ref{fig:gp residuals} shows the final astrometric residuals after the Gaussian Processes prediction has been subtracted, which demonstrate that all coherent residuals have been largely removed.
+\begin{figure}
+\includegraphics[width=\columnwidth]{2025052000348_2_residuals.png}
+\label{fig:gp residuals}
+\caption{Final residuals after corrected the values seen in Figure~\ref{fig:measured turbulence} with the prediction in Figure~\ref{fig:fit gp}. Some more subtle structure is still visible in these residuals, showing that there is still room for improvement in the Gaussian Processes correction.}
+\end{figure}
+
+Applying this procedure to the ensemble of r-band visits in the COSMOS field, we can see how the Gaussian Processes correction affects the astrometric repeatability. Table~\ref{table:dmL2AstroErr} shows the dmL2AstroErr metric, which gives the median value of the standard deviation of measurements of associated sources.
+%\begin{tabular}{| p | p || p | p |}
+\begin{table}
+\begin{tabular}{||c c c c||}
+\hline
+&&dML2AstroErr (mas)&\\
+\hline
+Band&Coordinate&Standard Calibration&With GP Correction \\
+\hline
+r& RA& 14.38& 11.05\\
+& Dec& 19.20& 11.41\\
+i & RA& 15.99& 13.17\\
+& Dec& 18.15& 12.71\\
+\hline
+\end{tabular}
+\label{table:dmL2AstroErr}
+\caption{Repeatability of single sources (dmL2AstroErr) measurements of bright isolated stars. Design value is $50$ mas.}
+\end{table}
+
+Figure~\ref{fig:AMx source} shows the repeatability of paired-source separations at 5, 20, and 200 arcmin in the fiducial calibration, while Figure~\ref{fig:AMx recal} shows the same metric after the Gaussian Processes correction.
+\begin{figure}
+\includegraphics[width=\columnwidth]{COSMOS_AMx_source.png}
+\label{fig:AMx source}
+\caption{Repeatability of separation between pairs of objects $5$, $20$, and $200$~arcmin apart with the standard calibration. Design values are $10$, $10$ and $15$~mas respectively.}
+\end{figure}
+\begin{figure}
+\includegraphics[width=\columnwidth]{COSMOS_AMx_recal.png}
+\label{fig:AMx recal}
+\caption{Repeatability of separation between pairs of objects $5$, $20$, and $200$~arcmin apart with the additional Gaussian Processes correction. Design values are $10$, $10$ and $15$~mas respectively.}
+\end{figure}
+The Gaussian Processes correction produces a significant reduction in the size of the metrics, approximately halving them in the case of AM2 and AM3. These numbers will be further reduced when proper motion and parallax are accounted for in their calculation.
+
+
+\vskip 0.4in
+This is the Rubin Observatory overview paper: \citet{2019ApJ...873..111I}.

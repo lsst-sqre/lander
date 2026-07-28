@@ -14,6 +14,7 @@ from ..pandoc.convert import convert_lsstdoc_tex
 from .citelink import CitationLinker
 from .commandparser import LatexCommand
 from .lsstbib import KNOWN_LSSTTEXMF_BIB_NAMES, get_bibliography
+from .lsstmacros import AUTHOR_LSSTDOC_MACROS
 from .normalizer import read_tex_file, replace_macros
 from .scraper import get_macros
 
@@ -459,6 +460,7 @@ class LsstLatexDoc(object):
                 mathjax=mathjax,
                 smart=smart,
                 extra_args=extra_args,
+                macros=AUTHOR_LSSTDOC_MACROS,
             )
             # removes Pandoc's terminal newlines
             formatted_author = formatted_author.strip()
@@ -563,37 +565,36 @@ class LsstLatexDoc(object):
         Into::
 
            ['A. Author', 'B. Author', 'C. Author']
+
+        All ``\author`` commands are parsed so that AASTeX documents, which
+        use one ``\author[orcid]{name}`` command per author, yield the full
+        author list rather than only the first author (DM-55645).
         """
         command = LatexCommand(
             "author", {"name": "authors", "required": True, "bracket": "{"}
         )
-        try:
-            parsed = next(command.parse(self._tex))
-        except StopIteration:
-            self._logger.warning("lsstdoc has no author")
-            self._authors = []
-            return
-
-        try:
-            content = parsed["authors"]
-        except KeyError:
-            self._logger.warning("lsstdoc has no author")
-            self._authors = []
-            return
-
-        # Clean content
-        content = content.replace("\n", " ")
-        content = content.replace("~", " ")
-        content = content.strip()
-
-        # Split content into list of individual authors
         authors = []
-        for part in content.split(","):
-            part = part.strip()
-            for split_part in part.split("and "):
-                split_part = split_part.strip()
-                if len(split_part) > 0:
-                    authors.append(split_part)
+        for parsed in command.parse(self._tex):
+            try:
+                content = parsed["authors"]
+            except KeyError:
+                continue
+
+            # Clean content
+            content = content.replace("\n", " ")
+            content = content.replace("~", " ")
+            content = content.strip()
+
+            # Split content into list of individual authors
+            for part in content.split(","):
+                part = part.strip()
+                for split_part in part.split("and "):
+                    split_part = split_part.strip()
+                    if len(split_part) > 0:
+                        authors.append(split_part)
+
+        if len(authors) == 0:
+            self._logger.warning("lsstdoc has no author")
         self._authors = authors
 
     def _parse_abstract(self):

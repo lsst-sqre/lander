@@ -149,6 +149,7 @@ def convert_lsstdoc_tex(
     mathjax=False,
     smart=True,
     extra_args=None,
+    macros=LSSTDOC_MACROS,
 ):
     """Convert lsstdoc-class LaTeX to another markup format.
 
@@ -195,6 +196,11 @@ def convert_lsstdoc_tex(
         arguments are convenience arguments that are equivalent to items
         in ``extra_args``.
 
+    macros : `str`, optional
+        LaTeX macro definitions prepended to the content so Pandoc can
+        resolve them. Defaults to
+        `lsstprojectmeta.tex.lsstmacros.LSSTDOC_MACROS`.
+
     Returns
     -------
     output : `str`
@@ -205,7 +211,7 @@ def convert_lsstdoc_tex(
     This function will automatically install Pandoc if it is not available.
     See `ensure_pandoc`.
     """
-    augmented_content = "\n".join((LSSTDOC_MACROS, content))
+    augmented_content = "\n".join((macros, content))
     return convert_text(
         augmented_content,
         "latex",

@@ -1,0 +1,115 @@
+% Resources for the AASTeX:
+%   https://journals.aas.org/aastex-package-for-manuscript-preparation
+% Author guide:
+%   https://journals.aas.org/aastexguide/
+
+\documentclass[modern]{aastex701}
+
+% Package imports go here.
+
+% Local commands go here.
+\newcommand{\docRef}{RTN-126}
+\newcommand{\docUpstreamLocation}{\url{https://github.com/lsst/rtn-126}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% The following section outlines numerous optional output that
+%% can be displayed in the front matter or as running meta-data.
+%%
+%% Running header information. A short title on odd pages and
+%% short author list on even pages. Note that this
+%% information may be modified in production.
+%%\shorttitle{AASTeX v7 Sample article}
+%%\shortauthors{The Terra Mater collaboration}
+%%
+%% Include dates for submitted, revised, and accepted.
+%%\received{February 1, 2025}
+%%\revised{March 1, 2025}
+%%\accepted{\today}
+%%
+%% Indicate AAS Journal the manuscript was submitted to.
+%% Note that this command adds "Submitted to " the argument.
+%%\submitjournal{PSJ}
+%%
+%% You can add a light gray and diagonal water-mark to the first page
+%% with this command:
+%% \watermark{text}
+%% where "text", e.g. DRAFT, is the text to appear.  If the text is
+%% long you can control the water-mark size with:
+%% \setwatermarkfontsize{dimension}
+%% where dimension is any recognized LaTeX dimension, e.g. pt, in, etc.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Use this command to indicate a subdirectory where figures are located.
+%%\graphicspath{{./}{figures/}}
+
+
+\begin{document}
+\input{authors}
+\date{\today}
+\title{Point Spread Function Characterization of the Vera C. Rubin Observatory using the Data Preview 2 dataset.}
+
+% This can write metadata into the PDF.
+% Update keywords and author information as necessary.
+\hypersetup{
+    pdftitle={Point Spread Function Characterization of the Vera C. Rubin Observatory using the Data Preview 2 dataset.},
+    pdfauthor={legetp},
+    pdfkeywords={}
+}
+
+\input{abstract}
+
+%% Keywords should appear after the \end{abstract} command.
+%% The AAS Journals now uses Unified Astronomy Thesaurus concepts:
+%% https://astrothesaurus.org
+%% You can use the \uat command to link your UAT concepts back its source.
+%% \keywords{\uat{Galaxies}{573} --- \uat{Cosmology}{343}}
+
+%% Main content as individual inputs.
+\input{body}
+
+
+%% Modify acknowledgments as needed.
+\begin{acknowledgments}
+This material is based upon work supported in part by the National Science Foundation through Cooperative Agreements AST-1258333 and AST-2241526 and Cooperative Support Agreements AST-1202910 and AST-2211468 managed by the Association of Universities for Research in Astronomy (AURA), and the Department of Energy under Contract No.\ DE-AC02-76SF00515 with the SLAC National Accelerator Laboratory managed by Stanford University.
+Additional Rubin Observatory funding comes from private donations, grants to universities, and in-kind support from LSST-DA Institutional Members.
+\end{acknowledgments}
+
+%% To help institutions obtain information on the effectiveness of their
+%% telescopes the AAS Journals has created a group of keywords for telescope
+%% facilities.
+%
+%% Following the acknowledgments section, use the following syntax and the
+%% \facility{} or \facilities{} macros to list the keywords of facilities used
+%% in the research for the paper.  Each keyword is check against the master
+%% list during copy editing.  Individual instruments can be provided in
+%% parentheses, after the keyword, but they are not verified.
+
+\vspace{5mm}
+\facility{Rubin}
+
+%% Similar to \facility{}, there is the optional \software command to allow
+%% authors a place to specify which programs were used during the creation of
+%% the manuscript. Authors should list each code and include either a
+%% citation or url to the code inside ()s when available.
+\software{LSST Science Pipelines}
+
+%% Appendix material should be preceded with a single \appendix command.
+%% There should be a \section command for each appendix. Mark appendix
+%% subsections with the same markup you use in the main body of the paper.
+
+%% Each Appendix (indicated with \section) will be lettered A, B, C, etc.
+%% The equation counter will reset when it encounters the \appendix
+%% command and will number appendix equations (A1), (A2), etc. The
+%% Figure and Table counter will not reset.
+
+%% \appendix
+
+
+% Include all the relevant bib files so that references can be found from
+% lsst-texmf.
+% https://lsst-texmf.lsst.io/lsstdoc.html#bibliographies
+\bibliographystyle{aasjournalv7}
+\bibliography{local,lsst,lsst-dm,refs_ads,refs,books}
+
+\end{document}
