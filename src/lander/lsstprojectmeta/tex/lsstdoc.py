@@ -14,6 +14,7 @@ from ..pandoc.convert import convert_lsstdoc_tex
 from .citelink import CitationLinker
 from .commandparser import LatexCommand
 from .lsstbib import KNOWN_LSSTTEXMF_BIB_NAMES, get_bibliography
+from .lsstmacros import AUTHOR_LSSTDOC_MACROS
 from .normalizer import read_tex_file, replace_macros
 from .scraper import get_macros
 
@@ -459,6 +460,7 @@ class LsstLatexDoc(object):
                 mathjax=mathjax,
                 smart=smart,
                 extra_args=extra_args,
+                macros=AUTHOR_LSSTDOC_MACROS,
             )
             # removes Pandoc's terminal newlines
             formatted_author = formatted_author.strip()

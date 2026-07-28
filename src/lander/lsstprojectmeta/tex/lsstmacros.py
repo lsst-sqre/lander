@@ -3,7 +3,7 @@
 lsstprojectmeta mirrors these macros to allow Pandoc to resolve them.
 """
 
-__all__ = ["LSSTDOC_MACROS"]
+__all__ = ["LSSTDOC_MACROS", "AUTHOR_LSSTDOC_MACROS"]
 
 LSSTDOC_MACROS = r"""\newcommand{\latex}{LaTeX}
 \newcommand{\docType}{LSST Document}
@@ -164,3 +164,17 @@ LSSTDOC_MACROS = r"""\newcommand{\latex}{LaTeX}
 
 \newcommand{\uc}[1]{\texttt{#1}}
 """
+
+# Macro set for converting author names. lsstdoc redefines the standard TeX
+# accent/letter commands \c (cedilla) and \th (thorn) as abbreviations for
+# "c." and a superscript "th". In author names those commands always carry
+# their standard TeX meaning (e.g. Fran\c{c}ois), even in documents of other
+# classes such as AASTeX, so the redefinitions are dropped here (DM-55645).
+AUTHOR_LSSTDOC_MACROS = "\n".join(
+    line
+    for line in LSSTDOC_MACROS.splitlines()
+    if not (
+        line.startswith(r"\renewcommand{\c}")
+        or line.startswith(r"\renewcommand{\th}")
+    )
+)
