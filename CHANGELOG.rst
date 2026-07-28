@@ -2,8 +2,8 @@
 Change Log
 ##########
 
-Unreleased
-==========
+1.2.0 (2026-07-28)
+==================
 
 - Fix author extraction for AASTeX documents (`DM-55645 <https://rubinobs.atlassian.net/browse/DM-55645>`__):
 
