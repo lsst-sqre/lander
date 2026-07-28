@@ -20,7 +20,7 @@ from pydantic import (
 from structlog import get_logger
 
 from .lsstprojectmeta.tex.lsstdoc import LsstLatexDoc
-from .ook import get_authors_from_authors_yaml
+from .ook import get_authors_from_authors_yaml, uses_generated_authors
 
 # Detects a GitHub repo slug from a GitHub URL
 GITHUB_SLUG_PATTERN = re.compile(
@@ -160,10 +160,13 @@ def _get_lsstdoc_configuration(path: str) -> Dict[str, Any]:
         ]
 
     # Prefer authors resolved from authors.yaml through the Ook API over
-    # names parsed out of the LaTeX source (DM-55645).
-    ook_authors = get_authors_from_authors_yaml(os.path.dirname(path))
-    if ook_authors is not None:
-        config["authors"] = ook_authors
+    # names parsed out of the LaTeX source (DM-55645). Guarded on the
+    # document actually inputting the generated authors.tex: a document
+    # with a hand-written \author command may carry a stale authors.yaml.
+    if uses_generated_authors(path):
+        ook_authors = get_authors_from_authors_yaml(os.path.dirname(path))
+        if ook_authors is not None:
+            config["authors"] = ook_authors
 
     return config
 

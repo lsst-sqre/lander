@@ -7,7 +7,7 @@ Unreleased
 
 - Fix author extraction for AASTeX documents (`DM-55645 <https://rubinobs.atlassian.net/browse/DM-55645>`__):
 
-  - When an ``authors.yaml`` file is present alongside the document's root LaTeX file, author names are now resolved through the `Ook authors API <https://roundtable.lsst.cloud/ook/docs>`__, yielding clean Unicode names in ``authors.yaml`` order. Lander falls back to LaTeX-based author parsing if the file is absent or the API is unavailable. The Ook API base URL can be overridden with the ``OOK_API_BASE_URL`` environment variable.
+  - When an ``authors.yaml`` file is present alongside the document's root LaTeX file, and the document inputs the ``authors.tex`` file generated from it, author names are now resolved through the `Ook authors API <https://roundtable.lsst.cloud/ook/docs>`__, yielding clean Unicode names in ``authors.yaml`` order. Lander falls back to LaTeX-based author parsing if the file is absent or unused, or the API is unavailable. The Ook API base URL can be overridden with the ``OOK_API_BASE_URL`` environment variable.
   - All ``\author`` commands are now parsed, so AASTeX documents (one ``\author[orcid]{name}`` command per author) no longer lose every author after the first.
   - The lsstdoc abbreviation macros ``\c`` ("*c.*") and ``\th`` (superscript "th") are no longer applied when converting author names with Pandoc, so names using the standard TeX cedilla and thorn accents (for example ``Fran\c{c}ois``) are converted correctly instead of being mangled (for example "Franc.cois").
 

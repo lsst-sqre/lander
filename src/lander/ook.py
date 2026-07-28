@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import html
 import os
+import re
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, List, Optional
 
@@ -19,7 +20,7 @@ import requests
 import yaml
 from structlog import get_logger
 
-__all__ = ["get_authors_from_authors_yaml"]
+__all__ = ["get_authors_from_authors_yaml", "uses_generated_authors"]
 
 OOK_API_BASE_URL = "https://roundtable.lsst.cloud/ook"
 """Default base URL of the Ook API."""
@@ -30,9 +31,47 @@ REQUEST_TIMEOUT = 10.0
 MAX_CONCURRENT_REQUESTS = 8
 """Maximum number of concurrent Ook API requests."""
 
+AUTHORS_INPUT_PATTERN = re.compile(r"\\input\s*\{\s*authors(?:\.tex)?\s*\}")
+"""Pattern matching an ``\\input`` of the generated ``authors.tex`` file."""
+
 
 class OokAuthorResolutionError(Exception):
     """Raised when authors cannot be resolved through the Ook API."""
+
+
+def uses_generated_authors(tex_path: str) -> bool:
+    r"""Test whether a LaTeX source file inputs the generated
+    ``authors.tex`` file.
+
+    An ``authors.yaml`` file is only an authoritative author list when the
+    document actually uses the ``authors.tex`` that db2authors generates
+    from it. Some documents carry a stale ``authors.yaml`` alongside a
+    hand-written (or commented-out) ``\author`` command; for those, the
+    LaTeX source is the truth.
+
+    Parameters
+    ----------
+    tex_path : `str`
+        Path to the document's root LaTeX file.
+
+    Returns
+    -------
+    bool
+        `True` if the source contains an uncommented
+        ``\input{authors}`` (or ``\input{authors.tex}``) command.
+    """
+    try:
+        with open(tex_path) as f:
+            source = f.read()
+    except OSError:
+        return False
+
+    for line in source.splitlines():
+        # Discard comments: everything after a % that isn't escaped as \%
+        code = re.split(r"(?<!\\)%", line, maxsplit=1)[0]
+        if AUTHORS_INPUT_PATTERN.search(code):
+            return True
+    return False
 
 
 def get_authors_from_authors_yaml(

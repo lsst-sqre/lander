@@ -174,15 +174,10 @@ def test_lsstdoc_configuration_prefers_ook(fake_ook_api: None) -> None:
     ]
 
 
-def test_lsstdoc_configuration_latex_fallback(
-    tmp_path: Any, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """Without authors.yaml, authors come from the LaTeX source."""
-    for name in ("RTN-126.tex", "authors.tex", "abstract.tex", "body.tex"):
-        (tmp_path / name).write_text(
-            open(os.path.join(RTN126_DIR, name)).read()
-        )
-    # The revision-date fallback requires the document to be in a Git repo.
+def _git_init_and_commit(tmp_path: Any) -> None:
+    """Make tmp_path a Git repo with one commit (the revision-date
+    fallback requires the document to be in a Git repo).
+    """
     env = {
         **os.environ,
         "GIT_AUTHOR_NAME": "Test",
@@ -198,7 +193,72 @@ def test_lsstdoc_configuration_latex_fallback(
         env=env,
         check=True,
     )
+
+
+def test_lsstdoc_configuration_latex_fallback(
+    tmp_path: Any, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Without authors.yaml, authors come from the LaTeX source."""
+    for name in ("RTN-126.tex", "authors.tex", "abstract.tex", "body.tex"):
+        (tmp_path / name).write_text(
+            open(os.path.join(RTN126_DIR, name)).read()
+        )
+    _git_init_and_commit(tmp_path)
     config = _get_lsstdoc_configuration(str(tmp_path / "RTN-126.tex"))
     assert config["authors"] == [
         {"plain": "Pierre-François Léget", "html": "Pierre-François Léget"}
+    ]
+
+
+def test_uses_generated_authors() -> None:
+    assert ook.uses_generated_authors(os.path.join(RTN126_DIR, "RTN-126.tex"))
+    assert ook.uses_generated_authors(
+        os.path.join(DMTN324_DIR, "DMTN-324.tex")
+    )
+
+
+def test_uses_generated_authors_variants(tmp_path: Any) -> None:
+    doc = tmp_path / "doc.tex"
+
+    doc.write_text("\\input{authors.tex}\n")
+    assert ook.uses_generated_authors(str(doc))
+
+    doc.write_text("\\input { authors }\n")
+    assert ook.uses_generated_authors(str(doc))
+
+    # Commented-out input does not count
+    doc.write_text("%\\input{authors}\n\\author{Someone Else}\n")
+    assert not ook.uses_generated_authors(str(doc))
+
+    doc.write_text("\\author{A. Author}\n")
+    assert not ook.uses_generated_authors(str(doc))
+
+    assert not ook.uses_generated_authors(str(tmp_path / "missing.tex"))
+
+
+def test_lsstdoc_configuration_stale_authors_yaml(
+    fake_ook_api: None, tmp_path: Any
+) -> None:
+    """A document with a hand-written \\author command and a stale
+    authors.yaml (input of authors.tex commented out) uses the LaTeX
+    authors, not the Ook resolution.
+    """
+    for name in ("RTN-126.tex", "authors.tex", "abstract.tex", "body.tex"):
+        (tmp_path / name).write_text(
+            open(os.path.join(RTN126_DIR, name)).read()
+        )
+    source = (tmp_path / "RTN-126.tex").read_text()
+    source = source.replace(
+        "\\input{authors}",
+        "%\\input{authors}\n\\author{NSF-DOE Vera C. Rubin Observatory}",
+    )
+    (tmp_path / "RTN-126.tex").write_text(source)
+    (tmp_path / "authors.yaml").write_text("- legetp\n")
+    _git_init_and_commit(tmp_path)
+    config = _get_lsstdoc_configuration(str(tmp_path / "RTN-126.tex"))
+    assert config["authors"] == [
+        {
+            "plain": "NSF-DOE Vera C. Rubin Observatory",
+            "html": "NSF-DOE Vera C. Rubin Observatory",
+        }
     ]
