@@ -203,7 +203,9 @@ class Configuration(BaseModel):
     ci_build: Optional[str] = Field(default_factory=_build_ci_number)
     """CI build number."""
 
-    ci_url: Optional[HttpUrl] = Field(default_factory=_build_ci_url)
+    ci_url: Optional[HttpUrl] = Field(  # type: ignore[assignment]
+        default_factory=_build_ci_url
+    )
     """CI build URL."""
 
     git_sha: Optional[str]
@@ -240,7 +242,9 @@ class Configuration(BaseModel):
     upload: bool = False
     """A flag whether to perform an LSST the Docs upload."""
 
-    ltd_url: HttpUrl = Field(default="https://keeper.lsst.codes")
+    ltd_url: HttpUrl = Field(  # type: ignore[assignment]
+        default="https://keeper.lsst.codes"
+    )
     """URL of the LTD Keeper API."""
 
     ltd_user: Optional[str]

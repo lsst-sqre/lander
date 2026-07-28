@@ -13,6 +13,7 @@ __all__ = [
 import asyncio
 import logging
 import os
+from typing import Dict
 
 import pybtex.database
 from aiohttp import ClientSession
@@ -22,7 +23,7 @@ KNOWN_LSSTTEXMF_BIB_NAMES = ("lsst", "lsst-dm", "refs", "books", "refs_ads")
 
 
 # Cache of bibtex file content, keyed by name (see KNOWN_LSSTTEXMF_BIB_NAMES).
-_LSSTTEXMF_BIB_CACHE = {}
+_LSSTTEXMF_BIB_CACHE: Dict[str, str] = {}
 
 
 async def _download_text(url, session):
