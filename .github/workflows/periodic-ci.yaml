@@ -1,6 +1,13 @@
 # This is a separate run of the Python test suite that doesn't cache the tox
 # environment and runs from a schedule.  The purpose is to test compatibility
 # with the latest versions of dependencies.
+#
+# This workflow definition has to live on the default branch (main) because
+# GitHub only fires `schedule:` triggers from the default branch.  The code
+# that is actually released and deployed lives on the 1.0 maintenance branch,
+# so every job here explicitly checks out `ref: "1.0"`.  The Python version
+# matrix below therefore mirrors the one in 1.0's own .github/workflows/ci.yaml
+# rather than anything on main.
 
 name: Periodic CI
 
@@ -8,7 +15,7 @@ env:
   # Default Python version used for all jobs other than test, which uses a
   # matrix of supported versions. Quote the version to avoid interpretation as
   # a floating point number.
-  PYTHON_VERSION: "3.12"
+  PYTHON_VERSION: "3.13"
 
 "on":
   schedule:
@@ -23,11 +30,17 @@ jobs:
     strategy:
       matrix:
         python:
+          - "3.8"
+          - "3.9"
+          - "3.10"
           - "3.11"
           - "3.12"
+          - "3.13"
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: "1.0"
 
       - name: Set up node
         uses: actions/setup-node@v4
@@ -68,6 +81,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: "1.0"
           fetch-depth: 0 # full history for setuptools_scm
 
       - name: Set up node
