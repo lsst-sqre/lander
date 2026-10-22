@@ -2,6 +2,12 @@
 Change Log
 ##########
 
+Unreleased
+==========
+
+- Drop the unused ``python-dateutil`` dependency (`DM-56548 <https://rubinobs.atlassian.net/browse/DM-56548>`__).
+  Lander never imported it, but its unbounded ``python-dateutil>=2.6.0`` requirement let resolvers select python-dateutil 3.0.0 (released 2026-10-21) and then backtrack the transitive ``boto3``/``botocore`` dependencies to 2014-era releases pinned to ``six==1.7.3``, which fails on Python 3.12+ with ``ModuleNotFoundError: No module named 'six.moves'``.
+
 1.2.0 (2026-07-28)
 ==================
 
